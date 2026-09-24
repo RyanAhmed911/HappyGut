@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **1. Strategy & scope** | Sep 24–27 | [`01-strategy.md`](01-strategy.md): stress test, positioning, hero flow, scope tiers, KPIs, rubric map | 🟡 Draft, awaiting team review |
 | **2. Architecture & stack** | Sep 27–Oct 1 | `02-architecture.md`: agents, verdict engine, data model (SQL + graph), APIs, stack decision records, repo skeleton | ⏳ |
-| **3. Data & knowledge design** | Sep 29–Oct 3 | [`03-data.md`](03-data.md): sources and licences, scrapers/parsers, Food KG schema, guideline corpus, synthetic cohort spec, data lifecycle, privacy | 🟡 In progress (§1 sources done) |
+| **3. Data & knowledge design** | Sep 29–Oct 3 | [`03-data.md`](03-data.md): sources and licences, scrapers/parsers, Food KG schema, guideline corpus, synthetic cohort spec, data lifecycle, privacy | 🟡 In progress (§1–2 done) |
 | **4. UX & Bangla design** | Sep 29–Oct 3 | `04-ux.md` + Figma: hero-flow screens, verdict card, check-in, Bangla copy, low-bandwidth rules | ⏳ |
 | **5. Evaluation & safety plan** | Oct 1–4 | `05-evaluation.md`: test sets, metrics, red-flag suite, bias slices | ⏳ |
 

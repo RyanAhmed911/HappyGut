@@ -1,6 +1,6 @@
 # Step 3: Data lifecycle and engineering
 
-> Status: **§1 Data sources drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
+> Status: **§1 Data sources and §2 Acquisition drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
 **Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
@@ -104,7 +104,72 @@ HappyGut combines seven types of data source, each with a documented licence. In
 ---
 
 ## 2. Acquisition methods
-_Next._
+
+### 2.1 Portal checkbox selection
+| Method | Select? | Used for |
+|---|---|---|
+| Web Scrapers | ✅ | Wikipedia cuisine pages, open-access guidelines, DGDA registry |
+| AI Extraction | ✅ | Meal photos, labels, guideline text → Rule Cards, dish descriptions → graph facts |
+| MCP Servers for data access | ✅ | Our own food-graph / journal / research servers + Supabase, Neo4j, Filesystem |
+| Bulk Upload | ✅ | Admin knowledge intake, patient photos, lab reports, wearable exports |
+| Automated Flows | ✅ | n8n, Supabase webhooks, scheduled GitHub Actions |
+| API Pull / SDK | ✅ | USDA, Open Food Facts, Europe PMC, PubMed, Wikidata SPARQL, Fitbit |
+| RSS / Atom Feeds | ✅ | PubMed saved-search and journal feeds for new IBD diet research (Finals) |
+| Email Inbox | ❌ | Not needed |
+| OCR | ✅ | Package labels, menus, lab reports, Bangladesh food-table PDF |
+| Speech-to-Text | ✅ | Bangla/English/Banglish voice logging |
+
+### 2.2 Scrapers / crawlers
+- **Scrapy spiders**: Wikipedia Bangladeshi and Bengali cuisine categories, English and Bangla
+- **Crawl4AI** (open source): open-access guideline pages → clean markdown for RAG
+- **Playwright headless**: DGDA drug registry (JavaScript-rendered, paginated)
+- **Wikidata SPARQL harvester**: dishes, ingredients, Bangla labels
+- **Crawl etiquette**: robots.txt respected · 1 req/s throttle · identifying User-Agent · ETag caching · exponential-backoff retries
+- **No anti-bot evasion** (no CAPTCHA or paywall bypass)
+- **Licence gate**: each job is tagged with its source licence; content that isn't openly licensed goes to Rule Cards only
+
+### 2.3 MCP servers for data access
+**Built by us**
+- `happygut-foodgraph`: food knowledge graph queries (`search_dish`, `get_components`, `explain_verdict_path`)
+- `happygut-journal`: consent-scoped patient log and pre-visit report access for clinicians' MCP clients (Finals)
+- `happygut-research`: differentially private aggregate trigger statistics (Finals)
+
+**Used**
+- Supabase MCP: Postgres schema and queries
+- Neo4j Cypher MCP: graph queries and curation
+- Filesystem MCP: raw data-lake folders
+- Playwright MCP: building and debugging scrapers
+
+**Transports**: stdio (local) · Streamable HTTP (remote)
+
+### 2.4 Bulk upload, automated flows, AI extraction
+
+**Bulk upload**
+- Admin knowledge intake: PDF / CSV / XLSX → Supabase Storage `raw/` → webhook → ingestion pipeline
+- Patient uploads: meal/label/menu photos, voice notes, lab report PDFs/photos, wearable exports (CSV / JSON / Takeout ZIP)
+- Intake checks: type and size limits, schema validation, **EXIF/GPS stripped from photos**, PII scrub before any cloud call
+
+**Automated flows**
+- n8n: medication and check-in reminders
+- n8n: nightly Personal Gut Graph + flare-risk recompute
+- n8n: weekly clinician pre-visit report
+- n8n: wearable sync (Finals)
+- n8n: RSS watch for new IBD diet papers → LLM triage → human review queue (Finals)
+- Supabase database / storage webhooks → FastAPI ingestion endpoints
+- Scheduled GitHub Actions: weekly scraper runs, USDA / Open Food Facts delta refresh
+
+**API pull**
+- USDA FoodData Central · Open Food Facts · Europe PMC · PubMed E-utilities · Wikidata SPARQL · Fitbit / Google Health (Finals)
+
+**AI extraction**
+- Vision-language model: meal photo → dishes, ingredients, cooking method, portion, confidence (JSON)
+- Labels and menus: VLM OCR first, Tesseract (Bangla + English) as fallback → normalised ingredient list
+- Food-table PDF: Docling / pdfplumber tables → LLM repair of broken rows
+- Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → human review
+- Wikipedia text → LLM → dish–ingredient graph candidates with provenance → human review
+- Lab reports: OCR + LLM → LOINC-coded values (Finals)
+- Voice: faster-whisper (local GPU) → Banglish transliteration (Dakshina) → intent and entity extraction
+- Every output is validated against a Pydantic schema; low confidence → ⚪ "Not sure" or human review
 
 ## 3. Parsing, cleaning and validation
 _Pending._
