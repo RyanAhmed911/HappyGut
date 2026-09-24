@@ -1,6 +1,6 @@
 # Step 3: Data lifecycle and engineering
 
-> Status: **§1–3 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
+> Status: **§1–4 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
 **Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
@@ -248,8 +248,83 @@ HappyGut combines seven types of data source, each with a documented licence. In
 - Schemathesis: property-based contract tests generated from the OpenAPI spec
 - pytest: golden-file tests for the parsers (food table, PubMed XML, label OCR)
 
-## 4. Storage (SQL · vector · graph · lakehouse)
-_Pending._
+## 4. Storage
+
+### 4.1 Storage targets (all free tier)
+| Target | Select? | Technology | Holds |
+|---|---|---|---|
+| Relational | ✅ | Supabase Postgres | Profiles, meal checks, verdicts, check-ins, meds, reminders, consent, audit |
+| NoSQL | ✅ | IndexedDB on the device (Dexie.js) | Offline-first queue of meal logs and check-ins, cached recent verdicts (low-bandwidth use) |
+| Vector DB | ✅ | pgvector (Supabase) | Guideline chunks + Rule Card embeddings (BGE-M3, 1024-d) |
+| Object storage | ✅ | Supabase Storage (S3-compatible) + Cloudflare R2 | User uploads, generated reports; knowledge snapshots and lakehouse files |
+| Data warehouse | ✅ | DuckDB | Analytics over lakehouse tables: evaluations, synthetic cohort, knowledge QA |
+| Lakehouse | ✅ | Delta Lake (delta-rs) on R2 | Bronze / silver / gold tables, with time travel for reproducible evaluations |
+| Graph DB | ✅ | Neo4j AuraDB Free | Food Knowledge Graph + Personal Gut Graph |
+| Cache / KV | ✅ | Upstash Redis | LLM/VLM response cache, free-tier API rate-limit counters, recompute locks |
+
+### 4.2 Schema design
+**Postgres schemas**
+- `core`: patient (pseudonymous ID only; identity stays in `auth.users`), profile (diagnosis, phenotype, stricture flag, disease state), medication, reminder
+- `events`: meal_check (image ref, dishes JSONB, verdict, scores, evidence JSONB, model + prompt version), checkin (HBI/SCCAI items, weight, stress, sleep, doses taken), wearable_daily, lab_result (LOINC), verdict_feedback, red_flag_event
+- `knowledge`: document, chunk (text, contextual header, embedding, tsvector, licence), rule_card
+- `audit`: consent (scope, granted/revoked), access_log, model_run
+
+**Neo4j graph model**
+- `(Dish)-[:CONTAINS {typical_g}]->(Ingredient)-[:HAS_COMPONENT {per_100g, level}]->(Component)`
+- `(Ingredient)-[:MAPS_TO]->(FoodCode)`: Bangladesh food table / USDA
+- `(RuleCard)-[:ABOUT]->(Component)` · `(RuleCard)-[:APPLIES_TO]->(Phenotype|DiseaseState)` · `(RuleCard)-[:CITES]->(Paper)`
+- `(Dish)-[:GENTLER_ALTERNATIVE]->(Dish)`
+- `(Patient)-[:HAS_PHENOTYPE]->(Phenotype)` · `(Patient)-[:REACTS_TO {p, n, ci, updated_at}]->(Component|Dish)`
+- Patient nodes hold a pseudonymous ID only; no health free-text in the graph
+
+**Lakehouse layout (medallion)**
+- Bronze: raw source snapshots and extraction outputs
+- Silver: cleaned, normalised, entity-resolved foods, dishes, rules
+- Gold: graph import tables, evaluation results, synthetic cohort features, differentially private research aggregates
+- **No identifiable patient rows in the lakehouse**
+
+**Redis keys**
+- `cache:vlm:{sha256(image)}`: 7-day TTL
+- `cache:llm:{prompt_hash}`: 24h TTL
+- `cache:verdict:{patient}:{dish}:{profile_version}`: 1h TTL, invalidated when the graph updates
+- `rl:{provider}`: token-bucket counters for free-tier quotas
+- `lock:recompute:{patient}`
+
+### 4.3 Partitioning
+- Postgres: monthly range partitions on `meal_check`, `checkin`, `wearable_daily`
+- Delta bronze: partitioned by `source` / `ingest_date`
+- Delta gold: evaluations by `eval_run`; synthetic cohort by `sim_run`
+- Neo4j: population knowledge and per-patient subgraphs kept apart by label and ID
+
+### 4.4 Indexes
+- B-tree: `(patient_id, created_at DESC)` on all event tables
+- GIN: JSONB dishes/evidence, tsvector full text
+- pg_trgm trigram: Bangla and Banglish name search (Postgres has no Bangla stemmer)
+- HNSW (pgvector, cosine, m=16, ef_construction=64): chunk embeddings
+- BRIN: wearable timestamps
+- Partial index: unresolved red-flag events
+- Neo4j: unique constraints on dish/ingredient/component IDs; full-text index on EN/BN names and aliases
+
+### 4.5 Retention
+- Meal photos: 30 days after extraction, unless the user chooses to keep them
+- Voice notes: deleted right after transcription (transcript kept)
+- Health records: kept while the account is active; one-click export and delete, cascading across Postgres, the patient's Neo4j subgraph and storage
+- LLM traces: 30 days, PII-scrubbed
+- Audit and consent logs: 1 year
+- Generated reports: signed URLs expire in 7 days
+- Knowledge snapshots and synthetic data: kept permanently and versioned (synthetic data flagged)
+
+### 4.6 Tiered storage
+- Hot: Postgres, Neo4j, Redis (live app)
+- Warm: Delta silver/gold on R2, queried with DuckDB (analytics, evaluations)
+- Cold: immutable bronze snapshots on R2 (reproducibility, licence audit)
+- Edge: IndexedDB on the device (offline logging)
+
+### 4.7 Residency and operational notes
+- Supabase region: Mumbai or Singapore (nearest to Bangladesh; no Bangladesh region exists)
+- Encryption: AES-256 at rest (provider), TLS in transit, application-level encryption for free-text notes
+- Free-tier limits (*check current values*): Supabase DB and storage caps; free Supabase projects pause when inactive, so keep the demo project warm before judging
+- Free-tier limits (*check current values*): Aura Free node/relationship caps; Upstash command quota; R2 free storage
 
 ## 5. Visualization and dashboards
 _Pending._
