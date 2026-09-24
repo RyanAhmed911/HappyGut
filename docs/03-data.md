@@ -1,6 +1,6 @@
 # Step 3: Data lifecycle and engineering
 
-> Status: **§0 prototype selections + §1–10 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
+> Status: **§0 prototype selections + §1–12 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
 **Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
@@ -600,6 +600,53 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Quantized local models (Q4_K_M) fit in 12 GB VRAM
 - SSE streaming for faster perceived response; target p90 < 5 s scan-to-verdict
 - Partitioning and indexes as in §4
+
+## 11. Other data stack notes
+
+**AI-native patterns**
+- Personal Gut Graph: one population food knowledge graph + a per-patient layer of learned REACTS_TO edges
+- "LLM perceives, engine decides": AI for reading and explaining; a deterministic, unit-tested engine for the verdict
+- Evidence-carrying verdicts: every verdict stores its evidence IDs, so any answer can be audited back to the paper
+- Licence-aware ingestion: each source's licence decides whether full text or only a cited Rule Card is stored
+- Human-in-the-loop curation: LLM extracts facts, humans approve before they enter the graph
+- Dual-model privacy: local model scrubs PII; cloud models only see de-identified text
+- Synthetic cohort as test oracle: injected ground-truth triggers make trigger discovery measurable
+
+**Agent-driven data ops**
+- Knowledge-gap loop: every ⚪ "Not sure" or unmatched dish is queued; an enrichment agent drafts graph facts → human review → graph update
+- Data flywheel: "was this right for you?" feedback feeds Trigger Discovery and grows the evaluation sets
+- Curation via MCP: a coding agent uses the Neo4j and Supabase MCP servers to find orphan nodes and unmatched ingredients and propose fixes as reviewable diffs
+
+**Future roadmap**
+- Federated learning (Flower + differential privacy) for population trigger priors
+- Wearables (Health Connect / Fitbit) and lab-report ingestion
+- Bangla voice logging
+- Offline-first PWA with an on-device small model
+- HL7 FHIR integration with hospitals
+- Differentially private research lakehouse + Metabase portal + happygut-research MCP
+- New cuisines and languages as plug-in graph modules (India, Pakistan, Middle East)
+- Open release of the Bangladeshi Food Knowledge Graph (respecting source licences)
+
+## 12. Publishing local environment to the internet
+
+**Tools**
+- ✅ Cloudflare Tunnel (cloudflared): always-on during judging
+- ✅ ngrok: development only
+
+**Tunneling usage notes**
+- Cloudflare Tunnel exposes from the team GPU machine: Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
+- Cloudflare Tunnel exposes: BGE-M3 embedding + reranker service
+- Cloudflare Tunnel exposes: happygut-foodgraph MCP server (Streamable HTTP)
+- Cloudflare security: Access service tokens, so only our hosted backend can reach Ollama and the embedding service
+- Cloudflare security: services bound to localhost only; nothing opened on the router
+- Cloudflare security: MCP server needs a bearer token and is read-only (food knowledge only, no patient data)
+- Cloudflare security: free WAF rate-limit rule; TLS end to end; request bodies not logged
+- Cloudflare lifecycle: runs as a system service with auto-restart during the submission and judging windows; health-check endpoint
+- Fallback: if the tunnel or machine is offline, the backend switches to cloud-only models (degraded-mode banner)
+- ngrok: receives Supabase database/storage webhooks and n8n callbacks on local FastAPI during development
+- ngrok: free static domain for a stable webhook URL
+- ngrok: shared-secret header checked on every webhook
+- ngrok: started per dev session and closed afterwards, never used in production
 
 ---
 
