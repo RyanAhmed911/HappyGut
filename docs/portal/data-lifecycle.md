@@ -195,3 +195,64 @@
 - Evaluation report (Markdown + charts) exported from the lab after each evaluation run
 - Langfuse: LLM traces, tokens, prompt-version comparisons, eval scores
 - Neo4j Aura Explore: knowledge-graph QA
+## 6. Insights: AI, ML and non-AI
+
+**Methods to tick**
+- ✅ Classical ML: LightGBM flare early-warning model + logistic-regression baseline
+- ✅ LLM Inference / RAG over data
+- ✅ Anomaly Detection: symptom deviation from the patient's own baseline
+- ✅ Rule Engine / Heuristics: verdict engine, stricture rules, red flags, clinical index scoring
+- ✅ Statistical Analysis: Bayesian N-of-1 trigger discovery, evaluation statistics
+- ❌ Deep Learning (we only run pre-trained models; federated PyTorch training is Finals)
+- ❌ Forecasting (Prophet etc.)
+- ❌ Clustering (trigger-profile clustering for research is Finals)
+
+**AI / ML details**
+- Perception: vision-language model (free-tier cloud, local Qwen-VL fallback on Ollama) → dishes, ingredients, cooking method, portion, confidence (JSON)
+- Retrieval: BGE-M3 multilingual embeddings (Bangla + English) in pgvector HNSW + keyword/trigram search → reciprocal rank fusion → bge-reranker-v2-m3
+- Graph retrieval: Neo4j traversal Dish → Ingredient → Component → Rule Card → Paper
+- Explanation: LLM writes Bangla/English explanations only from retrieved evidence, as JSON with citation IDs
+- Trigger Discovery (statistical): Bayesian Beta-Binomial per patient × food component
+  - Exposure = meal containing the component above a set level; outcome = symptom rise 6–48h later vs personal baseline
+  - Guideline-informed population prior → posterior + 90% credible interval
+  - "Likely trigger" when P(rate > baseline) > 0.8 with ≥ 3 exposures
+  - Confounders (stress, missed doses) handled by stratification
+- Flare Early Warning (classical ML): LightGBM, target = flare onset within 7 days
+  - Features: 7/14-day HBI/SCCAI mean and slope, stool frequency, blood flag, missed doses, stress, sleep, weight change, trigger-exposure load
+  - Patient-grouped time split (no leakage) · isotonic calibration · SHAP top factors per alert
+  - Baselines: logistic regression and the v0 rule score
+- Anomaly detection: EWMA / rolling z-score on each patient's symptom indices and stool frequency (≥ 2 SD for 2 days → early-warning feature)
+- Training data: simulated IBD cohort (500 patients × 180 days, injected triggers, labelled SYNTHETIC)
+- Test data: team-labelled 200-food verdict set · team-captured ~300 Bangladeshi meal photos · guideline Q&A set · red-flag suite
+- Metrics: dish recognition top-1 / top-3 accuracy
+- Metrics: verdict accuracy + macro-F1, with 🔴 recall prioritised
+- Metrics: retrieval Recall@5 and MRR; Ragas faithfulness and answer relevance
+- Metrics: trigger recovery precision / recall / F1 and days-to-detection
+- Metrics: flare model AUROC, AUPRC, Brier score, calibration curve, alert lead time
+- Metrics: red-flag recall (target 100%); p90 scan-to-verdict latency (< 5 s)
+- Bias slices: Bangla vs English vs Banglish input, sex, disease phenotype
+- Honesty: flare-model and trigger results are reported as results on simulated data
+
+**Non-AI analytics**
+- Verdict engine: deterministic weighted score (guideline severity × component level × disease-state multiplier + personal posterior) → 🟢🟡🔴 thresholds; low confidence → ⚪; unit-tested
+- Hard overrides before any LLM output: stricturing Crohn's (insoluble fibre, skins, seeds, nuts → 🔴); red-flag symptoms → escalation
+- Clinical indices: Harvey-Bradshaw Index and SCCAI computed from check-in items with standard published activity thresholds
+- Early warning v0: rule score (index rise, blood, missed doses, weight loss past a threshold)
+- Red-flag rule set: structured answers + Bangla/English/Banglish keyword patterns, run before the LLM
+- SQL aggregations: medication adherence %, symptom-free days and streaks, weekly averages, exposures per component
+- Evaluation statistics: bootstrap 95% confidence intervals on every metric
+- Evaluation statistics: McNemar's test, verdict engine vs an LLM-only baseline
+- Product KPIs: 4-week logging retention, scans per day, latency, cache hit rate, free-tier quota usage
+
+**How insights are delivered**
+- Verdict card, instantly after a scan: verdict + why + citations + a gentler alternative
+- "My Gut" dashboard: trends, trigger insights, Personal Gut Graph
+- Web push notifications (PWA): medication and check-in reminders
+- Web push notifications (PWA): rising flare risk with its top factors
+- Web push notifications (PWA): new trigger found ("fried food: 4 of 5 times")
+- Weekly AI summary in Bangla/English, written only from computed statistics
+- Red-flag escalation screen: stops diet advice and shows who to contact now
+- Clinician pre-visit PDF, shared by QR code / link
+- Streamlit Evaluation Lab for the team and judges
+
+**Finals additions (not in the form yet):** federated learning (Flower + PyTorch + Opacus differential privacy) · mixed-effects confounder model · wearable features (resting HR, HRV, sleep) · trigger-profile clustering for research
