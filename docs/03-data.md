@@ -1,6 +1,6 @@
 # Step 3: Data lifecycle and engineering
 
-> Status: **§1 Data sources and §2 Acquisition drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
+> Status: **§1–3 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
 **Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
@@ -171,8 +171,82 @@ HappyGut combines seven types of data source, each with a documented licence. In
 - Voice: faster-whisper (local GPU) → Banglish transliteration (Dakshina) → intent and entity extraction
 - Every output is validated against a Pydantic schema; low confidence → ⚪ "Not sure" or human review
 
-## 3. Parsing, cleaning and validation
-_Pending._
+## 3. Parsing, formats and cleaning
+
+### 3.1 Formats handled
+| Format | Select? | Where it appears |
+|---|---|---|
+| JSON | ✅ | API responses (USDA, Open Food Facts, Fitbit), LLM structured outputs, wearable exports |
+| CSV | ✅ | USDA bulk, wearable exports, graph import files, research exports |
+| XLSX | ✅ | Admin uploads (curated dish lists, portion tables) |
+| PDF | ✅ | Guidelines, Bangladesh food table, lab reports; pre-visit report output |
+| Parquet | ✅ | Lakehouse tables, synthetic cohort, evaluation results |
+| Avro | ❌ | Not used |
+| XML | ✅ | PubMed E-utilities, Europe PMC full text (JATS) |
+| YAML | ✅ | Rule Cards (version-controlled), pipeline configuration |
+| JSONL | ✅ | Open Food Facts dump, evaluation sets, LLM batch jobs |
+| Markdown | ✅ | Crawled pages converted for RAG, prompt library |
+| HTML | ✅ | Scraped pages (Wikipedia, guideline sites, DGDA) |
+| Images | ✅ | Meal/label/menu photos, lab report photos |
+| Audio | ✅ | Voice notes |
+| Video | ❌ | Not used |
+| Protobuf | ❌ | Not used |
+
+### 3.2 Parsers
+- Docling: layout-aware PDF parsing (food-table tables, guideline sections)
+- pdfplumber / PyMuPDF: fallback table and text extraction
+- BeautifulSoup + lxml: Wikipedia HTML, PubMed XML, Europe PMC JATS XML
+- Crawl4AI: HTML → LLM-ready Markdown
+- pandas / Polars (+ openpyxl): CSV, XLSX
+- DuckDB: JSONL, Parquet, CSV at scale
+- orjson: fast JSON
+- ruamel.yaml: Rule Cards
+- Instructor + Pydantic: LLM/VLM JSON-mode parsing with automatic retry on invalid output
+- Tesseract (Bangla + English) + VLM OCR: labels, menus, lab reports
+- faster-whisper: audio → text
+- Pillow (+ pillow-heif): image decode, including iPhone HEIC
+
+### 3.3 Formatters and converters
+- DuckDB: CSV / JSONL ↔ Parquet (lakehouse)
+- Docling: PDF → Markdown / JSON
+- Crawl4AI / markdownify: HTML → Markdown
+- ffmpeg: WebM / OGG / M4A → 16 kHz mono WAV for speech-to-text
+- Pillow: photos → resized WebP, EXIF stripped (low bandwidth + privacy)
+- ruamel.yaml → Cypher: Rule Cards → Neo4j
+- CSV → Neo4j `LOAD CSV`: bulk graph import
+- Jinja2 + WeasyPrint: HTML → PDF pre-visit report (Bangla shaping via HarfBuzz)
+- fhir.resources: HL7 FHIR JSON export for clinicians (Finals)
+- openapi-typescript: OpenAPI → TypeScript types for the frontend
+
+### 3.4 Data cleaning and enrichment
+- Bangla text: Unicode NFC normalisation, Bangla ↔ ASCII digits (০–৯), zero-width character cleanup
+- Banglish → Bangla transliteration (Dakshina-based) before matching
+- Units: nutrients per 100 g edible portion; kJ ↔ kcal; mg / g harmonised
+- Local portions → grams (plate, bati, cup, piece)
+- Entity resolution: dish names across Wikipedia EN/BN, Wikidata, food table, USDA and user text → one canonical dish ID
+  - rapidfuzz fuzzy matching + BGE-M3 multilingual embeddings + transliteration
+  - LLM adjudication for ambiguous matches → human review
+- Ingredient → food-code mapping: Bangladesh food table first, USDA as fallback
+- Dedup: products by barcode, papers by DOI/PMID, chunks by content hash, near-duplicate pages by MinHash
+- AI enrichment: LLM tags each dish (fat level, insoluble fibre, FODMAP groups, lactose, spice level, cooking method) with provenance
+- AI enrichment: Bangla names and aliases
+- AI enrichment: contextual chunk headers for RAG
+- Wearables: physiologically impossible values removed, rolling-median artefact filter
+- Check-ins: range checks; missing days flagged, never silently imputed
+- PII scrub: Microsoft Presidio + local LLM (Bangla names, +8801 phone numbers, addresses); EXIF / GPS removed from photos
+- Time: stored in UTC, displayed in Asia/Dhaka
+- Provenance on every record: source, licence, retrieved_at, extraction model + prompt version
+
+### 3.5 Schema validation
+- Pydantic v2: every ingestion record and LLM output
+- Zod: frontend forms and API responses
+- JSON Schema generated from Pydantic: a shared contract between Python and TypeScript
+- JSON Schema check in CI on Rule Card YAML (check-jsonschema pre-commit hook)
+- Pandera: DataFrame checks (nutrient ranges; per-100 g macros ≤ 100 g; valid HBI/SCCAI item ranges)
+- Postgres: NOT NULL / CHECK constraints, row-level security, and a mandatory `is_synthetic` flag
+- Neo4j: uniqueness and node-key constraints on dishes, ingredients and components
+- Schemathesis: property-based contract tests generated from the OpenAPI spec
+- pytest: golden-file tests for the parsers (food table, PubMed XML, label OCR)
 
 ## 4. Storage (SQL · vector · graph · lakehouse)
 _Pending._
