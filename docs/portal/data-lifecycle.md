@@ -256,3 +256,128 @@
 - Streamlit Evaluation Lab for the team and judges
 
 **Finals additions (not in the form yet):** federated learning (Flower + PyTorch + Opacus differential privacy) · mixed-effects confounder model · wearable features (resting HR, HRV, sleep) · trigger-profile clustering for research
+## 7. Pipelines and orchestration
+
+**Orchestration**
+- n8n (self-hosted, Docker): reminders, nightly recompute, weekly clinician report, ingestion after admin upload
+- Python pipeline CLI (Typer + Makefile): knowledge build crawl → parse → resolve → enrich → load (bronze → silver → gold → Neo4j / pgvector)
+- Pipeline steps are idempotent and can re-run from any stage
+- LangGraph: meal-check agent pipeline (details in the AI section)
+
+**Scheduling / triggers**
+- n8n cron: per-user medication and check-in reminder times (Asia/Dhaka)
+- n8n cron: 02:00 nightly Personal Gut Graph + flare-risk recompute
+- n8n cron: weekly pre-visit report
+- Supabase database webhooks: new meal_check / checkin → FastAPI → red-flag check + incremental trigger update
+- Supabase Storage trigger: admin upload → ingestion pipeline
+- pg_cron: expire cache entries, delete meal photos past retention
+- Manual: `make knowledge` for full knowledge rebuilds
+
+**Streaming / real-time**
+- Supabase Realtime (Postgres changes over WebSocket): dashboard updates after check-ins and recomputes
+- Server-Sent Events from FastAPI stream each scan in stages: dishes found → verdict → explanation text
+- Event-driven webhooks instead of Kafka (event volume is low; no broker needed)
+
+## 8. Outbound: APIs and distribution
+
+**Outbound APIs**
+- FastAPI REST, versioned `/v1`
+- Endpoints: `POST /v1/meal-checks` (photo/text → verdict), `GET /v1/meal-checks/{id}`, `POST /v1/checkins`
+- Endpoints: `GET /v1/insights/triggers`, `GET /v1/insights/flare-risk`, `POST /v1/reports/previsit`, `GET /v1/foods/search`
+- Auth: Supabase Auth JWT (email OTP / Google), verified in FastAPI + Postgres row-level security
+- Rate limits: per-user token bucket (slowapi) + per-provider quota guard for free-tier AI APIs
+- OpenAPI 3.1 docs (Swagger UI / ReDoc) + generated TypeScript client
+- CORS locked to the app domain; request size limits
+
+**Webhooks and exports**
+- Patient data export: JSON + CSV, one click (access / portability)
+- Clinician pre-visit PDF: signed link expiring in 7 days + QR code
+- Web Push (VAPID) notifications sent by n8n
+- Evaluation exports: Parquet / CSV results + Markdown report in the repo
+
+**Embeddings / model serving**
+- Ollama on the team GPU (12 GB VRAM, quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback
+- Embedding + rerank service (BGE-M3, bge-reranker-v2-m3) on the GPU machine behind FastAPI
+- Cloudflare Tunnel exposes the local Ollama and embedding services to the hosted backend
+- MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
+- Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
+
+## 9. Open-source stack
+- PostgreSQL + pgvector + pg_trgm + pg_cron: relational store, vector search, Bangla fuzzy search, scheduled cleanup
+- Supabase: Auth, Storage, Realtime, database webhooks
+- Neo4j: Food Knowledge Graph + Personal Gut Graph
+- DuckDB: in-process analytics over the lakehouse
+- Delta Lake (delta-rs): versioned bronze/silver/gold tables with time travel
+- Scrapy: Wikipedia cuisine crawling
+- Crawl4AI: guideline pages → Markdown
+- Docling / pdfplumber: PDF and table parsing
+- BeautifulSoup + lxml: HTML / XML parsing
+- pandas: tabular cleaning
+- Pydantic + Instructor: schemas and validated LLM output
+- Pandera: DataFrame quality checks
+- Microsoft Presidio: PII detection and anonymisation
+- rapidfuzz: fuzzy dish-name matching
+- BGE-M3 + bge-reranker-v2-m3 (FlagEmbedding): multilingual embeddings and reranking
+- Ollama + open-weight Qwen models: local inference
+- LangGraph: agent orchestration
+- scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
+- NumPy / SciPy: Bayesian trigger statistics, bootstrap confidence intervals
+- FastAPI: backend API and SSE streaming
+- Next.js + React + Zod: PWA frontend and validation
+- Recharts + D3.js: patient charts and the Gut Graph
+- Streamlit + Plotly: Evaluation Lab
+- Jinja2 + WeasyPrint: PDF reports
+- Langfuse: LLM tracing and evaluation scores
+- Ragas: RAG evaluation
+- pytest + Schemathesis: tests and API contract tests
+- Pillow: image processing and EXIF stripping
+- n8n: workflow automation (source-available under its Sustainable Use License, not OSI open source)
+
+## 10. Quality, governance and observability
+
+**Data quality**
+- Pandera checks at every silver/gold step (ranges, nulls, uniqueness)
+- Completeness: every dish has ingredients and component tags; every Rule Card has a citation and licence
+- Unmatched-ingredient rate reported on each knowledge build
+- Neo4j orphan-node checks (e.g. dishes without components)
+- Freshness: knowledge snapshot date shown in the admin view; USDA / Open Food Facts refreshed monthly
+- Human review queue for every LLM-extracted fact, plus a 10% random re-audit
+- Golden-file tests on parsers
+- CI regression gate: verdict accuracy and red-flag recall on the evaluation sets must not drop
+- `is_synthetic` flag enforced on all simulated data
+
+**Privacy and compliance**
+- Pseudonymous patient IDs; identity kept only in Supabase Auth
+- Presidio + local LLM strip PII before any cloud AI call; EXIF / GPS removed from photos
+- Consent scopes (care, clinician sharing, research aggregates): opt-in, revocable, logged
+- Row-level security per patient; service role only in the backend (least privilege)
+- AES-256 at rest, TLS in transit, signed expiring URLs
+- One-click export + cascading delete (right of access / erasure)
+- Data minimisation: photos deleted after 30 days; no location collected
+- Research outputs are aggregates only, with small-group suppression (k ≥ 10)
+- Aligned with GDPR principles and HIPAA-style safeguards; Bangladesh data-protection law tracked (*verify current status*)
+- Positioned as self-management support, not a medical device; disclaimer shown in the app
+- The prototype holds no real patient data; all test data is synthetic and labelled
+
+**Lineage and observability**
+- Provenance on every record: source, licence, retrieved_at, model + prompt version
+- Medallion lineage: every silver/gold row keeps its bronze source ID
+- Each evaluation run records its Delta table version + git commit (reproducible results)
+- Every verdict stores its evidence IDs → traceable to the Rule Card → the paper
+- Langfuse traces every LLM/VLM call (latency, tokens, prompt version)
+- Structured JSON logs (structlog)
+- n8n failure alerts; red-flag events recorded in the audit log
+
+**Cost and performance**
+- Running cost: $0 (free tiers + the team's GPU)
+- Postgres cache by image SHA-256 / prompt hash: repeat dishes need no API call
+- Model routing: small/fast model for classification, larger model only for explanations
+- Local Ollama handles PII scrubbing, Bangla normalisation, and fallback when a free-tier quota runs out
+- Per-provider quota guard with automatic fallback to local models
+- Compact prompts: structured evidence (IDs + short facts) and the top 5 reranked chunks, not raw documents
+- Photos downscaled to ≤ 1024 px WebP before the vision model (fewer tokens)
+- Precomputed dish component profiles, so the verdict decision itself needs no LLM call
+- Embeddings and enrichment run as offline GPU batch jobs
+- Quantized local models (Q4_K_M) fit in 12 GB VRAM
+- SSE streaming for faster perceived response; target p90 < 5 s scan-to-verdict
+- Partitioning and indexes as in §4
