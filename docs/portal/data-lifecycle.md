@@ -124,3 +124,74 @@
 - Neo4j uniqueness / node-key constraints (dishes, ingredients, components)
 - Schemathesis: property-based API contract tests from OpenAPI
 - pytest golden-file tests for parsers (food table, PubMed XML, label extraction)
+
+## 4. Storage details
+**Schema design**
+- Postgres `core`: pseudonymous patient ID, profile (diagnosis, phenotype, stricture flag, disease state), medications, reminders
+- Postgres `events`: meal_check, checkin (HBI/SCCAI items, weight, stress, sleep, doses), verdict_feedback, red_flag_event
+- Postgres `knowledge`: documents, chunks (text, contextual header, BGE-M3 embedding, tsvector, licence), rule_cards
+- Postgres `audit`: consent scopes, access_log, model_run (model + prompt version)
+- Postgres `cache`: VLM/LLM results keyed by image SHA-256 / prompt hash (protects free-tier API quotas)
+- Neo4j: Dish → CONTAINS → Ingredient → HAS_COMPONENT → Component
+- Neo4j: Ingredient → MAPS_TO → FoodCode (Bangladesh food table / USDA)
+- Neo4j: RuleCard → ABOUT / APPLIES_TO / CITES → Component / Phenotype / Paper
+- Neo4j: Dish → GENTLER_ALTERNATIVE → Dish
+- Neo4j: Patient → REACTS_TO {p, n, ci} → Component / Dish (pseudonymous ID only)
+- Lakehouse medallion (Delta Lake + DuckDB): bronze (raw snapshots) → silver (cleaned, entity-resolved) → gold (graph imports, evaluation results, synthetic cohort features)
+- No identifiable patient rows in the lakehouse
+
+**Partitioning**
+- Postgres: monthly range partitions on meal_check and checkin
+- Delta bronze: partitioned by source / ingest_date
+- Delta gold: evaluations by eval_run; synthetic cohort by sim_run
+
+**Indexes**
+- B-tree (patient_id, created_at DESC) on event tables
+- GIN on JSONB and tsvector
+- pg_trgm trigram for Bangla/Banglish name search (Postgres has no Bangla stemmer)
+- HNSW (cosine, m=16, ef_construction=64) on embeddings
+- Partial index on unresolved red-flag events
+- Neo4j: unique constraints on IDs; full-text index on EN/BN names and aliases
+
+**Retention**
+- Meal photos: 30 days after extraction, unless the user keeps them
+- Health records: kept while the account is active; one-click export and delete across Postgres, Neo4j and storage
+- Cache entries: 7 days
+- LLM traces: 30 days, PII-scrubbed
+- Audit / consent logs: 1 year
+- Report links: expire in 7 days
+- Knowledge snapshots and synthetic data: permanent, versioned, flagged
+
+**Tiered storage**
+- Hot: Postgres + Neo4j (live app)
+- Warm: Delta silver/gold tables, queried with DuckDB
+- Cold: immutable bronze snapshots in Supabase Storage (reproducibility, licence audit)
+
+**Residency & security**
+- Supabase region: Mumbai or Singapore (nearest to Bangladesh)
+- AES-256 at rest, TLS in transit, app-level encryption for free-text notes
+
+## 5. Visualization
+
+**Visualization details**
+- Verdict card: 🟢🟡🔴⚪ icon + label + evidence bar (guideline / composition / personal contribution)
+- Symptom trend line (HBI/SCCAI) with meal markers and dose ticks, 7/30/90-day toggle
+- Trigger insights: per-component probability with credible interval + exposure count
+- Symptom-free-day calendar heatmap
+- Flare-risk gauge + top-factor waterfall
+- Personal Gut Graph (D3 force layout): edge thickness = trigger probability, tap for evidence, verdict path highlighted
+- Interactivity: tap a point → that day's meals and check-in, evidence tooltips, range toggles
+- Real-time: Supabase Realtime updates insights after each check-in / graph recompute
+- Accessibility: never colour-only (icon + text), colour-blind-safe palette, WCAG AA contrast
+- Accessibility: screen-reader summaries, one-line plain-language caption per chart
+- Localization: Bangla/English labels, optional Bangla numerals
+- Low bandwidth: charts rendered client-side from small JSON, graph view lazy-loaded
+- Dark mode
+
+**Dashboards & reports**
+- Patient "My Gut" dashboard (in-app, Recharts + D3)
+- Clinician pre-visit PDF (Bangla/English): QR share on demand + weekly n8n schedule
+- Streamlit + Plotly Model & Evaluation Lab: trigger-recovery curves, verdict confusion matrix, flare-risk calibration, latency, language/bias slices
+- Evaluation report (Markdown + charts) exported from the lab after each evaluation run
+- Langfuse: LLM traces, tokens, prompt-version comparisons, eval scores
+- Neo4j Aura Explore: knowledge-graph QA
