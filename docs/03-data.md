@@ -1,9 +1,36 @@
 # Step 3: Data lifecycle and engineering
 
-> Status: **§1–5 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
+> Status: **§0 prototype selections + §1–5 full design drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
 **Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
+
+---
+
+## 0. Prototype portal selections (authoritative for the Oct 31 form)
+
+> **Rule:** tick an item only if it earns points (under the cap or a bonus) **and** will really exist by Oct 31. §1–5 below are the full design; anything tagged *Finals* there is **not** entered in the preliminary form.
+
+| Form section | Tick for Oct 31 | Finals only (not in the form yet) |
+|---|---|---|
+| Data sources | Internal · External APIs · Public Web · Open Datasets · User Uploads · Synthetic | IoT / Sensor |
+| Acquisition | Web Scrapers · AI Extraction · MCP · Bulk Upload · Automated Flows · API Pull | RSS · OCR (the vision model does it) · Speech-to-Text |
+| Formats | JSON · CSV · PDF · Images | — (others are true but earn nothing past the cap of 4) |
+| Storage | Relational (Postgres) · Vector (pgvector) · Object (Supabase Storage) · Graph (Neo4j) · Lakehouse (Delta/Parquet) · Warehouse (DuckDB) | NoSQL (IndexedDB) · Cache (Redis) · Cloudflare R2 |
+| Visualization | Recharts · D3.js · Plotly · Streamlit | Grafana · Metabase |
+
+**Moved to Finals:**
+- Wearables (Fitbit / Google Health API, export import, sync flow)
+- Voice notes (faster-whisper, ffmpeg, Common Voice)
+- Lab reports (OCR, LOINC)
+- DGDA registry + Playwright scraper
+- IBDMDB calibration
+- RSS watcher
+- `happygut-journal` and `happygut-research` MCP servers
+- Tesseract fallback
+- FHIR export
+
+**Prototype infrastructure:** one Supabase project (Postgres + pgvector + Storage) · Neo4j AuraDB Free · local Python on the team GPU machine (Ollama, DuckDB, Delta files) · n8n.
 
 ---
 
@@ -18,7 +45,7 @@
 | Public Web (scraping) | ✅ | Wikipedia cuisine pages, open-access guideline pages, Bangladeshi drug registry |
 | Open Datasets (Kaggle, HF, gov) | ✅ | Bangladesh Food Composition Table, USDA bulk, Wikidata, Dakshina, Common Voice, IBDMDB |
 | User Uploads / Bulk Import | ✅ | Meal/label/menu photos, voice notes, lab reports, wearable exports, admin knowledge uploads |
-| IoT / Sensor / Streaming | ✅ | Wearable heart rate, HRV, sleep and steps (import in MVP; live sync in Finals) |
+| IoT / Sensor / Streaming | ❌ *(Finals)* | Wearable heart rate, HRV, sleep and steps |
 | Third-party / Partner Data | ❌ | We have no partner data agreements. We're already at 5/5 points for source types, so ticking it gains nothing and a judge could question it |
 | Synthetic / AI-generated Data | ✅ | Simulated patient cohort with injected triggers, generated Bangla/Banglish evaluation sets |
 
@@ -99,7 +126,7 @@
 ### 1.4 Portal text: "Data source details"
 > Plain text, ready to paste.
 
-HappyGut combines seven types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence, and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL; barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, open-access ESPEN, IOIBD and AGA guideline documents, and the DGDA Bangladesh drug registry for local medicine brand names. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, Google's Dakshina dataset for Banglish-to-Bangla transliteration, Mozilla Common Voice Bengali for speech evaluation, and IBDMDB public metadata for calibration. User uploads: meal, menu and label photos, Bangla/English voice notes, lab report photos, wearable export files, and a team-captured set of about 300 Bangladeshi meal photos used as our test set. Sensor data: heart rate, HRV, sleep and steps from wearables, imported from exports in the prototype and synced live via the Fitbit/Google Health APIs and Android Health Connect in the production roadmap. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and human-reviewed Bangla/Banglish, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records.
+HappyGut's prototype combines six types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, and open-access ESPEN, IOIBD and AGA guideline documents. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, and Google's Dakshina dataset for Banglish-to-Bangla transliteration. User uploads: meal, menu and label photos, plus a team-captured set of about 300 real Bangladeshi meal photos used as our test set. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and human-reviewed Bangla/Banglish, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records. Wearables, voice notes, lab reports and a Bangladeshi medicine registry are planned for the finals phase.
 
 ---
 
@@ -114,10 +141,10 @@ HappyGut combines seven types of data source, each with a documented licence. In
 | Bulk Upload | ✅ | Admin knowledge intake, patient photos, lab reports, wearable exports |
 | Automated Flows | ✅ | n8n, Supabase webhooks, scheduled GitHub Actions |
 | API Pull / SDK | ✅ | USDA, Open Food Facts, Europe PMC, PubMed, Wikidata SPARQL, Fitbit |
-| RSS / Atom Feeds | ✅ | PubMed saved-search and journal feeds for new IBD diet research (Finals) |
+| RSS / Atom Feeds | ❌ *(Finals)* | PubMed saved-search and journal feeds for new IBD diet research (Finals) |
 | Email Inbox | ❌ | Not needed |
-| OCR | ✅ | Package labels, menus, lab reports, Bangladesh food-table PDF |
-| Speech-to-Text | ✅ | Bangla/English/Banglish voice logging |
+| OCR | ❌ | The vision-language model reads labels and menus; Tesseract and lab-report OCR are Finals |
+| Speech-to-Text | ❌ *(Finals)* | Bangla/English/Banglish voice logging |
 
 ### 2.2 Scrapers / crawlers
 - **Scrapy spiders**: Wikipedia Bangladeshi and Bengali cuisine categories, English and Bangla
@@ -178,17 +205,17 @@ HappyGut combines seven types of data source, each with a documented licence. In
 |---|---|---|
 | JSON | ✅ | API responses (USDA, Open Food Facts, Fitbit), LLM structured outputs, wearable exports |
 | CSV | ✅ | USDA bulk, wearable exports, graph import files, research exports |
-| XLSX | ✅ | Admin uploads (curated dish lists, portion tables) |
+| XLSX | ➖ used, not ticked | Admin uploads (curated dish lists, portion tables) |
 | PDF | ✅ | Guidelines, Bangladesh food table, lab reports; pre-visit report output |
-| Parquet | ✅ | Lakehouse tables, synthetic cohort, evaluation results |
+| Parquet | ➖ used, not ticked | Lakehouse tables, synthetic cohort, evaluation results |
 | Avro | ❌ | Not used |
-| XML | ✅ | PubMed E-utilities, Europe PMC full text (JATS) |
-| YAML | ✅ | Rule Cards (version-controlled), pipeline configuration |
-| JSONL | ✅ | Open Food Facts dump, evaluation sets, LLM batch jobs |
-| Markdown | ✅ | Crawled pages converted for RAG, prompt library |
-| HTML | ✅ | Scraped pages (Wikipedia, guideline sites, DGDA) |
+| XML | ➖ used, not ticked | PubMed E-utilities, Europe PMC full text (JATS) |
+| YAML | ➖ used, not ticked | Rule Cards (version-controlled), pipeline configuration |
+| JSONL | ➖ used, not ticked | Open Food Facts dump, evaluation sets, LLM batch jobs |
+| Markdown | ➖ used, not ticked | Crawled pages converted for RAG, prompt library |
+| HTML | ➖ used, not ticked | Scraped pages (Wikipedia, guideline sites, DGDA) |
 | Images | ✅ | Meal/label/menu photos, lab report photos |
-| Audio | ✅ | Voice notes |
+| Audio | ➖ used, not ticked | Voice notes |
 | Video | ❌ | Not used |
 | Protobuf | ❌ | Not used |
 
@@ -254,13 +281,13 @@ HappyGut combines seven types of data source, each with a documented licence. In
 | Target | Select? | Technology | Holds |
 |---|---|---|---|
 | Relational | ✅ | Supabase Postgres | Profiles, meal checks, verdicts, check-ins, meds, reminders, consent, audit |
-| NoSQL | ✅ | IndexedDB on the device (Dexie.js) | Offline-first queue of meal logs and check-ins, cached recent verdicts (low-bandwidth use) |
+| NoSQL | ❌ *(Finals)* | IndexedDB on the device (Dexie.js) | Offline-first queue of meal logs and check-ins, cached recent verdicts (low-bandwidth use) |
 | Vector DB | ✅ | pgvector (Supabase) | Guideline chunks + Rule Card embeddings (BGE-M3, 1024-d) |
 | Object storage | ✅ | Supabase Storage (S3-compatible) + Cloudflare R2 | User uploads, generated reports; knowledge snapshots and lakehouse files |
 | Data warehouse | ✅ | DuckDB | Analytics over lakehouse tables: evaluations, synthetic cohort, knowledge QA |
 | Lakehouse | ✅ | Delta Lake (delta-rs) on R2 | Bronze / silver / gold tables, with time travel for reproducible evaluations |
 | Graph DB | ✅ | Neo4j AuraDB Free | Food Knowledge Graph + Personal Gut Graph |
-| Cache / KV | ✅ | Upstash Redis | LLM/VLM response cache, free-tier API rate-limit counters, recompute locks |
+| Cache / KV | ❌ *(Finals)* | Upstash Redis | LLM/VLM response cache, free-tier API rate-limit counters, recompute locks |
 
 ### 4.2 Schema design
 **Postgres schemas**
@@ -335,11 +362,11 @@ HappyGut combines seven types of data source, each with a documented licence. In
 | D3.js | ✅ | Interactive Personal Gut Graph (d3-force via react-force-graph) |
 | Plotly | ✅ | Evaluation-lab charts; static charts in the clinician PDF (Kaleido → PNG) |
 | Streamlit | ✅ | Internal Model & Evaluation Lab |
-| Grafana | ✅ | Operations board over Postgres + Langfuse metrics |
-| Metabase | ✅ | Research dashboard over differentially private aggregates (Finals) |
-| *Added:* Langfuse | ✅ | LLM traces, token/cost, prompt versions, evaluation scores |
-| *Added:* Neo4j Aura Explore | ✅ | Knowledge-graph curation and QA |
-| *Added:* Mermaid | ✅ | Architecture and data-flow diagrams in docs |
+| Grafana | ❌ *(Finals)* | Operations board over Postgres + Langfuse metrics |
+| Metabase | ❌ *(Finals)* | Research dashboard over differentially private aggregates (Finals) |
+| *Added:* Langfuse | ➖ used, listed under observability | LLM traces, token/cost, prompt versions, evaluation scores |
+| *Added:* Neo4j Aura Explore | ➖ used, not ticked | Knowledge-graph curation and QA |
+| *Added:* Mermaid | ➖ used, not ticked | Architecture and data-flow diagrams in docs |
 | Chart.js, ECharts, Vega, Observable, Superset, Kibana, Dash | ❌ | Would duplicate the tools above |
 
 ### 5.2 Visualization details
@@ -405,3 +432,4 @@ _Pending._
 | DA3 | Dish recognition uses a vision-language model; image datasets are for evaluation only | Free-tier budget, no time to train a vision model, and zero-shot VLMs handle new dishes |
 | DA4 | Team-captured meal photos are the primary test set | Fully licensed, and genuinely Bangladeshi meals |
 | DA5 | Synthetic data is always labelled; real longitudinal data (IBDMDB) only calibrates it | Rigour without fabricated results |
+| DA6 | Portal ticks only for items that earn points **and** exist by Oct 31 (§0); the full design stays in §1–5 with Finals tags | Avoids overbuilding and claims we can't demo |
