@@ -228,15 +228,15 @@ The portal rewards *documented, real* components. **Rule: we only list what we a
 
 ---
 
-## 10. Open questions for the team (these decide Step 2)
+## 10. Team answers (2026-09-24) and what they change
 
-1. **Skills and stack comfort:** is the team stronger in Python or JavaScript/TypeScript? Has anyone shipped React Native or Flutter, or should we go PWA-first? *(Recommended: Next.js PWA + Python FastAPI backend.)*
-2. **Clinical advisor:** can we get a gastroenterologist and/or clinical dietitian (e.g., through a university hospital) to review the knowledge base and label the 200-food test set? *This is the biggest credibility multiplier available to us.*
-3. **Real users:** do we have access to IBD patients (support groups, family, clinic) for 5–10 validation interviews in October? If we collect any real health data we'll need consent forms, and possibly university ethics approval.
-4. **Compute and budget:** does anyone have a GPU (≥8 GB VRAM) for local models? Is there a monthly budget for LLM APIs and hosting, or do we stay on free tiers and credits?
-5. **Team roster:** names for the five mandatory roles (mapping proposed in `00-roadmap.md`).
-
----
+| Question | Answer | Consequence for the design |
+|---|---|---|
+| Stack language | Either; we vibe-code | Choose per component on merit: Python for AI/ML/agents, TypeScript for the web app. Decided in Step 2 |
+| Clinical advisor | Not required for the competition | We rely on published guidelines (ESPEN, IOIBD, AGA) for credibility and cite them everywhere. The food test set is labelled by us from guideline rules, and we say so |
+| Real users / pilot | Not planned; no university involvement | Validation = synthetic cohort with injected triggers + eval harness. User-outcome KPIs (retention, FR-QoL-29) move to the roadmap. Informal usability feedback from friends/family is optional and collects no health data |
+| Compute & budget | 12 GB VRAM GPU, 16 GB RAM; **free-tier AI APIs only** | Local models on Ollama in the 4–12B range, quantised (Q4/Q5), for PII scrubbing, Bangla tasks and fallback. Cloud LLMs only on free tiers, so rate limits make **caching, model routing and local fallback essential** (these also score for token optimisation) |
+| Roles | Everyone works across roles; names assigned at submission | Role table in `00-roadmap.md` stays as a suggestion |
 
 ## 11. Decision log
 
