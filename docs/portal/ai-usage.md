@@ -394,3 +394,26 @@ GitHub Actions
 - ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
 - ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with local models. Tick only if done
 - ❌ CrewAI, AutoGen, Swarm, OpenAI Agents SDK, Letta, smolagents, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
+
+## AI Development Lifecycle (AI-DLC)
+**Frameworks adopted (3 = max)**
+- ✅ GitHub Spec-Kit: spec → plan → tasks for every feature
+- ✅ Claude Skills: repeatable project procedures as `.claude/skills/`
+- ✅ AGENTS.md spec: cross-tool agent memory (mirrors CLAUDE.md for Cursor / Lovable / other agents)
+
+**Process notes (phases, artifacts, review gates)**
+1. Inception: strategy, data and AI design docs with decision logs (`docs/01-strategy.md`, `docs/03-data.md`, portal texts) + non-negotiable product rules in CLAUDE.md
+   - Gate: team review of every decision
+2. Specification (Spec-Kit): CLAUDE.md rules become the Spec-Kit constitution
+   - Each feature gets `/specify` → spec.md (user stories, acceptance criteria incl. safety rules) → `/plan` → plan.md (architecture, contracts) → `/tasks` → tasks.md
+   - Features: 001 knowledge layer · 002 meal-check hero flow · 003 check-in + trigger discovery · 004 flare early warning · 005 dietitian · 006 clinician report · 007 foodgraph MCP
+   - Gate: spec checked against the constitution before any code
+3. Construction: Claude Code implements tasks in small PRs (one GitHub issue per task via GitHub MCP); Lovable / v0 for UI
+   - Claude Skills encode repeatable steps: add-rule-card, add-dish, new-prompt-version, run-evals
+   - Gate: unit tests on every verdict-engine rule
+   - Gate: CI eval regression (red-flag recall 100%, verdict accuracy must not drop)
+   - Gate: human review of every AI-generated PR; native-speaker review of Bangla copy
+4. Operations and learning: Langfuse traces, Evaluation Lab, user feedback, knowledge-gap queue
+   - Lessons feed back into the constitution, skills and prompt library
+- Memory bank: CLAUDE.md + AGENTS.md (project memory), `docs/` decision logs, versioned `prompts/` library (build provenance)
+- Accountability: every AI-generated change is reviewed and owned by a named team member; AI usage documented per the Congress code of conduct
