@@ -77,8 +77,9 @@
   - text-input intent routing
   - second check on red-flag free text
   - fallback explainer when the Gemini quota runs out
+  - Also run locally (Llama 3.2 3B) as the offline router / red-flag fallback
   - Why: very fast inference, separate quota
-- Gemma (local, Ollama, ~12B quantized): privacy and local tasks
+- Gemma (local, Ollama, Gemma 3 4B Q4_K_M): privacy and local tasks
   - PII scrubbing (raw text never leaves our machine)
   - Bangla/Banglish normalisation
   - local vision fallback
@@ -88,8 +89,8 @@
   - dish enrichment
   - contextual chunk headers
   - synthetic Bangla/Banglish evaluation sets
-  - LLM-as-judge (a different model family from the generator, to reduce self-bias)
   - Why: strong structured output, free unlimited batch runs
+- DeepSeek-R1-Distill-Qwen-7B (local): LLM-as-judge for evaluation (claim-vs-evidence support checks), a different model from the Gemini generator to reduce self-bias
 - Supporting (non-LLM) models: BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder
 - Privacy note: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
 
@@ -212,7 +213,7 @@ Evaluation
 - MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
 - Ollama (llama.cpp runtime): local quantized inference on the team GPU
-- Gemma and Qwen open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, LLM-as-judge
+- Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, offline routing, LLM-as-judge
 - FlagEmbedding (BGE-M3, bge-reranker-v2-m3): multilingual embeddings and reranking
 - sentence-transformers: fine-tuning the dish-name embedding model
 - pgvector + Neo4j: vector index and knowledge graph for Graph RAG
@@ -267,7 +268,7 @@ Evaluation
 
 **Methods**
 - Ragas: faithfulness, context precision/recall, answer relevance
-- LLM-as-judge: local Qwen (a different model family from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
+- LLM-as-judge: local DeepSeek-R1-Distill-Qwen-7B (a different model from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
 - Human evaluation: native Bangla speakers on the team blind-rate 50 explanations (readability, accuracy)
 - Ablations: naive RAG → contextual → hybrid → reranker
 - Verdict engine vs LLM-only baseline, compared with McNemar's test
@@ -360,3 +361,29 @@ Supabase Database Webhooks
 GitHub Actions
 - On any PR changing prompts, models or retrieval: run the promptfoo + Ragas evaluation suite and red-flag tests
 - Block the merge on regression; post an eval summary comment on the PR
+
+## Local / on-device LLMs
+**Runtimes**
+- ✅ Ollama: serves all local LLMs (GGUF)
+- ✅ *Add:* Hugging Face Transformers / sentence-transformers (PyTorch): BGE-M3 embeddings, bge-reranker, embedding fine-tune
+- ➕ LM Studio: tick only if the team really uses it to benchmark models side by side
+
+**Local models we actually run** (tick the exact versions you run)
+- ✅ Gemma 3 4B (*add*): online PII scrubbing, Bangla/Banglish normalisation, local vision fallback
+- ✅ Qwen 2.5 7B Instruct: nightly batch work (Rule Card extraction, dish enrichment, contextual chunk headers, synthetic Bangla eval sets)
+- ✅ Llama 3.2 3B: always-on offline router and red-flag second check when the Groq quota runs out
+- ✅ DeepSeek-R1-Distill-Qwen-7B (*add*): LLM-as-judge (does the evidence support each claim?)
+
+**Hardware, quantization, why local**
+- GPU: NVIDIA, 12 GB VRAM (*fill in exact model*) · 16 GB system RAM
+- Format: GGUF, Q4_K_M quantization, 8k context
+- Online set (always loaded, ~8–9 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 + reranker
+- Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
+- Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
+- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=2`, `keep_alive` long for online models, short for batch models
+- Reached by the hosted backend through Cloudflare Tunnel (Access service token)
+- Why local, privacy: raw text that may contain PII never leaves our machine; cloud models only see de-identified text
+- Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks
+- Why local, resilience: automatic fallback when free-tier cloud quotas run out
+- Why local, sovereignty: inference runs on team hardware in Bangladesh
+- Why local, roadmap: the same small models are candidates for the offline/on-device app
