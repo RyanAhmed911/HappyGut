@@ -323,7 +323,7 @@
 - scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
 - NumPy / SciPy: Bayesian trigger statistics, bootstrap confidence intervals
 - FastAPI: backend API and SSE streaming
-- Next.js + React + Zod: PWA frontend and validation
+- React + Vite (vite-plugin-pwa) + Tailwind + shadcn/ui + Zod: PWA frontend and validation
 - Recharts + D3.js: patient charts and the Gut Graph
 - Streamlit + Plotly: Evaluation Lab
 - Jinja2 + WeasyPrint: PDF reports

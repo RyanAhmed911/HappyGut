@@ -31,3 +31,35 @@
 - Honesty: simulated-data results always labelled; no fabricated traction or outcomes
 - Human oversight: humans approve AI-extracted knowledge and review every AI-generated code change
 - Legally sourced data only, each source's licence recorded; positioned as self-management support, not a medical device
+
+# Portal text: Tooling & IDE
+
+## IDE / Editor
+- VS Code + Claude Code (main AI coding agent)
+- Lovable and v0 for UI generation; Claude Artifacts for prototypes
+
+## Deployment method
+- Frontend PWA: Vercel (free)
+- Backend API: FastAPI in Docker, on a free container host (Hugging Face Spaces free CPU, or Render) (*final choice in Step 2*)
+- GPU services: Ollama, embedding/rerank service, MCP servers and n8n in Docker Compose on the team GPU machine, exposed via Cloudflare Tunnel
+- Managed data: Supabase (Postgres + pgvector + Auth + Storage, Mumbai/Singapore region), Neo4j AuraDB Free
+- CI/CD: GitHub Actions (tests, evaluation regression gate); Vercel preview deploys per PR
+
+## Frameworks & libraries
+- Frontend: React, Vite (PWA), Tailwind, shadcn/ui, Zod, Recharts, D3.js
+- Backend: FastAPI, Pydantic, LiteLLM, Supabase client
+- AI / agents: LangGraph, Pydantic-AI, Instructor, CrewAI, smolagents, MCP Python SDK (FastMCP), langchain-mcp-adapters
+- Retrieval: pgvector, Neo4j, FlagEmbedding (BGE-M3, bge-reranker), sentence-transformers
+- Data: Docling, Crawl4AI, Scrapy, pandas, DuckDB, Delta Lake, Pandera, Presidio
+- ML: LightGBM, scikit-learn, SHAP, NumPy/SciPy
+- Eval / ops: Ragas, promptfoo, Langfuse, pytest, Schemathesis, Streamlit, Plotly
+- Automation: n8n
+
+## Context / memory files
+- `CLAUDE.md`: project context and non-negotiable product rules
+- `AGENTS.md`: the same rules for other coding agents (Cursor, Lovable, others)
+- `.claude/skills/`: repeatable procedures (add-rule-card, add-dish, new-prompt-version, run-evals)
+- `.specify/memory/constitution.md` + `specs/*/spec.md, plan.md, tasks.md` (Spec-Kit)
+- `docs/` decision logs (strategy, data, architecture)
+- `prompts/` versioned prompt library (build + runtime)
+- Lovable project knowledge file (design tokens, Bangla/i18n rules)
