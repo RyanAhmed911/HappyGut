@@ -298,3 +298,35 @@ Evaluation
 - Free-tier cloud APIs receive only food photos and de-identified text
 - Every verdict logs its evidence IDs + model and prompt versions
 - "Not a medical device" disclaimer
+
+## Frontend AI / visual app builders
+> Tick only the tools the team really uses during the build.
+
+**Tick**
+- ✅ Lovable: initial PWA shell and hero-flow screens
+- ✅ v0 (Vercel): individual components
+- ✅ Claude Artifacts: interactive prototypes and layout exploration
+- ✅ Gemini Canvas: Bangla UI copy drafts
+- ✅ *Add:* Google Stitch: screen designs exported to Figma (*check it's still available when you start*)
+
+**How we used them**
+- Lovable: generated the first React + Tailwind + shadcn/ui + Supabase app (scan screen, verdict card, daily check-in, My Gut dashboard), synced to GitHub, then continued in Claude Code
+- v0: generated self-contained components (verdict card with evidence bar, trigger-insight card, Recharts trend charts, flare-risk gauge), added to the codebase with the shadcn CLI
+- Claude Artifacts: quick clickable prototypes to compare verdict-card variants and the clinician pre-visit report layout before building
+- Gemini Canvas: first drafts of bilingual UI copy, which native Bangla speakers on the team then reviewed and edited
+- Google Stitch → Figma: hero-flow screen designs for the Figma link and design review
+
+**Share AI-built:** target ~80% of UI code AI-generated, then refined by hand; the actual share is reported from git history at submission
+
+**Human-owned parts**
+- Bangla typography and line breaking
+- Safety wording (verdicts, red-flag screen, disclaimer)
+- Accessibility fixes
+- Final Bangla copy
+
+**Custom workflow**
+- Shared design tokens (colours, verdict palette, spacing) given to every tool, so generated pieces match
+- Every generated string moved into `bn` / `en` message files (i18n); no hard-coded text
+- Noto Sans Bengali / Hind Siliguri fonts; Bangla numerals optional
+- Checks on every UI change: axe + Lighthouse (accessibility, performance) and a mobile low-bandwidth budget (small initial JavaScript bundle, lazy-loaded charts)
+- UI-generation prompts saved in the prompt library (`prompts/build/`)
