@@ -330,3 +330,33 @@ Evaluation
 - Noto Sans Bengali / Hind Siliguri fonts; Bangla numerals optional
 - Checks on every UI change: axe + Lighthouse (accessibility, performance) and a mobile low-bandwidth budget (small initial JavaScript bundle, lazy-loaded charts)
 - UI-generation prompts saved in the prompt library (`prompts/build/`)
+
+## Workflow automation
+**Tick (4 = max, + n8n bonus)**
+- ✅ n8n (self-hosted)
+- ✅ LangGraph
+- ✅ *Add:* GitHub Actions
+- ✅ *Add:* Supabase Database Webhooks
+
+**Automated workflows**
+
+n8n
+- Reminders: per-user cron (Asia/Dhaka) → Supabase query → Bangla/English Web Push for doses and check-ins
+- Nightly intelligence (02:00): runs Trigger Discovery + Flare Early Warning (FastAPI) → updates Personal Gut Graph edges
+- Nightly alerts: push "rising flare risk" with top factors, and "new trigger found" insights
+- Weekly digest (Sunday): Weekly Summary agent writes a Bangla/English digest from SQL-computed statistics → push + in-app card
+- Weekly clinician report: pre-visit PDF (WeasyPrint) → signed expiring link
+- Knowledge ingestion: Supabase Storage upload webhook → parse → chunk → contextual headers (local Qwen) → embed (BGE-M3) → Rule Card candidates → review-queue notice
+- Knowledge-gap loop (daily): collects ⚪ "Not sure" / unmatched dishes → Knowledge Enrichment agent drafts graph facts → human review
+- Error workflow: any failed run → team chat webhook alert
+
+LangGraph
+- Real-time meal-check agent graph (Safety Sentinel → privacy → perception → dish resolver → evidence retrieval → verdict engine → explainer → output guard)
+- Dietitian generator–critic loop
+
+Supabase Database Webhooks
+- New meal check / check-in → FastAPI → red-flag check + incremental trigger update in real time
+
+GitHub Actions
+- On any PR changing prompts, models or retrieval: run the promptfoo + Ragas evaluation suite and red-flag tests
+- Block the merge on regression; post an eval summary comment on the PR
