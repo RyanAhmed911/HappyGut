@@ -132,3 +132,71 @@ Evaluation
 - Recall@5, MRR on the guideline Q&A set
 - Ragas faithfulness and context precision
 - Ablation table: naive vector → + contextual headers → + hybrid → + reranker
+
+## MCP usage
+> **Status: PLANNED.** Fill in the portal only for servers that run by Oct 31. Repo/deploy URLs and "# endpoints actually called" come from the real build.
+
+### Built
+**happygut-foodgraph** · tick "Reused across multiple projects / clients"
+- # tools: 3
+- Transport: stdio, Streamable HTTP
+- Language / SDK: Python, MCP Python SDK (FastMCP)
+- Repo / deploy URL: GitHub repo path `mcp/foodgraph` + Cloudflare Tunnel URL *(after build)*
+- Purpose: exposes the HappyGut Food Knowledge Graph (Bangladeshi dishes → ingredients → gut-relevant components → cited IBD Rule Cards) as read-only tools, so the app's agent, our dev tools and clinicians' AI clients share one trusted source of food evidence instead of duplicating graph queries. No patient data.
+- Tools:
+  - `search_dish(query, lang)`: Bangla/English/Banglish name → canonical dishes
+  - `get_components(dish_id)`: ingredients, component levels, sources
+  - `explain_verdict_path(dish_id, phenotype, state)`: graph path dish → component → Rule Card → paper
+
+**happygut-journal** *(only if built by Oct 31)* · tick reuse
+- # tools: 3
+- Transport: Streamable HTTP
+- Language / SDK: Python, FastMCP
+- Purpose: lets a clinician's AI client read one patient's consented, read-only summary before a visit; bearer token per clinician, scoped to patients who shared via QR
+- Tools:
+  - `get_symptom_trend(patient_ref, days)`
+  - `get_adherence(patient_ref, days)`
+  - `get_previsit_summary(patient_ref)`
+
+### Used
+**Supabase MCP**
+- Source: Supabase (official)
+- # endpoints called: ~4
+- Capabilities: tools `list_tables`, `apply_migration`, `execute_sql`, `generate_typescript_types`
+- How: Claude Code designed and applied the Postgres schema and migrations, checked row-level security policies, and generated TypeScript types
+
+**Neo4j Cypher MCP** (`mcp-neo4j-cypher`)
+- Source: Neo4j Labs (open source)
+- # endpoints called: 3
+- Capabilities: tools `get_neo4j_schema`, `read_neo4j_cypher`, `write_neo4j_cypher`
+- How: Claude Code inspected the graph schema, found orphan nodes and unmatched ingredients, and proposed fixes that we reviewed
+
+**Filesystem MCP**
+- Source: Model Context Protocol reference servers (open source)
+- # endpoints called: ~3
+- Capabilities: tools `list_directory`, `read_text_file`, `search_files`
+- How: Claude Code browsed raw/bronze data-lake folders during parser and ingestion work
+
+### MCP clients / hosts
+- Claude Code: development, schema work, graph curation
+- HappyGut meal-check agent: LangGraph via `langchain-mcp-adapters` → `happygut-foodgraph`
+- Claude Desktop: demo of exploring the food graph / clinician summary
+
+### Transports
+- ✅ stdio
+- ✅ Streamable HTTP
+- ❌ SSE (legacy), WebSocket
+
+### Reuse, architecture and integration notes
+- One foodgraph server serves the app agent, Claude Code curation and the Claude Desktop demo, so there's a single source of graph logic
+- All built tools are read-only; writes go only through the reviewed ingestion pipeline
+- Data separation: food knowledge (foodgraph) vs consented patient data (journal); research gets aggregates only
+- Auth: bearer tokens on Streamable HTTP, published through Cloudflare Tunnel with Access service tokens; stdio local only
+- Rate limits: per-token limits in the server + Cloudflare WAF rule
+- Observability: every tool call traced in Langfuse (tool, latency, caller)
+- Typed contracts: Pydantic input/output models generate the tool JSON schemas
+
+### Anything else about MCP
+- Design choice: MCP for knowledge access, but the verdict engine itself stays in-process (deterministic, unit-tested), so the same decision logic isn't spread across tools
+- Gotcha planned for: free-tier tunnel URLs change, so a named Cloudflare Tunnel keeps a stable endpoint for clients
+- Next: `happygut-research` (aggregated, privacy-protected trigger statistics for researchers), plus MCP resources for Rule Cards and the prompt library
