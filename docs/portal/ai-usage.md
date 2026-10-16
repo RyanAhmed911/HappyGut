@@ -206,3 +206,95 @@ Evaluation
 - Design choice: MCP for knowledge access, but the verdict engine itself stays in-process (deterministic, unit-tested), so the same decision logic isn't spread across tools
 - Gotcha planned for: free-tier tunnel URLs change, so a named Cloudflare Tunnel keeps a stable endpoint for clients
 - Next: `happygut-research` (aggregated, privacy-protected trigger statistics for researchers), plus MCP resources for Rule Cards and the prompt library
+
+## Open-source tools & libraries (AI)
+- LangGraph: agent graph for the meal-check flow, dietitian loop and background jobs
+- MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
+- LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
+- Ollama (llama.cpp runtime): local quantized inference on the team GPU
+- Gemma and Qwen open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, LLM-as-judge
+- FlagEmbedding (BGE-M3, bge-reranker-v2-m3): multilingual embeddings and reranking
+- sentence-transformers: fine-tuning the dish-name embedding model
+- pgvector + Neo4j: vector index and knowledge graph for Graph RAG
+- Docling + Crawl4AI: guideline documents → structured, chunkable text
+- Instructor + Pydantic: typed, validated LLM outputs with automatic retry
+- Microsoft Presidio: PII detection before any cloud call
+- LightGBM + scikit-learn + SHAP: flare early-warning model and explanations
+- Ragas: RAG faithfulness and context metrics
+- promptfoo: prompt regression tests in CI
+- Langfuse: tracing, prompt versions, evaluation scores, user-feedback scores
+- Streamlit: Evaluation Lab
+
+## Agent frameworks & orchestration
+**Meal-check graph (LangGraph state machine)**
+1. Router: input type (photo / text) and language
+2. Safety Sentinel: red-flag rules + LLM second check; can stop the graph and show the escalation screen
+3. Privacy node: local Gemma + Presidio strip PII
+4. Perception agent (Gemini vision): dishes, ingredients, method, portion → JSON
+5. Dish Resolver agent: calls the `search_dish` MCP tool; ambiguous match → interrupt to ask the user (human-in-the-loop)
+6. Evidence Retriever, two parallel branches: graph path (`explain_verdict_path` MCP tool + personal edges) and hybrid RAG
+7. Verdict Engine: deterministic tool, not an LLM
+8. Explainer agent (Gemini): grounded Bangla/English explanation with citations
+9. Output Guard: schema, citation and banned-claim checks; retry once, otherwise a safe template
+
+**Other agents**
+- Dietitian agent: generator–critic loop. The LLM drafts a weekly plan, the verdict engine checks every dish, failing dishes are regenerated (max 2 rounds)
+- Knowledge Enrichment agent: takes the "Not sure" / unmatched-dish queue, drafts graph facts, sends them to human review
+- Weekly Summary agent: writes the digest from SQL-computed statistics only
+- Trigger Discovery + Flare Early Warning: nightly jobs scheduled by n8n
+
+**Patterns**
+- Tool calling through MCP, with an allow-list of tools per agent
+- Conditional edges, parallel branches, human-in-the-loop interrupts
+- Postgres checkpointer: resumable runs
+- LiteLLM retries and cross-provider fallbacks
+
+## Fine-tuning / adaptation
+- Embedding fine-tuning (planned for Oct 31): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
+  - Training pairs: Banglish / Bangla / English dish names ↔ canonical dish IDs, from Dakshina transliterations, graph aliases and reviewed synthetic spellings
+  - Measured by dish-resolution Recall@1 against the base model
+- Adaptation without weight changes: few-shot examples of Bangladeshi dishes, a Bangla medical glossary in prompts, retrieval grounding
+- Finals: QLoRA (PEFT + bitsandbytes, fits 12 GB VRAM) on a small Gemma/Qwen model for Bangla explanation style, trained on team-reviewed explanations
+
+## Evaluation & quality measurement
+**Test sets (all versioned)**
+- ~200-food verdict set, labelled by the team from Rule Cards
+- ~300 team meal photos with dish labels
+- ~100 guideline Q&A pairs with sources
+- Red-flag suite (Bangla / English / Banglish)
+- Banglish dish-name set
+- Simulated patient cohort
+
+**Methods**
+- Ragas: faithfulness, context precision/recall, answer relevance
+- LLM-as-judge: local Qwen (a different model family from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
+- Human evaluation: native Bangla speakers on the team blind-rate 50 explanations (readability, accuracy)
+- Ablations: naive RAG → contextual → hybrid → reranker
+- Verdict engine vs LLM-only baseline, compared with McNemar's test
+- Regression gate: promptfoo suite runs in CI on every prompt or model change; merge blocked if red-flag recall < 100% or verdict accuracy drops > 2 points
+- Online signals: "was this right for you?" feedback logged as Langfuse scores; latency and token cost per call
+- Bootstrap 95% confidence intervals; slices by language, sex and phenotype
+
+## Guardrails, safety & privacy
+**Input**
+- Red-flag Safety Sentinel runs first (rules + LLM second check) → escalation screen, no diet advice
+- PII scrubbing: Presidio + local Gemma (Bangla names, +8801 phone numbers, NID numbers, addresses) before any cloud call
+- EXIF/GPS stripped from photos; "photograph the food, not people" hint
+- Non-food image → rejected
+- Prompt-injection defence: text read from labels/menus is treated as data inside delimiters, never as instructions
+- Tools are read-only and allow-listed per agent; Cypher is parameterised
+- Scope guard: diagnosis or medication questions → polite refusal + "ask your doctor"
+
+**Output**
+- Pydantic schema validation; retry once, otherwise a safe template
+- The LLM can't change the verdict: the validator checks the explanation matches the engine's verdict
+- Citation check: every claim must cite an evidence ID that was retrieved; unsupported claims dropped → ⚪ "Not sure"
+- Banned-claim filter (Bangla + English): "safe", "cure", dose or medication-change wording
+- Stricturing Crohn's hard rules applied before any LLM output
+- Low confidence → ⚪ "Not sure" or a clarifying question
+
+**Privacy and accountability**
+- Consent scopes, row-level security, pseudonymous IDs
+- Free-tier cloud APIs receive only food photos and de-identified text
+- Every verdict logs its evidence IDs + model and prompt versions
+- "Not a medical device" disclaimer
