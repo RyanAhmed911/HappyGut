@@ -177,6 +177,12 @@ Evaluation
 - Capabilities: tools `list_directory`, `read_text_file`, `search_files`
 - How: Claude Code browsed raw/bronze data-lake folders during parser and ingestion work
 
+**GitHub MCP** (`github-mcp-server`)
+- Source: GitHub (official)
+- # endpoints called: ~4
+- Capabilities: tools `issue_write` / `list_issues`, `create_pull_request`, `pull_request_read`, `get_file_contents`
+- How: Claude Code tracked each build step as a GitHub issue, opened one pull request per step, and read PR diffs and review comments while fixing them
+
 ### MCP clients / hosts
 - Claude Code: development, schema work, graph curation
 - HappyGut meal-check agent: LangGraph via `langchain-mcp-adapters` → `happygut-foodgraph`
