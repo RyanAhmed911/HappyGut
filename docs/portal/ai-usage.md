@@ -92,3 +92,43 @@
   - Why: strong structured output, free unlimited batch runs
 - Supporting (non-LLM) models: BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder
 - Privacy note: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
+
+## Retrieval & RAG (tick)
+- ✅ Contextual RAG (Anthropic-style context per chunk)
+- ✅ Variable / Semantic Chunking
+- ✅ Graph RAG
+- ✅ Knowledge Graph / Other Graph Methods
+- ✅ Hybrid Search (Keyword + Vector)
+- ✅ Rerankers (BGE)
+- ➖ True but not ticked (no extra points): Naive RAG, Vector Database (pgvector), Query Rewriting
+- ❌ Late Chunking, Agentic RAG, Self-RAG, Corrective RAG, HyDE (not used as named techniques)
+
+## RAG architecture details
+**Two retrieval paths, fused into one evidence packet**
+
+Graph path (food facts and personal history)
+- Dish resolution: Banglish → Bangla → canonical dish ID (pg_trgm + BGE-M3 name embeddings)
+- Neo4j traversal: Dish → Ingredient → Component (level per 100 g)
+- Rule Cards matching (component, phenotype, disease state) → cited Papers
+- Patient REACTS_TO edges (personal evidence) + GENTLER_ALTERNATIVE dishes
+
+Text path (guideline passages for the explanation)
+- Corpus: CC-licensed ESPEN / IOIBD / AGA guideline text, published FODMAP composition papers, Rule Card texts
+- Parsing: Docling, structure-aware (sections, headings; tables kept whole)
+- Variable chunking: split by section first, then semantic breakpoints (embedding-similarity drops) into ~200–500-token chunks
+- Contextual RAG: local Qwen writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
+- Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
+- Index: pgvector HNSW (cosine, m=16, ef_construction=64)
+- Keyword search: Postgres tsvector (English) + pg_trgm (Bangla/Banglish)
+- Metadata filters: licence, phenotype, disease state, document type
+- Query: built from structured facts (component + phenotype + state), not raw user text
+- Hybrid fusion: Reciprocal Rank Fusion, top 50 → bge-reranker-v2-m3 → top 5
+
+Evidence gate and grounding
+- Low reranker score or no matching Rule Card → no explanation from weak evidence → ⚪ "Not sure" + a clarifying question
+- Evidence packet = IDs + short fact lines (~300 tokens) → the explainer must cite IDs → a validator checks every cited ID was in the packet
+
+Evaluation
+- Recall@5, MRR on the guideline Q&A set
+- Ragas faithfulness and context precision
+- Ablation table: naive vector → + contextual headers → + hybrid → + reranker
