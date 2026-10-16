@@ -417,3 +417,16 @@ GitHub Actions
    - Lessons feed back into the constitution, skills and prompt library
 - Memory bank: CLAUDE.md + AGENTS.md (project memory), `docs/` decision logs, versioned `prompts/` library (build provenance)
 - Accountability: every AI-generated change is reviewed and owned by a named team member; AI usage documented per the Congress code of conduct
+
+## Anything else about your AI usage?
+- Core design principle: "AI perceives and explains, a deterministic engine decides". Every verdict is reproducible, unit-tested and explainable, so the LLM can't invent a medical judgement
+- Personal AI, not generic AI: the Personal Gut Graph learns each patient's own triggers from their logs (Bayesian N-of-1) instead of giving one-size-fits-all IBD diet rules
+- Bangla-first AI: Bangla / English / Banglish input, Bangladeshi dish knowledge graph, Bangla medical glossary, native-speaker review of all generated Bangla
+- Honest evaluation: results on simulated patients are always labelled as simulated; real-data claims are made only where we measured them
+- Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
+- Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording
+- Model and data cards: one page per model role and per dataset (purpose, limits, licence, evaluation results), published in `/docs`
+- Cost-aware AI: runs at $0 on free tiers + one 12 GB GPU through caching, routing and local fallbacks, a realistic path for low-resource settings
+- Privacy by architecture: local models handle anything that might contain PII; cloud models only see food photos and de-identified text
+- Known limits, stated openly: not a medical device; flare prediction not yet validated on real patients; dish recognition limited to dishes in our graph (unknown → ⚪ "Not sure")
+- Next: federated learning across users, QLoRA-tuned Bangla explainer, on-device small model for offline use, clinical validation with partner gastroenterologists
