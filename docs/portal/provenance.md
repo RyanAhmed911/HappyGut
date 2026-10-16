@@ -63,3 +63,41 @@
 - `docs/` decision logs (strategy, data, architecture)
 - `prompts/` versioned prompt library (build + runtime)
 - Lovable project knowledge file (design tokens, Bangla/i18n rules)
+
+# Portal text: MCP usage (build provenance)
+
+## MCP servers (name, purpose)
+Built by us
+- happygut-foodgraph: Food Knowledge Graph (dishes → ingredients → components → cited Rule Cards)
+- happygut-guidelines: hybrid guideline RAG with citations
+- happygut-journal: consent-scoped patient summaries for clinicians' AI clients
+- happygut-evals: evaluation harness for coding agents (eval-driven development)
+- happygut-research: aggregated, small-group-suppressed trigger statistics
+
+Used
+- Supabase MCP: schema, migrations, RLS checks, TypeScript types
+- Neo4j Cypher MCP: graph inspection and curation
+- Filesystem MCP: raw data-lake folders during ingestion work
+- GitHub MCP: issues and pull requests per build step
+- Playwright MCP: end-to-end tests of the PWA hero flow, demo screenshots
+
+## Tools exposed via MCP (our servers, 14 tools)
+- foodgraph: `search_dish`, `get_components`, `explain_verdict_path`
+- guidelines: `search_guidelines`, `get_rule_card`, `cite_source`
+- journal: `get_symptom_trend`, `get_adherence`, `get_previsit_summary`
+- evals: `run_eval_suite`, `get_latest_metrics`, `compare_runs`
+- research: `get_trigger_stats`, `list_cohorts`
+
+## Permissions granted to MCP tools
+- All 14 tools we built are read-only; data changes go only through the reviewed ingestion pipeline
+- foodgraph / guidelines: read-only Neo4j and Postgres roles limited to knowledge tables; no patient data
+- journal: bearer token per clinician, limited to patients who shared by QR consent; revocable; every call audit-logged
+- research: aggregates only, k ≥ 10 suppression; no row-level access
+- evals: stdio only (local dev); runs test suites, can't modify code or data
+- Remote servers (Streamable HTTP) sit behind Cloudflare Tunnel + Access service tokens, with rate limits and Langfuse tracing
+- Supabase MCP: development project only, never production; migrations applied after human review
+- Neo4j Cypher MCP: write tool used only on the dev database; fixes go out as reviewed diffs
+- Filesystem MCP: limited to the `data/` folder
+- GitHub MCP: scoped to the HappyGut repo; no merges without human approval
+- Playwright MCP: test/staging URLs only, synthetic accounts
+- Claude Code asks for approval before any write or execute tool call
