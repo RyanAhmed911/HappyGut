@@ -210,6 +210,7 @@ Evaluation
 
 ## Open-source tools & libraries (AI)
 - LangGraph: agent graph for the meal-check flow, dietitian loop and background jobs
+- Pydantic-AI: typed agent nodes (perception, resolver, explainer, dietitian) inside the LangGraph graph
 - MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
 - Ollama (llama.cpp runtime): local quantized inference on the team GPU
@@ -387,3 +388,9 @@ GitHub Actions
 - Why local, resilience: automatic fallback when free-tier cloud quotas run out
 - Why local, sovereignty: inference runs on team hardware in Bangladesh
 - Why local, roadmap: the same small models are candidates for the offline/on-device app
+
+## Agentic frameworks used
+- ✅ LangGraph: orchestrates the meal-check graph (sentinel → privacy → perception → resolver → retrieval → verdict engine → explainer → guard), the dietitian generator–critic loop, interrupts, Postgres checkpointing
+- ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
+- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with local models. Tick only if done
+- ❌ CrewAI, AutoGen, Swarm, OpenAI Agents SDK, Letta, smolagents, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
