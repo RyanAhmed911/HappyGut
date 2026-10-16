@@ -149,7 +149,7 @@ Evaluation
   - `get_components(dish_id)`: ingredients, component levels, sources
   - `explain_verdict_path(dish_id, phenotype, state)`: graph path dish → component → Rule Card → paper
 
-**happygut-journal** *(only if built by Oct 31)* · tick reuse
+**happygut-journal** · tick reuse
 - # tools: 3
 - Transport: Streamable HTTP
 - Language / SDK: Python, FastMCP
@@ -158,6 +158,35 @@ Evaluation
   - `get_symptom_trend(patient_ref, days)`
   - `get_adherence(patient_ref, days)`
   - `get_previsit_summary(patient_ref)`
+
+**happygut-guidelines** · tick reuse
+- # tools: 3
+- Transport: stdio, Streamable HTTP
+- Language / SDK: Python, FastMCP
+- Purpose: exposes our hybrid guideline RAG (contextual chunks + Rule Cards, reranked, with citations) so the explainer agent, Claude Code and clinicians' AI clients search the same cited IBD nutrition evidence
+- Tools:
+  - `search_guidelines(query, phenotype, state, lang)`: top cited passages
+  - `get_rule_card(id)`: structured rule + source quote
+  - `cite_source(id)`: full reference (DOI / PMID, licence)
+
+**happygut-evals** · tick reuse
+- # tools: 3 (+ MCP resources for evaluation reports)
+- Transport: stdio
+- Language / SDK: Python, FastMCP
+- Purpose: makes the evaluation harness available to coding agents, so Claude Code checks quality before and after every change (eval-driven development); also feeds live metrics to /docs
+- Tools:
+  - `run_eval_suite(suite)`: verdict / red-flag / RAG / trigger-recovery suites
+  - `get_latest_metrics()`
+  - `compare_runs(run_a, run_b)`: regression diff
+
+**happygut-research** · tick reuse
+- # tools: 2
+- Transport: Streamable HTTP
+- Language / SDK: Python, FastMCP
+- Purpose: aggregated trigger statistics for researchers, with small groups suppressed (k ≥ 10); runs on the clearly labelled simulated cohort until real consented data exists
+- Tools:
+  - `get_trigger_stats(component, region)`
+  - `list_cohorts()`
 
 ### Used
 **Supabase MCP**
@@ -183,6 +212,12 @@ Evaluation
 - # endpoints called: ~4
 - Capabilities: tools `issue_write` / `list_issues`, `create_pull_request`, `pull_request_read`, `get_file_contents`
 - How: Claude Code tracked each build step as a GitHub issue, opened one pull request per step, and read PR diffs and review comments while fixing them
+
+**Playwright MCP**
+- Source: Microsoft (open source)
+- # endpoints called: ~4
+- Capabilities: tools `browser_navigate`, `browser_click`, `browser_file_upload`, `browser_take_screenshot`
+- How: Claude Code ran end-to-end checks of the PWA hero flow (upload meal photo → verdict card in Bangla) on mobile viewport sizes and captured screenshots for the demo and /docs
 
 ### MCP clients / hosts
 - Claude Code: development, schema work, graph curation
@@ -393,7 +428,13 @@ GitHub Actions
 - ✅ LangGraph: orchestrates the meal-check graph (sentinel → privacy → perception → resolver → retrieval → verdict engine → explainer → guard), the dietitian generator–critic loop, interrupts, Postgres checkpointing
 - ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
 - ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with local models. Tick only if done
-- ❌ CrewAI, AutoGen, Swarm, OpenAI Agents SDK, Letta, smolagents, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
+- ✅ CrewAI: offline knowledge-curation crew for Rule Cards, run on local models
+  - Researcher agent: finds passages via Europe PMC + guideline RAG
+  - Extractor agent: drafts the Rule Card with an exact quote
+  - Critic agent: checks the quote supports the rule
+  - Output → human review queue
+- ✅ smolagents: data-ops code agent (local Qwen, sandboxed). Writes and runs read-only pandas / Cypher analysis on unmatched ingredients, orphan graph nodes and evaluation failures, then proposes fixes as reviewable diffs
+- ❌ AutoGen, Swarm, OpenAI Agents SDK, Letta, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
 
 ## AI Development Lifecycle (AI-DLC)
 **Frameworks adopted (3 = max)**
