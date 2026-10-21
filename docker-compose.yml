@@ -1,26 +1,24 @@
-# Services that run on the team GPU machine (12 GB VRAM).
+# Services that run on the team GPU machine: AMD Radeon RX 7700 XT (12 GB, ROCm) on Ubuntu.
 # Everything binds to localhost; only the gateway is published, through Tailscale Funnel:
 #   tailscale funnel 8080
-# Requires Docker with NVIDIA GPU support (Docker Desktop + WSL2 on Windows, nvidia-container-toolkit on Linux).
+# Requires Docker Engine on Ubuntu with the amdgpu kernel driver loaded (the Ollama ROCm image brings its own ROCm runtime).
+# Your user must be in the video and render groups:  sudo usermod -aG video,render $USER
 
 services:
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:rocm
     restart: unless-stopped
     environment:
-      OLLAMA_MAX_LOADED_MODELS: "2"
+      OLLAMA_MAX_LOADED_MODELS: "3"   # gemma3:4b + llama3.2:3b + bge-m3 stay loaded
+      # HSA_OVERRIDE_GFX_VERSION: "11.0.0"   # only if Ollama logs say the GPU is unsupported
       OLLAMA_KEEP_ALIVE: "24h"
     volumes:
       - ollama:/root/.ollama
     ports:
       - "127.0.0.1:11434:11434"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    devices:
+      - /dev/kfd
+      - /dev/dri
 
   gateway:
     image: caddy:2
@@ -47,7 +45,7 @@ services:
       - "127.0.0.1:5678:5678"
 
   # Added in Step 1 (knowledge layer):
-  # embed:  BGE-M3 + bge-reranker service (services/embed)
+  # embed:  bge-reranker-v2-m3 on CPU (services/embed); BGE-M3 embeddings are served by Ollama
   # mcp:    FastMCP servers (services/mcp)
 
 volumes:

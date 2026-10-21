@@ -49,7 +49,7 @@
 - Frontend: React, Vite (PWA), Tailwind, shadcn/ui, Zod, Recharts, D3.js
 - Backend: FastAPI, Pydantic, LiteLLM, Supabase client
 - AI / agents: LangGraph, Pydantic-AI, Instructor, CrewAI, smolagents, MCP Python SDK (FastMCP), langchain-mcp-adapters
-- Retrieval: pgvector, Neo4j, FlagEmbedding (BGE-M3, bge-reranker), sentence-transformers
+- Retrieval: pgvector, Neo4j, BGE-M3 via Ollama, bge-reranker via sentence-transformers
 - Data: Docling, Crawl4AI, Scrapy, pandas, DuckDB, Delta Lake, Pandera, Presidio
 - ML: LightGBM, scikit-learn, SHAP, NumPy/SciPy
 - Eval / ops: Ragas, promptfoo, Langfuse, pytest, Schemathesis, Streamlit, Plotly

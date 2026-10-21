@@ -250,7 +250,7 @@ Evaluation
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
 - Ollama (llama.cpp runtime): local quantized inference on the team GPU
 - Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, offline routing, LLM-as-judge
-- FlagEmbedding (BGE-M3, bge-reranker-v2-m3): multilingual embeddings and reranking
+- BGE-M3 (served by Ollama) + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
 - sentence-transformers: fine-tuning the dish-name embedding model
 - pgvector + Neo4j: vector index and knowledge graph for Graph RAG
 - Docling + Crawl4AI: guideline documents → structured, chunkable text
@@ -401,7 +401,7 @@ GitHub Actions
 ## Local / on-device LLMs
 **Runtimes**
 - ✅ Ollama: serves all local LLMs (GGUF)
-- ✅ *Add:* Hugging Face Transformers / sentence-transformers (PyTorch): BGE-M3 embeddings, bge-reranker, embedding fine-tune
+- ✅ *Add:* Hugging Face Transformers / sentence-transformers (PyTorch, CPU): bge-reranker cross-encoder, embedding fine-tune
 - ➕ LM Studio: tick only if the team really uses it to benchmark models side by side
 
 **Local models we actually run** (tick the exact versions you run)
@@ -411,12 +411,12 @@ GitHub Actions
 - ✅ DeepSeek-R1-Distill-Qwen-7B (*add*): LLM-as-judge (does the evidence support each claim?)
 
 **Hardware, quantization, why local**
-- GPU: NVIDIA, 12 GB VRAM (*fill in exact model*) · 16 GB system RAM
+- GPU: AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (Ollama ROCm build) · 16 GB system RAM
 - Format: GGUF, Q4_K_M quantization, 8k context
-- Online set (always loaded, ~8–9 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 + reranker
+- Online set (always loaded, ~7–8 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 on the GPU; reranker on the CPU
 - Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
 - Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
-- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=2`, `keep_alive` long for online models, short for batch models
+- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `keep_alive` long for online models, short for batch models
 - Reached by the hosted backend through Tailscale Funnel (API-key gateway)
 - Why local, privacy: raw text that may contain PII never leaves our machine; cloud models only see de-identified text
 - Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks

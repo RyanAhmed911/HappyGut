@@ -296,8 +296,8 @@
 - Evaluation exports: Parquet / CSV results + Markdown report in the repo
 
 **Embeddings / model serving**
-- Ollama on the team GPU (12 GB VRAM, quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback
-- Embedding + rerank service (BGE-M3, bge-reranker-v2-m3) on the GPU machine behind FastAPI
+- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback, BGE-M3 embeddings
+- Rerank service (bge-reranker-v2-m3, CPU) on the GPU machine behind FastAPI
 - Tailscale Funnel exposes the local Ollama and embedding services to the hosted backend (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
@@ -317,7 +317,7 @@
 - Pandera: DataFrame quality checks
 - Microsoft Presidio: PII detection and anonymisation
 - rapidfuzz: fuzzy dish-name matching
-- BGE-M3 + bge-reranker-v2-m3 (FlagEmbedding): multilingual embeddings and reranking
+- BGE-M3 (via Ollama) + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
 - Ollama + open-weight Qwen models: local inference
 - LangGraph: agent orchestration
 - scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
@@ -416,7 +416,7 @@
 **Tunneling usage notes**
 - Tailscale Funnel exposes one stable HTTPS address for the team GPU machine, routed by path:
   - `/llm` → Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
-  - `/embed` → BGE-M3 embedding + reranker service
+  - `/embed` → reranker service (embeddings go through `/llm`, Ollama's BGE-M3)
   - `/mcp` → MCP servers (Streamable HTTP)
 - Security: a Caddy gateway in front of every route checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
 - Security: services bound to localhost only; nothing opened on the router; Funnel adds TLS automatically

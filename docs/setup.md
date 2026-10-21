@@ -55,11 +55,20 @@ After the project is created:
 5. Skip optional extras (agents, graph analytics, sample datasets).
 6. Free instances pause when unused for a few days. Resume them from the console before working or demoing.
 
+### Tailscale, ngrok and data API keys
+- **Tailscale**: install on **Ubuntu** (the GPU machine), not Windows. Funnel publishes the machine that runs the services. Install it on Windows only if you want to reach the Ubuntu box from there.
+  `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`, then enable Funnel for the tailnet in the admin console.
+- **ngrok**: on "Where do you want to begin?" choose **Share localhost**. Later on Ubuntu: install the agent, run `ngrok config add-authtoken <token>`, and claim the free static domain under **Domains**. Skip "Gateway" and "AI Gateway".
+- **USDA FoodData Central key**: https://api.data.gov/signup/ (the same key works for FoodData Central) → `USDA_API_KEY`
+- **NCBI key**: sign in at https://www.ncbi.nlm.nih.gov/account/ → Account Settings (https://account.ncbi.nlm.nih.gov/settings/) → API Key Management → Create → `NCBI_API_KEY`
+
 ### Until the repo is cloned
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
 ## 2. GPU machine
-Requirements: NVIDIA GPU (12 GB), Docker with GPU support (Windows: Docker Desktop + WSL2; Linux: nvidia-container-toolkit), Tailscale.
+Machine: AMD Radeon RX 7700 XT (12 GB) on **Ubuntu** (the services run there, not on Windows). Requirements: Docker Engine, the amdgpu driver (`ls /dev/kfd /dev/dri` should list both), your user in the `video` and `render` groups (`sudo usermod -aG video,render $USER`, then log out and in), Tailscale and ngrok installed on Ubuntu.
+
+The machine dual-boots, so **the backend's local AI only works while it's booted into Ubuntu**. Keep it on Ubuntu during demo and judging windows; otherwise the app runs in degraded mode.
 
 ```bash
 # from the repo root, with .env filled in
@@ -70,6 +79,8 @@ docker compose exec ollama ollama pull gemma3:4b
 docker compose exec ollama ollama pull llama3.2:3b
 docker compose exec ollama ollama pull qwen2.5:7b
 docker compose exec ollama ollama pull deepseek-r1:7b
+docker compose exec ollama ollama pull bge-m3            # embeddings
+docker compose exec ollama ollama ps                     # PROCESSOR column should say GPU
 
 # check the gateway locally
 curl http://127.0.0.1:8080/health                                       # ok
