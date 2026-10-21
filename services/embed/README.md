@@ -1,3 +1,3 @@
-# services/embed: embedding and rerank service
+# services/embed: rerank service
 
-bge-reranker-v2-m3 (sentence-transformers, CPU) behind a small FastAPI app on the GPU machine, reached through the gateway at `/embed`. BGE-M3 embeddings (1024-d, multilingual) are served by Ollama on the AMD GPU (`bge-m3` model).
+bge-reranker-v2-m3 (sentence-transformers on the machine's native ROCm PyTorch, GPU) behind a small FastAPI app on `127.0.0.1:8001`, reached through the gateway at `/embed`. Runs natively, not in Docker. BGE-M3 embeddings (1024-d, multilingual) are served by Ollama (`bge-m3`).

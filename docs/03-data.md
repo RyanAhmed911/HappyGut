@@ -516,7 +516,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 
 **Embeddings / model serving**
 - Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback, BGE-M3 embeddings
-- Rerank service (bge-reranker-v2-m3, CPU) on the GPU machine behind FastAPI
+- Rerank service (bge-reranker-v2-m3 on ROCm PyTorch) on the GPU machine behind FastAPI
 - Tailscale Funnel exposes the local Ollama and embedding services to the hosted backend (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)

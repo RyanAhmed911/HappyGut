@@ -401,7 +401,7 @@ GitHub Actions
 ## Local / on-device LLMs
 **Runtimes**
 - ✅ Ollama: serves all local LLMs (GGUF)
-- ✅ *Add:* Hugging Face Transformers / sentence-transformers (PyTorch, CPU): bge-reranker cross-encoder, embedding fine-tune
+- ✅ *Add:* Hugging Face Transformers / sentence-transformers on ROCm PyTorch: bge-reranker cross-encoder, embedding fine-tune
 - ➕ LM Studio: tick only if the team really uses it to benchmark models side by side
 
 **Local models we actually run** (tick the exact versions you run)
@@ -411,9 +411,9 @@ GitHub Actions
 - ✅ DeepSeek-R1-Distill-Qwen-7B (*add*): LLM-as-judge (does the evidence support each claim?)
 
 **Hardware, quantization, why local**
-- GPU: AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (Ollama ROCm build) · 16 GB system RAM
+- GPU: AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
 - Format: GGUF, Q4_K_M quantization, 8k context
-- Online set (always loaded, ~7–8 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 on the GPU; reranker on the CPU
+- Online set (always loaded, ~8–9 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 (Ollama) + bge-reranker (ROCm PyTorch), all on the GPU
 - Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
 - Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
 - Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `keep_alive` long for online models, short for batch models

@@ -65,30 +65,42 @@ After the project is created:
 ### Until the repo is cloned
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
-## 2. GPU machine
-Machine: AMD Radeon RX 7700 XT (12 GB) on **Ubuntu** (the services run there, not on Windows). Requirements: Docker Engine, the amdgpu driver (`ls /dev/kfd /dev/dri` should list both), your user in the `video` and `render` groups (`sudo usermod -aG video,render $USER`, then log out and in), Tailscale and ngrok installed on Ubuntu.
+## 2. GPU machine (Ubuntu, AMD RX 7700 XT)
+Already installed on the machine: ROCm, ROCm PyTorch, Ollama (native), llama.cpp. Still needed: Docker Engine, Tailscale, ngrok.
 
-The machine dual-boots, so **the backend's local AI only works while it's booted into Ubuntu**. Keep it on Ubuntu during demo and judging windows; otherwise the app runs in degraded mode.
+The machine dual-boots, so **the local AI only works while it's booted into Ubuntu**. Keep it on Ubuntu during demo and judging windows; otherwise the app runs in degraded mode.
+
+| Runs natively on Ubuntu | Runs in Docker |
+|---|---|
+| Ollama (ROCm), rerank service (ROCm PyTorch, from Step 1) | Caddy API-key gateway, n8n |
 
 ```bash
-# from the repo root, with .env filled in
-docker compose up -d                      # ollama, gateway, n8n
+# 1. Ollama settings (native systemd service)
+sudo systemctl edit ollama
+#   add, then save:
+#   [Service]
+#   Environment="OLLAMA_MAX_LOADED_MODELS=3"
+#   Environment="OLLAMA_KEEP_ALIVE=24h"
+sudo systemctl restart ollama
 
-# pull the local models (Q4 quantized by default)
-docker compose exec ollama ollama pull gemma3:4b
-docker compose exec ollama ollama pull llama3.2:3b
-docker compose exec ollama ollama pull qwen2.5:7b
-docker compose exec ollama ollama pull deepseek-r1:7b
-docker compose exec ollama ollama pull bge-m3            # embeddings
-docker compose exec ollama ollama ps                     # PROCESSOR column should say GPU
+# 2. Local models
+ollama pull gemma3:4b
+ollama pull llama3.2:3b
+ollama pull qwen2.5:7b
+ollama pull deepseek-r1:7b
+ollama pull bge-m3
+ollama run gemma3:4b "hello" && ollama ps      # PROCESSOR column should say 100% GPU
 
-# check the gateway locally
-curl http://127.0.0.1:8080/health                                       # ok
-curl -H "X-HappyGut-Key: $GATEWAY_KEY" http://127.0.0.1:8080/llm/api/tags   # model list
+# 3. Gateway + n8n (from the repo root, with .env filled in)
+docker compose up -d
+curl http://127.0.0.1:8080/health                                              # ok
+curl -H "X-HappyGut-Key: $GATEWAY_KEY" http://127.0.0.1:8080/llm/api/tags      # model list
 
-# publish the gateway (stable https://<machine>.<tailnet>.ts.net)
-tailscale funnel --bg 8080
+# 4. Publish the gateway (stable https://<machine>.<tailnet>.ts.net)
+sudo tailscale funnel --bg 8080
 ```
+
+Keep Ollama bound to `127.0.0.1` (its default). The gateway is the only way in from outside.
 
 **Bangla smoke test (10 minutes):** ask `gemma3:4b` to (1) rewrite a Banglish sentence in Bangla, (2) remove the name and phone number from a Bangla sentence, (3) list the dishes in a photo of a Bangladeshi meal. Note the quality in `docs/02-architecture.md` so we can pin the model.
 

@@ -19,10 +19,10 @@ flowchart LR
         GROQ["Groq Llama<br/>routing · fallback"]
         LF["Langfuse<br/>traces · scores"]
     end
-    subgraph GPU["Team GPU machine (12 GB) · Docker Compose"]
+    subgraph GPU["Team GPU machine · Ubuntu · RX 7700 XT 12 GB"]
         GW["Caddy API-key gateway"]
         OLL["Ollama (ROCm, RX 7700 XT)<br/>Gemma 3 4B · Llama 3.2 3B · BGE-M3<br/>Qwen 2.5 7B · R1-Distill 7B"]
-        EMB["Rerank service (CPU)<br/>bge-reranker-v2-m3"]
+        EMB["Rerank service (ROCm PyTorch)<br/>bge-reranker-v2-m3"]
         MCP["MCP servers<br/>foodgraph · guidelines · journal · evals · research"]
         N8N["n8n"]
         PIPE["Knowledge pipelines<br/>(batch)"]
@@ -136,4 +136,4 @@ docker-compose.yml   GPU machine services
 | AR8 | Neo4j AuraDB Free for the knowledge graph | Graph RAG and the Personal Gut Graph need real graph traversal | Recursive SQL over tables |
 | AR9 | ~50 dishes and ~25 Rule Cards for the prototype | 10 days left; depth and correctness beat breadth | 150 dishes |
 | AR10 | Degraded mode when the GPU machine is offline | The demo must survive the team machine being off | No fallback |
-| AR11 | GPU machine is an AMD RX 7700 XT on Ubuntu: Ollama ROCm image; BGE-M3 served by Ollama; reranker on CPU | Ollama supports this GPU; avoids a heavy PyTorch-on-ROCm install for one small model | PyTorch ROCm embedding service |
+| AR11 | GPU machine is an AMD RX 7700 XT on Ubuntu with ROCm already installed: native Ollama (incl. BGE-M3 embeddings) and a native rerank service on ROCm PyTorch; only the gateway and n8n run in Docker (gateway uses host networking, localhost-only) | Reuses the working native ROCm stack; avoids GPU passthrough into containers | Ollama ROCm container; CPU reranker |

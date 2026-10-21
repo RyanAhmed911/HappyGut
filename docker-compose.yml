@@ -1,16 +1,19 @@
 # Services that run on the team GPU machine: AMD Radeon RX 7700 XT (12 GB, ROCm) on Ubuntu.
 # Everything binds to localhost; only the gateway is published, through Tailscale Funnel:
 #   tailscale funnel 8080
-# Requires Docker Engine on Ubuntu with the amdgpu kernel driver loaded (the Ollama ROCm image brings its own ROCm runtime).
-# Your user must be in the video and render groups:  sudo usermod -aG video,render $USER
+# Native on the host (not in Docker): Ollama (ROCm) and the rerank service (ROCm PyTorch, services/embed).
+# In Docker: the Caddy API-key gateway and n8n.
 
 services:
+  # Ollama runs natively on Ubuntu (already installed with ROCm), not in Docker.
+  # Configure it with:  sudo systemctl edit ollama   (see docs/setup.md)
+  # If you ever need a containerised Ollama instead:  docker compose --profile docker-ollama up -d
   ollama:
+    profiles: ["docker-ollama"]
     image: ollama/ollama:rocm
     restart: unless-stopped
     environment:
-      OLLAMA_MAX_LOADED_MODELS: "3"   # gemma3:4b + llama3.2:3b + bge-m3 stay loaded
-      # HSA_OVERRIDE_GFX_VERSION: "11.0.0"   # only if Ollama logs say the GPU is unsupported
+      OLLAMA_MAX_LOADED_MODELS: "3"
       OLLAMA_KEEP_ALIVE: "24h"
     volumes:
       - ollama:/root/.ollama
@@ -23,14 +26,11 @@ services:
   gateway:
     image: caddy:2
     restart: unless-stopped
+    network_mode: host   # reaches native Ollama (127.0.0.1:11434) and the rerank service (127.0.0.1:8001)
     environment:
       GATEWAY_KEY: ${GATEWAY_KEY:?set GATEWAY_KEY in .env}
     volumes:
       - ./services/gateway/Caddyfile:/etc/caddy/Caddyfile:ro
-    ports:
-      - "127.0.0.1:8080:8080"
-    depends_on:
-      - ollama
 
   n8n:
     image: n8nio/n8n:latest
@@ -44,9 +44,7 @@ services:
     ports:
       - "127.0.0.1:5678:5678"
 
-  # Added in Step 1 (knowledge layer):
-  # embed:  bge-reranker-v2-m3 on CPU (services/embed); BGE-M3 embeddings are served by Ollama
-  # mcp:    FastMCP servers (services/mcp)
+  # Added in Step 1: MCP servers (services/mcp)
 
 volumes:
   ollama:
