@@ -10,6 +10,12 @@ International AI Builders Congress 2026 · HealthSphere AI · ChronicCare AI
 |---|---|
 | [Roadmap](docs/00-roadmap.md) | Steps, dates, role owners |
 | [Step 1: Strategy & scope](docs/01-strategy.md) | Concept stress test, positioning, hero flow, KPIs, rubric mapping |
+| [Step 2: Architecture](docs/02-architecture.md) | System, hero-flow sequence, verdict engine, decisions |
+| [Step 3: Data lifecycle](docs/03-data.md) | Sources, licences, storage, ML, governance |
+| [Submission scope](docs/portal/submission-scope.md) | What is real in the prototype vs designed |
+| [Setup](docs/setup.md) | Free accounts and GPU machine |
+| [Constitution](.specify/memory/constitution.md) | Rules every change follows |
+| [Specs](specs/) | Spec-Kit feature specs |
 | [Prompt library](prompts/) | Versioned prompts used to design and build HappyGut |
 
 > HappyGut is a self-management support tool, not a medical device. It doesn't diagnose, treat, or replace a clinician.

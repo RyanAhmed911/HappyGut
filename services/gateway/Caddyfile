@@ -1,0 +1,33 @@
+# API-key gateway in front of the GPU machine's services.
+# Ollama has no authentication of its own, so it is never exposed directly.
+# Clients must send:  X-HappyGut-Key: <GATEWAY_KEY>
+
+:8080 {
+	handle /health {
+		respond "ok" 200
+	}
+
+	route {
+		@unauthorized not header X-HappyGut-Key {$GATEWAY_KEY}
+		respond @unauthorized "unauthorized" 401
+
+		handle_path /llm/* {
+			reverse_proxy ollama:11434
+		}
+
+		# Enabled in Step 1:
+		# handle_path /embed/* {
+		# 	reverse_proxy embed:8001
+		# }
+		# handle_path /mcp/* {
+		# 	reverse_proxy mcp:8100
+		# }
+
+		respond "not found" 404
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

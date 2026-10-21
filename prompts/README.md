@@ -9,5 +9,6 @@ Versioned prompts used to **design and build** HappyGut (build provenance), and 
 | P-003 | [`build/003-data-lifecycle-design.md`](build/003-data-lifecycle-design.md) | Data architecture | Full data lifecycle design |
 | P-004 | [`build/004-scope-honesty-check.md`](build/004-scope-honesty-check.md) | Review | Tick-only-if-real rule, lean prototype scope |
 | P-005 | [`build/005-ai-architecture-design.md`](build/005-ai-architecture-design.md) | AI architecture | Prompts, models, RAG, MCP, agents, evaluation, guardrails |
+| P-006 | [`build/006-step0-foundation.md`](build/006-step0-foundation.md) | Project setup | Free-only audit, architecture, Spec-Kit, skeleton, gateway |
 
 Build-phase prompts (Spec-Kit specs, Lovable UI, /docs module, MCP servers) are added as they're used. Runtime prompts live in `runtime/`.
