@@ -142,7 +142,7 @@ Evaluation
 - # tools: 3
 - Transport: stdio, Streamable HTTP
 - Language / SDK: Python, MCP Python SDK (FastMCP)
-- Repo / deploy URL: GitHub repo path `mcp/foodgraph` + Cloudflare Tunnel URL *(after build)*
+- Repo / deploy URL: GitHub repo path `mcp/foodgraph` + Tailscale Funnel URL *(after build)*
 - Purpose: exposes the HappyGut Food Knowledge Graph (Bangladeshi dishes → ingredients → gut-relevant components → cited IBD Rule Cards) as read-only tools, so the app's agent, our dev tools and clinicians' AI clients share one trusted source of food evidence instead of duplicating graph queries. No patient data.
 - Tools:
   - `search_dish(query, lang)`: Bangla/English/Banglish name → canonical dishes
@@ -233,14 +233,14 @@ Evaluation
 - One foodgraph server serves the app agent, Claude Code curation and the Claude Desktop demo, so there's a single source of graph logic
 - All built tools are read-only; writes go only through the reviewed ingestion pipeline
 - Data separation: food knowledge (foodgraph) vs consented patient data (journal); research gets aggregates only
-- Auth: bearer tokens on Streamable HTTP, published through Cloudflare Tunnel with Access service tokens; stdio local only
-- Rate limits: per-token limits in the server + Cloudflare WAF rule
+- Auth: bearer tokens on Streamable HTTP, published through Tailscale Funnel behind an API-key gateway; stdio local only
+- Rate limits: per-token limits in the server and the gateway
 - Observability: every tool call traced in Langfuse (tool, latency, caller)
 - Typed contracts: Pydantic input/output models generate the tool JSON schemas
 
 ### Anything else about MCP
 - Design choice: MCP for knowledge access, but the verdict engine itself stays in-process (deterministic, unit-tested), so the same decision logic isn't spread across tools
-- Gotcha planned for: free-tier tunnel URLs change, so a named Cloudflare Tunnel keeps a stable endpoint for clients
+- Gotcha planned for: free quick-tunnel URLs change on restart, so we use Tailscale Funnel's stable `*.ts.net` address (free, no domain needed)
 - Next: `happygut-research` (aggregated, privacy-protected trigger statistics for researchers), plus MCP resources for Rule Cards and the prompt library
 
 ## Open-source tools & libraries (AI)
@@ -417,7 +417,7 @@ GitHub Actions
 - Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
 - Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
 - Ollama settings: `OLLAMA_MAX_LOADED_MODELS=2`, `keep_alive` long for online models, short for batch models
-- Reached by the hosted backend through Cloudflare Tunnel (Access service token)
+- Reached by the hosted backend through Tailscale Funnel (API-key gateway)
 - Why local, privacy: raw text that may contain PII never leaves our machine; cloud models only see de-identified text
 - Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks
 - Why local, resilience: automatic fallback when free-tier cloud quotas run out

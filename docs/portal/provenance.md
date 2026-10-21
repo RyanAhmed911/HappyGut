@@ -40,8 +40,8 @@
 
 ## Deployment method
 - Frontend PWA: Vercel (free)
-- Backend API: FastAPI in Docker, on a free container host (Hugging Face Spaces free CPU, or Render) (*final choice in Step 2*)
-- GPU services: Ollama, embedding/rerank service, MCP servers and n8n in Docker Compose on the team GPU machine, exposed via Cloudflare Tunnel
+- Backend API: FastAPI in Docker on Hugging Face Spaces (free CPU tier, no card)
+- GPU services: Ollama, embedding/rerank service, MCP servers and n8n in Docker Compose on the team GPU machine, exposed via Tailscale Funnel
 - Managed data: Supabase (Postgres + pgvector + Auth + Storage, Mumbai/Singapore region), Neo4j AuraDB Free
 - CI/CD: GitHub Actions (tests, evaluation regression gate); Vercel preview deploys per PR
 
@@ -94,7 +94,7 @@ Used
 - journal: bearer token per clinician, limited to patients who shared by QR consent; revocable; every call audit-logged
 - research: aggregates only, k ≥ 10 suppression; no row-level access
 - evals: stdio only (local dev); runs test suites, can't modify code or data
-- Remote servers (Streamable HTTP) sit behind Cloudflare Tunnel + Access service tokens, with rate limits and Langfuse tracing
+- Remote servers (Streamable HTTP) sit behind Tailscale Funnel + an API-key gateway, with rate limits and Langfuse tracing
 - Supabase MCP: development project only, never production; migrations applied after human review
 - Neo4j Cypher MCP: write tool used only on the dev database; fixes go out as reviewed diffs
 - Filesystem MCP: limited to the `data/` folder

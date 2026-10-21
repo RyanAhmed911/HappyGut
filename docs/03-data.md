@@ -16,7 +16,7 @@
 | Data sources | Internal · External APIs · Public Web · Open Datasets · User Uploads · Synthetic | IoT / Sensor |
 | Acquisition | Web Scrapers · AI Extraction · MCP · Bulk Upload · Automated Flows · API Pull | RSS · OCR (the vision model does it) · Speech-to-Text |
 | Formats | JSON · CSV · PDF · Images | — (others are true but earn nothing past the cap of 4) |
-| Storage | Relational (Postgres) · Vector (pgvector) · Object (Supabase Storage) · Graph (Neo4j) · Lakehouse (Delta/Parquet) · Warehouse (DuckDB) | NoSQL (IndexedDB) · Cache (Redis) · Cloudflare R2 |
+| Storage | Relational (Postgres) · Vector (pgvector) · Object (Supabase Storage) · Graph (Neo4j) · Lakehouse (Delta/Parquet) · Warehouse (DuckDB) | NoSQL (IndexedDB) · Cache (Redis) |
 | Visualization | Recharts · D3.js · Plotly · Streamlit | Grafana · Metabase |
 
 **Moved to Finals:**
@@ -283,9 +283,9 @@ HappyGut's prototype combines six types of data source, each with a documented l
 | Relational | ✅ | Supabase Postgres | Profiles, meal checks, verdicts, check-ins, meds, reminders, consent, audit |
 | NoSQL | ❌ *(Finals)* | IndexedDB on the device (Dexie.js) | Offline-first queue of meal logs and check-ins, cached recent verdicts (low-bandwidth use) |
 | Vector DB | ✅ | pgvector (Supabase) | Guideline chunks + Rule Card embeddings (BGE-M3, 1024-d) |
-| Object storage | ✅ | Supabase Storage (S3-compatible) + Cloudflare R2 | User uploads, generated reports; knowledge snapshots and lakehouse files |
+| Object storage | ✅ | Supabase Storage (S3-compatible) | User uploads, generated reports; knowledge snapshots and lakehouse files |
 | Data warehouse | ✅ | DuckDB | Analytics over lakehouse tables: evaluations, synthetic cohort, knowledge QA |
-| Lakehouse | ✅ | Delta Lake (delta-rs) on R2 | Bronze / silver / gold tables, with time travel for reproducible evaluations |
+| Lakehouse | ✅ | Delta Lake (delta-rs), local files backed up to Supabase Storage | Bronze / silver / gold tables, with time travel for reproducible evaluations |
 | Graph DB | ✅ | Neo4j AuraDB Free | Food Knowledge Graph + Personal Gut Graph |
 | Cache / KV | ❌ *(Finals)* | Upstash Redis | LLM/VLM response cache, free-tier API rate-limit counters, recompute locks |
 
@@ -343,15 +343,15 @@ HappyGut's prototype combines six types of data source, each with a documented l
 
 ### 4.6 Tiered storage
 - Hot: Postgres, Neo4j, Redis (live app)
-- Warm: Delta silver/gold on R2, queried with DuckDB (analytics, evaluations)
-- Cold: immutable bronze snapshots on R2 (reproducibility, licence audit)
+- Warm: Delta silver/gold tables, queried with DuckDB (analytics, evaluations)
+- Cold: immutable bronze snapshots in Supabase Storage (reproducibility, licence audit)
 - Edge: IndexedDB on the device (offline logging) *(Finals)*
 
 ### 4.7 Residency and operational notes
 - Supabase region: Mumbai or Singapore (nearest to Bangladesh; no Bangladesh region exists)
 - Encryption: AES-256 at rest (provider), TLS in transit, application-level encryption for free-text notes
 - Free-tier limits (*check current values*): Supabase DB and storage caps; free Supabase projects pause when inactive, so keep the demo project warm before judging
-- Free-tier limits (*check current values*): Aura Free node/relationship caps; Upstash command quota; R2 free storage
+- Free-tier limits (*check current values*): Aura Free node/relationship caps
 
 ## 5. Visualization and dashboards
 
@@ -517,7 +517,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 **Embeddings / model serving**
 - Ollama on the team GPU (12 GB VRAM, quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback
 - Embedding + rerank service (BGE-M3, bge-reranker-v2-m3) on the GPU machine behind FastAPI
-- Cloudflare Tunnel exposes the local Ollama and embedding services to the hosted backend
+- Tailscale Funnel exposes the local Ollama and embedding services to the hosted backend (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
 
@@ -630,18 +630,19 @@ HappyGut's prototype combines six types of data source, each with a documented l
 ## 12. Publishing local environment to the internet
 
 **Tools**
-- ✅ Cloudflare Tunnel (cloudflared): always-on during judging
+- ✅ Tailscale Funnel: always-on during judging (free, no card, stable `*.ts.net` HTTPS address)
 - ✅ ngrok: development only
 
 **Tunneling usage notes**
-- Cloudflare Tunnel exposes from the team GPU machine: Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
-- Cloudflare Tunnel exposes: BGE-M3 embedding + reranker service
-- Cloudflare Tunnel exposes: happygut-foodgraph MCP server (Streamable HTTP)
-- Cloudflare security: Access service tokens, so only our hosted backend can reach Ollama and the embedding service
-- Cloudflare security: services bound to localhost only; nothing opened on the router
-- Cloudflare security: MCP server needs a bearer token and is read-only (food knowledge only, no patient data)
-- Cloudflare security: free WAF rate-limit rule; TLS end to end; request bodies not logged
-- Cloudflare lifecycle: runs as a system service with auto-restart during the submission and judging windows; health-check endpoint
+- Tailscale Funnel exposes one stable HTTPS address for the team GPU machine, routed by path:
+  - `/llm` → Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
+  - `/embed` → BGE-M3 embedding + reranker service
+  - `/mcp` → MCP servers (Streamable HTTP)
+- Security: a Caddy gateway in front of every route checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
+- Security: services bound to localhost only; nothing opened on the router; Funnel adds TLS automatically
+- Security: MCP servers also need a bearer token and are read-only
+- Security: per-key rate limiting in the gateway; request bodies not logged
+- Lifecycle: Tailscale + Docker Compose run as system services with auto-restart during the submission and judging windows; health-check endpoint
 - Fallback: if the tunnel or machine is offline, the backend switches to cloud-only models (degraded-mode banner)
 - ngrok: receives Supabase database/storage webhooks and n8n callbacks on local FastAPI during development
 - ngrok: free static domain for a stable webhook URL

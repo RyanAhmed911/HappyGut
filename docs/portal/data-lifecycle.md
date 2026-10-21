@@ -298,7 +298,7 @@
 **Embeddings / model serving**
 - Ollama on the team GPU (12 GB VRAM, quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback
 - Embedding + rerank service (BGE-M3, bge-reranker-v2-m3) on the GPU machine behind FastAPI
-- Cloudflare Tunnel exposes the local Ollama and embedding services to the hosted backend
+- Tailscale Funnel exposes the local Ollama and embedding services to the hosted backend (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
 
@@ -410,18 +410,19 @@
 ## 12. Publishing local environment to the internet
 
 **Tools**
-- ✅ Cloudflare Tunnel (cloudflared): always-on during judging
+- ✅ Tailscale Funnel: always-on during judging (free, no card, stable `*.ts.net` HTTPS address)
 - ✅ ngrok: development only
 
 **Tunneling usage notes**
-- Cloudflare Tunnel exposes from the team GPU machine: Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
-- Cloudflare Tunnel exposes: BGE-M3 embedding + reranker service
-- Cloudflare Tunnel exposes: happygut-foodgraph MCP server (Streamable HTTP)
-- Cloudflare security: Access service tokens, so only our hosted backend can reach Ollama and the embedding service
-- Cloudflare security: services bound to localhost only; nothing opened on the router
-- Cloudflare security: MCP server needs a bearer token and is read-only (food knowledge only, no patient data)
-- Cloudflare security: free WAF rate-limit rule; TLS end to end; request bodies not logged
-- Cloudflare lifecycle: runs as a system service with auto-restart during the submission and judging windows; health-check endpoint
+- Tailscale Funnel exposes one stable HTTPS address for the team GPU machine, routed by path:
+  - `/llm` → Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
+  - `/embed` → BGE-M3 embedding + reranker service
+  - `/mcp` → MCP servers (Streamable HTTP)
+- Security: a Caddy gateway in front of every route checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
+- Security: services bound to localhost only; nothing opened on the router; Funnel adds TLS automatically
+- Security: MCP servers also need a bearer token and are read-only
+- Security: per-key rate limiting in the gateway; request bodies not logged
+- Lifecycle: Tailscale + Docker Compose run as system services with auto-restart during the submission and judging windows; health-check endpoint
 - Fallback: if the tunnel or machine is offline, the backend switches to cloud-only models (degraded-mode banner)
 - ngrok: receives Supabase database/storage webhooks and n8n callbacks on local FastAPI during development
 - ngrok: free static domain for a stable webhook URL
