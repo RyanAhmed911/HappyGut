@@ -82,7 +82,7 @@ If the GPU machine is unreachable, PII scrubbing falls back to Presidio-only rul
 
 **Algorithm (v0)**
 1. Hard rules first. A `hard` Rule Card match (e.g. stricturing + insoluble fibre ≥ medium) → 🔴, and the reason is fixed.
-2. Guideline score per component = severity × level weight (low 0.33, medium 0.66, high 1.0) × state multiplier (flare 1.3, remission 1.0).
+2. Guideline score per component = severity × level weight (low 0.4, medium 0.7, high 1.0) × state multiplier (flare 1.3, remission 1.0).
 3. Personal score per component = P(trigger) when exposures ≥ 3; otherwise the prior is used, at reduced weight.
 4. Component risk = max(guideline score / 3, personal score). Dish risk = max over its components. Meal = max over dishes.
 5. Thresholds: < 0.35 🟢 · 0.35–0.65 🟡 · > 0.65 🔴.
