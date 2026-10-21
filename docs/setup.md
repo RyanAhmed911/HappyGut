@@ -47,6 +47,17 @@ After the project is created:
    - Paste the result into `SUPABASE_DB_URL`.
 5. Free projects pause after about a week without activity; open the dashboard or run a query before demos.
 
+### Neo4j AuraDB Free
+1. Go to console.neo4j.io and sign up (Google or email; no card).
+2. **Create instance** → choose **AuraDB Free**. Name it `happygut`. If a region choice is offered, pick the closest Asia option; otherwise keep the default.
+3. A credentials screen appears **once**. Click **Download and continue** to save the `.txt` file. It contains `NEO4J_URI` (`neo4j+s://<id>.databases.neo4j.io`), `NEO4J_USERNAME` (`neo4j`) and `NEO4J_PASSWORD`. Store it with your other secrets.
+4. Wait until the instance status says **Running** (a few minutes).
+5. Skip optional extras (agents, graph analytics, sample datasets).
+6. Free instances pause when unused for a few days. Resume them from the console before working or demoing.
+
+### Until the repo is cloned
+Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
+
 ## 2. GPU machine
 Requirements: NVIDIA GPU (12 GB), Docker with GPU support (Windows: Docker Desktop + WSL2; Linux: nvidia-container-toolkit), Tailscale.
 
