@@ -5,7 +5,7 @@ All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env
 ## 1. Accounts (one person each, share keys privately)
 | # | Service | What to do | `.env` keys |
 |---|---|---|---|
-| 1 | Supabase | New project → region **Mumbai** or **Singapore** → Database → Extensions: enable `vector`, `pg_trgm`, `pg_cron` | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL` |
+| 1 | Supabase | See **Supabase project settings** below | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL` |
 | 2 | Neo4j AuraDB Free | Create a free instance; save the generated password (shown once) | `NEO4J_URI`, `NEO4J_PASSWORD` |
 | 3 | Google AI Studio | aistudio.google.com → Get API key. **Not** Google Cloud / Vertex | `GEMINI_API_KEY` |
 | 4 | Groq | console.groq.com → API key | `GROQ_API_KEY` |
@@ -17,6 +17,23 @@ All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env
 | 10 | api.data.gov, NCBI | Free API keys | `USDA_API_KEY`, `NCBI_API_KEY` |
 
 Generate random secrets for `GATEWAY_KEY`, `MCP_BEARER_TOKEN` and `N8N_ENCRYPTION_KEY`, e.g. `python -c "import secrets;print(secrets.token_urlsafe(32))"`.
+
+### Supabase project settings
+| Setting | Choose | Why |
+|---|---|---|
+| Name | `happygut-dev` | The free plan allows 2 projects: build in `happygut-dev`, create `happygut-prod` for the public demo on Oct 28. MCP tools only ever touch dev |
+| Database password | **Generate**, save it in a password manager | It goes into `SUPABASE_DB_URL` in `.env` only |
+| Region | The most specific Asia-Pacific option available, ideally **Mumbai** (South Asia), else **Singapore** | Closest to Bangladesh (lower latency) |
+| Enable Data API | **On** | The app uses `supabase-js` for auth, realtime and reading its own history |
+| Automatically expose new tables | **Off** | Nothing becomes reachable through the API by accident; migrations grant access table by table |
+| Enable automatic RLS | **On** | Every new table starts locked; migrations add per-patient policies (Constitution V) |
+| Postgres type | **Default** | OrioleDB is an experimental storage engine; we need standard extensions (`vector`, `pg_trgm`, `pg_cron`) |
+
+After the project is created:
+1. Database → Extensions: enable `vector`, `pg_trgm`, `pg_cron`.
+2. Project Settings → API keys: copy the project URL, the **publishable / anon** key → `SUPABASE_ANON_KEY`, and the **secret / service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (backend only, never in the frontend or git).
+3. **Connect** button → copy the **Session pooler** connection string into `SUPABASE_DB_URL`. The direct connection is IPv6-only on the free plan, which many home networks and hosts can't reach.
+4. Free projects pause after about a week without activity; open the dashboard or run a query before demos.
 
 ## 2. GPU machine
 Requirements: NVIDIA GPU (12 GB), Docker with GPU support (Windows: Docker Desktop + WSL2; Linux: nvidia-container-toolkit), Tailscale.
