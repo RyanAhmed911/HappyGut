@@ -1,0 +1,23 @@
+id: RC-FLARE-FAT-M
+title_en: "Flare: moderately oily food"
+title_bn: "ফ্লেয়ার: মাঝারি তৈলাক্ত খাবার"  # native-speaker review needed
+component: fat
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 1
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare, keep oil and ghee moderate and watch how you feel after richer meals."
+recommendation_bn: "ফ্লেয়ারের সময় তেল ও ঘি পরিমিত রাখুন এবং ভারী খাবারের পর শরীর কেমন লাগে খেয়াল করুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

@@ -1,0 +1,33 @@
+id: dish.chicken_stew
+name_en: "Chicken stew"
+name_bn: "মুরগির স্টু"
+aliases: ["chicken stew", "murgir stew"]
+cuisine: Bangladeshi
+category: curry
+preparation: ["simmered", "mild"]
+ingredients:
+  - {name: "chicken"}
+  - {name: "potato"}
+  - {name: "carrot"}
+  - {name: "papaya"}
+  - {name: "black pepper"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: low
+  lactose: none
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

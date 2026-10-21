@@ -10,5 +10,6 @@ Versioned prompts used to **design and build** HappyGut (build provenance), and 
 | P-004 | [`build/004-scope-honesty-check.md`](build/004-scope-honesty-check.md) | Review | Tick-only-if-real rule, lean prototype scope |
 | P-005 | [`build/005-ai-architecture-design.md`](build/005-ai-architecture-design.md) | AI architecture | Prompts, models, RAG, MCP, agents, evaluation, guardrails |
 | P-006 | [`build/006-step0-foundation.md`](build/006-step0-foundation.md) | Project setup | Free-only audit, architecture, Spec-Kit, skeleton, gateway |
+| P-007 | [`build/007-engine-and-seeds.md`](build/007-engine-and-seeds.md) | Implementation | Verdict engine, red-flag sentinel, Trigger Discovery, knowledge seed drafts |
 
 Build-phase prompts (Spec-Kit specs, Lovable UI, /docs module, MCP servers) are added as they're used. Runtime prompts live in `runtime/`.

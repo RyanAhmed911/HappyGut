@@ -1,0 +1,33 @@
+id: dish.shutki_bhorta
+name_en: "Dried fish mash"
+name_bn: "শুঁটকি ভর্তা"
+aliases: ["shutki bhorta", "shutki vorta"]
+cuisine: Bangladeshi
+category: bhorta
+preparation: ["mashed raw with onion and chilli"]
+ingredients:
+  - {name: "dried fish"}
+  - {name: "raw onion"}
+  - {name: "garlic"}
+  - {name: "dried chilli"}
+  - {name: "mustard oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: none
+  lactose: none
+  fructans: high
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.lau_ghonto, dish.pepe_bhaji]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

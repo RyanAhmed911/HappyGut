@@ -1,0 +1,31 @@
+id: dish.pepe_bhaji
+name_en: "Cooked green papaya"
+name_bn: "পেঁপে ভাজি"
+aliases: ["pepe bhaji", "pepe torkari"]
+cuisine: Bangladeshi
+category: vegetable
+preparation: ["sauteed", "soft"]
+ingredients:
+  - {name: "green papaya"}
+  - {name: "turmeric"}
+  - {name: "onion"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: low
+  lactose: none
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

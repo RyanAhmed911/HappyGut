@@ -1,0 +1,31 @@
+id: dish.beguni
+name_en: "Beguni (eggplant fritter)"
+name_bn: "বেগুনি"
+aliases: ["beguni"]
+cuisine: Bangladeshi
+category: street_food
+preparation: ["deep-fried in gram-flour batter"]
+ingredients:
+  - {name: "eggplant"}
+  - {name: "gram flour"}
+  - {name: "oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: medium
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

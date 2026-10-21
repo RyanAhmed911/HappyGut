@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  engine-and-seeds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - name: Verdict engine, red-flag sentinel, Trigger Discovery
+        working-directory: engine
+        run: uv run --group dev pytest -q
+      - name: Knowledge seeds (validator + engine sanity on real seeds)
+        working-directory: pipelines
+        run: |
+          uv run python -m happygut_pipelines.seeds
+          uv run --group dev pytest -q

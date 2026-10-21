@@ -1,0 +1,23 @@
+id: RC-FLARE-SPICE-H
+title_en: "Flare: very spicy food"
+title_bn: "ফ্লেয়ার: খুব ঝাল খাবার"  # native-speaker review needed
+component: capsaicin_spice
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 2
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare, very spicy food is often reported to worsen pain and diarrhoea; ask for less chilli."
+recommendation_bn: "ফ্লেয়ারের সময় বেশি ঝাল খাবারে পেট ব্যথা ও পাতলা পায়খানা বাড়ে বলে রোগীরা প্রায়ই জানান; কম ঝাল দিতে বলুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

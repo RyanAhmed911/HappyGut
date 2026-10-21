@@ -1,0 +1,23 @@
+id: RC-FLARE-SPICE-M
+title_en: "Flare: moderately spicy food"
+title_bn: "ফ্লেয়ার: মাঝারি ঝাল খাবার"  # native-speaker review needed
+component: capsaicin_spice
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 1
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare, milder versions of your usual dishes are often easier on the gut."
+recommendation_bn: "ফ্লেয়ারের সময় চেনা খাবারগুলো কম ঝালে খেলে অনেক সময় পেটে সহজ হয়।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

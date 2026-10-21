@@ -1,0 +1,33 @@
+id: dish.sheer_khurma
+name_en: "Sheer khurma"
+name_bn: "শির খুরমা"
+aliases: ["sheer khurma", "shir khurma"]
+cuisine: Bangladeshi
+category: dairy
+preparation: ["slow-cooked milk"]
+ingredients:
+  - {name: "milk"}
+  - {name: "vermicelli"}
+  - {name: "dates"}
+  - {name: "nuts"}
+  - {name: "ghee"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: none
+  lactose: high
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: medium
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: high
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.chitoi_pitha, dish.roshogolla]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

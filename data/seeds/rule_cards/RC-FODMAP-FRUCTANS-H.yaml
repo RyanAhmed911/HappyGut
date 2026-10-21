@@ -1,0 +1,35 @@
+id: RC-FODMAP-FRUCTANS-H
+title_en: "IBS-like symptoms: high fructans (onion, garlic, wheat)"
+title_bn: "আইবিএস-ধরনের উপসর্গ: বেশি ফ্রুক্টান (পেঁয়াজ, রসুন, গম)"  # native-speaker review needed
+component: fructans
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 2
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Onion, garlic and wheat are high in fructans; in quiescent IBD with IBS-like symptoms, a dietitian-guided low-FODMAP approach can reduce bloating and pain."
+recommendation_bn: "পেঁয়াজ, রসুন ও গমে ফ্রুক্টান বেশি; রোগ শান্ত থাকা অবস্থায় আইবিএস-ধরনের উপসর্গ থাকলে পুষ্টিবিদের পরামর্শে লো-ফডম্যাপ খাদ্য পেট ফাঁপা ও ব্যথা কমাতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: AGA2024
+    citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

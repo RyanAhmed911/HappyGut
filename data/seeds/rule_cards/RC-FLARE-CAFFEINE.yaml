@@ -1,0 +1,23 @@
+id: RC-FLARE-CAFFEINE
+title_en: "Flare: strong caffeinated drinks"
+title_bn: "ফ্লেয়ার: কড়া ক্যাফেইনযুক্ত পানীয়"  # native-speaker review needed
+component: caffeine
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 1
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Strong tea or coffee can speed up the gut; during a flare, keep caffeinated drinks light."
+recommendation_bn: "কড়া চা বা কফি অন্ত্রের গতি বাড়াতে পারে; ফ্লেয়ারের সময় হালকা রাখুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

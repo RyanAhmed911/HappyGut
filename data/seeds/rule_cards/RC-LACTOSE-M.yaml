@@ -1,0 +1,23 @@
+id: RC-LACTOSE-M
+title_en: "Lactose intolerance: milk-rich dishes"
+title_bn: "ল্যাকটোজ অসহিষ্ণুতা: দুধ-প্রধান খাবার"  # native-speaker review needed
+component: lactose
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [lactose_intolerant]
+  state: [remission, flare]
+severity: 2
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "If you are lactose intolerant, keep milk-rich dishes small or choose lactose-free options; dairy only needs limiting if it bothers you."
+recommendation_bn: "ল্যাকটোজ সহ্য না হলে দুধ-প্রধান খাবার অল্প খান বা ল্যাকটোজমুক্ত বিকল্প নিন; সমস্যা না হলে দুধ বাদ দেওয়ার দরকার নেই।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

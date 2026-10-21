@@ -1,0 +1,33 @@
+id: dish.borhani
+name_en: "Borhani"
+name_bn: "বোরহানি"
+aliases: ["borhani", "burhani"]
+cuisine: Bangladeshi
+category: drink
+preparation: ["spiced yogurt drink"]
+ingredients:
+  - {name: "yogurt"}
+  - {name: "green chilli"}
+  - {name: "mustard"}
+  - {name: "mint"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: none
+  insoluble_fibre: none
+  lactose: medium
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

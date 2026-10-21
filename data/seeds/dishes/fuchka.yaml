@@ -1,0 +1,34 @@
+id: dish.fuchka
+name_en: "Fuchka"
+name_bn: "ফুচকা"
+aliases: ["fuchka", "phuchka", "pani puri"]
+cuisine: Bangladeshi
+category: street_food
+preparation: ["fried shells", "tamarind water", "raw onion", "chilli"]
+ingredients:
+  - {name: "semolina shells"}
+  - {name: "yellow peas"}
+  - {name: "egg"}
+  - {name: "raw onion"}
+  - {name: "chilli"}
+  - {name: "tamarind"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: medium
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

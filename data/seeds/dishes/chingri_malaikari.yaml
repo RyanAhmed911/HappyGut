@@ -1,0 +1,33 @@
+id: dish.chingri_malaikari
+name_en: "Prawn malai curry"
+name_bn: "চিংড়ির মালাইকারি"
+aliases: ["chingri malai curry", "malaikari", "prawn malai"]
+cuisine: Bangladeshi
+category: fish
+preparation: ["coconut milk", "ghee"]
+ingredients:
+  - {name: "prawns"}
+  - {name: "coconut milk"}
+  - {name: "ghee"}
+  - {name: "onion"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: low
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.rui_macher_patla_jhol, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

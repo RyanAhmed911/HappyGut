@@ -1,0 +1,31 @@
+id: dish.mishti_doi
+name_en: "Sweet yogurt"
+name_bn: "মিষ্টি দই"
+aliases: ["mishti doi", "misti doi", "doi"]
+cuisine: Bangladeshi
+category: dairy
+preparation: ["fermented"]
+ingredients:
+  - {name: "milk"}
+  - {name: "sugar"}
+  - {name: "culture"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: none
+  lactose: medium
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.roshogolla]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

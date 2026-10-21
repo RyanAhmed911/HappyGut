@@ -1,0 +1,23 @@
+id: RC-FLARE-SSN
+title_en: "Flare: whole nuts, seeds and tough skins"
+title_bn: "ফ্লেয়ার: আস্ত বাদাম, বীজ ও শক্ত খোসা"  # native-speaker review needed
+component: skins_seeds_nuts
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 1
+hard: false
+evidence_level: clinical_practice  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare, whole nuts, seeds and tough skins can be harder to tolerate; choose soft or peeled versions."
+recommendation_bn: "ফ্লেয়ারের সময় আস্ত বাদাম, বীজ ও শক্ত খোসা সহ্য করা কঠিন হতে পারে; নরম বা খোসা ছাড়ানো খাবার বেছে নিন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

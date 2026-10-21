@@ -1,0 +1,29 @@
+id: RC-STRICT-001
+title_en: "Stricturing Crohn's: avoid tough insoluble fibre"
+title_bn: "স্ট্রিকচারিং ক্রোনস: শক্ত অদ্রবণীয় আঁশ এড়িয়ে চলুন"  # native-speaker review needed
+component: insoluble_fibre
+min_level: medium
+applies_to:
+  diagnosis: [CD]
+  phenotype: [stricturing]
+  state: [remission, flare]
+severity: 3
+hard: true
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "With stricturing Crohn's, avoid foods high in tough insoluble fibre (leafy stalks, whole grains, raw vegetables); choose soft, well-cooked, low-residue food."
+recommendation_bn: "স্ট্রিকচারিং ক্রোনস থাকলে শক্ত অদ্রবণীয় আঁশযুক্ত খাবার (শাকের ডাঁটা, গোটা শস্য, কাঁচা সবজি) এড়িয়ে চলুন; নরম, ভালোভাবে রান্না করা, কম আঁশের খাবার বেছে নিন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: AGA2024
+    citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

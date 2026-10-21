@@ -1,0 +1,31 @@
+id: dish.bhapa_pitha
+name_en: "Bhapa pitha"
+name_bn: "ভাপা পিঠা"
+aliases: ["bhapa pitha", "vapa pitha"]
+cuisine: Bangladeshi
+category: sweet_snack
+preparation: ["steamed"]
+ingredients:
+  - {name: "rice flour"}
+  - {name: "date molasses"}
+  - {name: "grated coconut"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: medium
+  lactose: none
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.chitoi_pitha]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

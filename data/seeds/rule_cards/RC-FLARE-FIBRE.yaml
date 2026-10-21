@@ -1,0 +1,23 @@
+id: RC-FLARE-FIBRE
+title_en: "Flare: temporary lower-fibre choices"
+title_bn: "ফ্লেয়ার: সাময়িক কম আঁশের খাবার"  # native-speaker review needed
+component: insoluble_fibre
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 1
+hard: false
+evidence_level: clinical_practice  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare with diarrhoea, a temporary lower-fibre (low-residue) choice may ease symptoms; return to normal fibre once settled."
+recommendation_bn: "পাতলা পায়খানাসহ ফ্লেয়ারের সময় কিছুদিন কম আঁশের খাবার উপসর্গ কমাতে পারে; ভালো হলে আবার স্বাভাবিক আঁশে ফিরুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

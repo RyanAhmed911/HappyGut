@@ -1,0 +1,23 @@
+id: RC-LACTOSE-L
+title_en: "Lactose intolerance: small amounts"
+title_bn: "ল্যাকটোজ অসহিষ্ণুতা: অল্প পরিমাণ"  # native-speaker review needed
+component: lactose
+min_level: low
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [lactose_intolerant]
+  state: [remission, flare]
+severity: 1
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Small amounts of lactose are often tolerated even with lactose intolerance; notice your own limit."
+recommendation_bn: "ল্যাকটোজ অসহিষ্ণুতা থাকলেও অল্প ল্যাকটোজ অনেক সময় সহ্য হয়; নিজের সীমা খেয়াল করুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

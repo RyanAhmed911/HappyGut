@@ -1,0 +1,29 @@
+id: RC-STRICT-002
+title_en: "Stricturing Crohn's: avoid skins, seeds and whole nuts"
+title_bn: "স্ট্রিকচারিং ক্রোনস: খোসা, বীজ ও আস্ত বাদাম এড়িয়ে চলুন"  # native-speaker review needed
+component: skins_seeds_nuts
+min_level: low
+applies_to:
+  diagnosis: [CD]
+  phenotype: [stricturing]
+  state: [remission, flare]
+severity: 3
+hard: true
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "With stricturing Crohn's, avoid skins, seeds and whole nuts, which can be hard to pass through a narrowed bowel."
+recommendation_bn: "স্ট্রিকচারিং ক্রোনস থাকলে খোসা, বীজ ও আস্ত বাদাম এড়িয়ে চলুন; সরু হয়ে যাওয়া অন্ত্রে এগুলো আটকে যেতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: AGA2024
+    citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

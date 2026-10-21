@@ -1,0 +1,33 @@
+id: dish.beef_tehari
+name_en: "Beef tehari"
+name_bn: "বিফ তেহারি"
+aliases: ["tehari", "beef tehari", "gorur tehari"]
+cuisine: Bangladeshi
+category: rice_dish
+preparation: ["mustard oil", "green chilli"]
+ingredients:
+  - {name: "beef"}
+  - {name: "aromatic rice"}
+  - {name: "mustard oil"}
+  - {name: "onion"}
+  - {name: "green chilli"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: high
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

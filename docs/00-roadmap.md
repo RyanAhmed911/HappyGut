@@ -18,8 +18,8 @@ Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.
 | Day | Step | Spec | Done means | Status |
 |---|---|---|---|---|
 | Oct 21 | **0. Foundation** | — | Accounts + GPU machine ready ([`setup.md`](setup.md)); skeleton, constitution, AGENTS.md, skills, specs 001–002 pushed | 🟡 Repo part done; accounts pending |
-| Oct 22–23 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | ~50 dishes + ~25 Rule Cards in Neo4j; contextual hybrid RAG in pgvector; foodgraph MCP | ⏳ |
-| Oct 23–25 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text → Bangla verdict card with citations, end to end on a phone | ⏳ |
+| Oct 22–23 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | ~50 dishes + ~25 Rule Cards in Neo4j; contextual hybrid RAG in pgvector; foodgraph MCP | 🟡 Drafts done (61 dishes, 25 Rule Cards); team review via [`seed-review.md`](seed-review.md) |
+| Oct 23–25 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text → Bangla verdict card with citations, end to end on a phone | 🟡 Verdict engine + red-flag sentinel done (62 tests) |
 | Oct 25–26 | **3. Personal layer** | 003 | Check-in, simulated cohort, Trigger Discovery, early-warning score, "My Gut" | ⏳ |
 | Oct 26–27 | **4. Proof** | 004 | Eval sets, red-flag suite, RAG ablation, Eval Lab; remaining MCP servers; n8n | ⏳ |
 | Oct 28 | **5. Ship** | — | Deployed URL, demo account, /docs, clinician PDF, Figma prototype | ⏳ |

@@ -1,0 +1,33 @@
+id: dish.rui_macher_kalia
+name_en: "Rohu kalia"
+name_bn: "রুই মাছের কালিয়া"
+aliases: ["rui kalia", "macher kalia"]
+cuisine: Bangladeshi
+category: fish
+preparation: ["fried fish in rich gravy"]
+ingredients:
+  - {name: "rohu fish"}
+  - {name: "oil"}
+  - {name: "onion"}
+  - {name: "yogurt"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.rui_macher_patla_jhol, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft
