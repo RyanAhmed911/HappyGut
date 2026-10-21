@@ -5,7 +5,7 @@ All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env
 ## 1. Accounts (one person each, share keys privately)
 | # | Service | What to do | `.env` keys |
 |---|---|---|---|
-| 1 | Supabase | See **Supabase project settings** below | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_DB_URL` |
+| 1 | Supabase | See **Supabase project settings** below | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `SUPABASE_DB_URL` |
 | 2 | Neo4j AuraDB Free | Create a free instance; save the generated password (shown once) | `NEO4J_URI`, `NEO4J_PASSWORD` |
 | 3 | Google AI Studio | aistudio.google.com → Get API key. **Not** Google Cloud / Vertex | `GEMINI_API_KEY` |
 | 4 | Groq | console.groq.com → API key | `GROQ_API_KEY` |
@@ -31,9 +31,21 @@ Generate random secrets for `GATEWAY_KEY`, `MCP_BEARER_TOKEN` and `N8N_ENCRYPTIO
 
 After the project is created:
 1. Database → Extensions: enable `vector`, `pg_trgm`, `pg_cron`.
-2. Project Settings → API keys: copy the project URL, the **publishable / anon** key → `SUPABASE_ANON_KEY`, and the **secret / service_role** key → `SUPABASE_SERVICE_ROLE_KEY` (backend only, never in the frontend or git).
-3. **Connect** button → copy the **Session pooler** connection string into `SUPABASE_DB_URL`. The direct connection is IPv6-only on the free plan, which many home networks and hosts can't reach.
-4. Free projects pause after about a week without activity; open the dashboard or run a query before demos.
+2. **Keys** (Project Settings → API Keys): copy the **publishable key** (`sb_publishable_…`) into `SUPABASE_PUBLISHABLE_KEY`, and the **secret key** (`sb_secret_…`, click to reveal) into `SUPABASE_SECRET_KEY`. The secret key is for the backend only.
+3. **Project URL**: it isn't on the API Keys page. Find it in any of these places:
+   - Project Settings → **Data API**, at the top as "Project URL"
+   - the green **Connect** button → **App Frameworks** tab, shown as `SUPABASE_URL`
+   - or build it yourself: Project Settings → General → **Project ID**, then `https://<project-id>.supabase.co`
+
+   Put it in `SUPABASE_URL`.
+4. **Database connection string** (green **Connect** button at the top of the project page):
+   - This is the database's address plus login, which the Python backend uses to talk to Postgres directly.
+   - In the **Connection String** tab, choose type **URI**, then look for **Session pooler**. Don't pick "Direct connection": on the free plan it only works on IPv6 networks, which most home internet and hosting services aren't.
+   - Copy it. It looks like `postgresql://postgres.<project-id>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:5432/postgres`
+   - Replace `[YOUR-PASSWORD]`, brackets included, with the database password you saved when creating the project.
+   - If the password contains `@ : / # ? %`, either reset it (Project Settings → Database) to letters and numbers only, or URL-encode those characters.
+   - Paste the result into `SUPABASE_DB_URL`.
+5. Free projects pause after about a week without activity; open the dashboard or run a query before demos.
 
 ## 2. GPU machine
 Requirements: NVIDIA GPU (12 GB), Docker with GPU support (Windows: Docker Desktop + WSL2; Linux: nvidia-container-toolkit), Tailscale.
