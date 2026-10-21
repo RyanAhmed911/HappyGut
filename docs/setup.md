@@ -21,7 +21,7 @@ Generate random secrets for `GATEWAY_KEY`, `MCP_BEARER_TOKEN` and `N8N_ENCRYPTIO
 ### Supabase project settings
 | Setting | Choose | Why |
 |---|---|---|
-| Name | `happygut-dev` | The free plan allows 2 projects: build in `happygut-dev`, create `happygut-prod` for the public demo on Oct 28. MCP tools only ever touch dev |
+| Name | `happygut` | One project for build and demo. Keep the second free slot as a spare. Safety comes from read-only MCP, reviewed migrations and simulated-only data instead of a second project |
 | Database password | **Generate**, save it in a password manager | It goes into `SUPABASE_DB_URL` in `.env` only |
 | Region | The most specific Asia-Pacific option available, ideally **Mumbai** (South Asia), else **Singapore** | Closest to Bangladesh (lower latency) |
 | Enable Data API | **On** | The app uses `supabase-js` for auth, realtime and reading its own history |

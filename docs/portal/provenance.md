@@ -75,8 +75,8 @@ Built by us
 - happygut-research: aggregated, small-group-suppressed trigger statistics
 
 Used
-- Supabase MCP: schema, migrations, RLS checks, TypeScript types
-- Neo4j Cypher MCP: graph inspection and curation
+- Supabase MCP: schema inspection, RLS checks, TypeScript types (read-only)
+- Neo4j Cypher MCP: graph inspection and curation checks (read-only)
 - Filesystem MCP: raw data-lake folders during ingestion work
 - GitHub MCP: issues and pull requests per build step
 - Playwright MCP: end-to-end tests of the PWA hero flow, demo screenshots
@@ -95,8 +95,8 @@ Used
 - research: aggregates only, k ≥ 10 suppression; no row-level access
 - evals: stdio only (local dev); runs test suites, can't modify code or data
 - Remote servers (Streamable HTTP) sit behind Tailscale Funnel + an API-key gateway, with rate limits and Langfuse tracing
-- Supabase MCP: development project only, never production; migrations applied after human review
-- Neo4j Cypher MCP: write tool used only on the dev database; fixes go out as reviewed diffs
+- Supabase MCP: read-only mode; schema changes only through reviewed migration files (Supabase CLI); the prototype holds simulated data only
+- Neo4j Cypher MCP: read tools only; fixes go into reviewed seed files and the graph is rebuilt from them
 - Filesystem MCP: limited to the `data/` folder
 - GitHub MCP: scoped to the HappyGut repo; no merges without human approval
 - Playwright MCP: test/staging URLs only, synthetic accounts

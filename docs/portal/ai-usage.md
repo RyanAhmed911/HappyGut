@@ -192,14 +192,14 @@ Evaluation
 **Supabase MCP**
 - Source: Supabase (official)
 - # endpoints called: ~4
-- Capabilities: tools `list_tables`, `apply_migration`, `execute_sql`, `generate_typescript_types`
-- How: Claude Code designed and applied the Postgres schema and migrations, checked row-level security policies, and generated TypeScript types
+- Capabilities: tools `list_tables`, `execute_sql`, `get_advisors`, `generate_typescript_types` (server run in read-only mode)
+- How: Claude Code inspected the schema, checked row-level security with the security advisors, and generated TypeScript types. Schema changes go through reviewed migration files applied with the Supabase CLI, not through MCP
 
 **Neo4j Cypher MCP** (`mcp-neo4j-cypher`)
 - Source: Neo4j Labs (open source)
-- # endpoints called: 3
-- Capabilities: tools `get_neo4j_schema`, `read_neo4j_cypher`, `write_neo4j_cypher`
-- How: Claude Code inspected the graph schema, found orphan nodes and unmatched ingredients, and proposed fixes that we reviewed
+- # endpoints called: 2
+- Capabilities: tools `get_neo4j_schema`, `read_neo4j_cypher` (write tool not used)
+- How: Claude Code inspected the graph schema and found orphan nodes and unmatched ingredients; fixes go into the reviewed seed files and the graph is rebuilt from them
 
 **Filesystem MCP**
 - Source: Model Context Protocol reference servers (open source)
