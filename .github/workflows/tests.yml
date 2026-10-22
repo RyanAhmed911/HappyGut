@@ -15,6 +15,9 @@ jobs:
       - name: Verdict engine, red-flag sentinel, Trigger Discovery
         working-directory: engine
         run: uv run --group dev pytest -q
+      - name: MCP servers (in-process MCP client)
+        working-directory: services/mcp
+        run: uv run --group dev pytest -q
       - name: Knowledge seeds (validator + engine sanity on real seeds)
         working-directory: pipelines
         run: |

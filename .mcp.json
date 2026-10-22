@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "happygut-foodgraph": {
+      "command": "uv",
+      "args": ["run", "--project", "services/mcp", "happygut-foodgraph"],
+      "env": { "HAPPYGUT_INCLUDE_DRAFTS": "1" }
+    }
+  }
+}

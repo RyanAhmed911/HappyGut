@@ -9,9 +9,9 @@
 - [x] T004 Supabase-only migration: `pg_cron` jobs for cache expiry and photo retention
 
 ## Phase 2: Graph [US1, US2, US4]
-- [ ] T005 Graph model from seeds: nodes, relationships, Cypher statements with constraints and full-text index
-- [ ] T006 In-memory graph with the same queries, for tests and the MCP server's offline mode
-- [ ] T007 `happygut-foodgraph` MCP server (FastMCP): `search_dish`, `get_components`, `explain_verdict_path`; read-only; stdio + Streamable HTTP
+- [x] T005 Graph model from seeds: nodes, relationships, Cypher statements with constraints and full-text index
+- [x] T006 In-memory graph with the same queries, for tests and the MCP server's offline mode
+- [x] T007 `happygut-foodgraph` MCP server (FastMCP): `search_dish`, `get_components`, `explain_verdict_path`; read-only; stdio + Streamable HTTP
 
 ## Phase 3: Guideline corpus [US3]
 - [ ] T008 Source registry with licence gate (full text only for open licences; otherwise Rule Cards only)
