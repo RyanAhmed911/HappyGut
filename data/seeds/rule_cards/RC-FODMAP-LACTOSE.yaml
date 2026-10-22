@@ -1,0 +1,23 @@
+id: RC-FODMAP-LACTOSE
+title_en: "IBS-like symptoms: lactose"
+title_bn: "আইবিএস-ধরনের উপসর্গ: ল্যাকটোজ"  # native-speaker review needed
+component: lactose
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 1
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Lactose is one of the FODMAPs; with IBS-like symptoms, watch milk-rich dishes."
+recommendation_bn: "ল্যাকটোজ একটি ফডম্যাপ; আইবিএস-ধরনের উপসর্গ থাকলে দুধ-প্রধান খাবারে খেয়াল রাখুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

@@ -1,0 +1,33 @@
+id: dish.haleem
+name_en: "Haleem"
+name_bn: "হালিম"
+aliases: ["halim", "haleem"]
+cuisine: Bangladeshi
+category: stew
+preparation: ["slow-cooked", "fried onion topping"]
+ingredients:
+  - {name: "beef or mutton"}
+  - {name: "mixed lentils"}
+  - {name: "wheat"}
+  - {name: "ghee"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: medium
+  lactose: none
+  fructans: medium
+  gos: high
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: high
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.patla_khichuri]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

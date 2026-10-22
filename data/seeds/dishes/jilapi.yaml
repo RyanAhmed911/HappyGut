@@ -1,0 +1,31 @@
+id: dish.jilapi
+name_en: "Jilapi"
+name_bn: "জিলাপি"
+aliases: ["jilapi", "jalebi", "jilebi"]
+cuisine: Bangladeshi
+category: sweet
+preparation: ["deep-fried", "sugar syrup"]
+ingredients:
+  - {name: "refined wheat flour"}
+  - {name: "oil or vanaspati"}
+  - {name: "sugar"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.chitoi_pitha, dish.roshogolla]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

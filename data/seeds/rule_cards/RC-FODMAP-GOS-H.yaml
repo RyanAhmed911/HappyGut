@@ -1,0 +1,29 @@
+id: RC-FODMAP-GOS-H
+title_en: "IBS-like symptoms: high GOS (lentils, chickpeas, peas)"
+title_bn: "আইবিএস-ধরনের উপসর্গ: বেশি জিওএস (ডাল, ছোলা, মটর)"  # native-speaker review needed
+component: gos
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 2
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Lentils, chickpeas and dried peas are high in GOS; with IBS-like symptoms, smaller portions or well-rinsed preparations may help."
+recommendation_bn: "ডাল, ছোলা ও শুকনো মটরে জিওএস বেশি; আইবিএস-ধরনের উপসর্গ থাকলে কম পরিমাণে বা ভালো করে ধুয়ে রান্না করলে সুবিধা হতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

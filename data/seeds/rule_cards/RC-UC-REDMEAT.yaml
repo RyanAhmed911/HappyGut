@@ -1,0 +1,23 @@
+id: RC-UC-REDMEAT
+title_en: "Ulcerative colitis: reduce red and processed meat"
+title_bn: "আলসারেটিভ কোলাইটিস: লাল ও প্রক্রিয়াজাত মাংস কমান"  # native-speaker review needed
+component: red_processed_meat
+min_level: medium
+applies_to:
+  diagnosis: [UC]
+  phenotype: [any]
+  state: [remission, flare]
+severity: 1
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "For ulcerative colitis, IBD dietary guidance advises reducing red and processed meat."
+recommendation_bn: "আলসারেটিভ কোলাইটিসে লাল মাংস ও প্রক্রিয়াজাত মাংস কমানোর পরামর্শ দেওয়া হয়।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: IOIBD2020
+    citation: "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

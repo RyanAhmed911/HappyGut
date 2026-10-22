@@ -1,0 +1,35 @@
+id: dish.kacchi_biryani
+name_en: "Kacchi biryani"
+name_bn: "কাচ্চি বিরিয়ানি"
+aliases: ["kacchi", "kachchi biriyani", "kacchi biriyani", "kacchi biryani"]
+cuisine: Bangladeshi
+category: rice_dish
+preparation: ["dum-cooked", "ghee", "fried onion", "yogurt marinade"]
+ingredients:
+  - {name: "mutton"}
+  - {name: "basmati rice"}
+  - {name: "ghee"}
+  - {name: "potato"}
+  - {name: "yogurt"}
+  - {name: "onion"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: low
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: high
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

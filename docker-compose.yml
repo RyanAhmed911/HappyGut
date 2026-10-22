@@ -1,0 +1,51 @@
+# Services that run on the team GPU machine: AMD Radeon RX 7700 XT (12 GB, ROCm) on Ubuntu.
+# Everything binds to localhost; only the gateway is published, through Tailscale Funnel:
+#   tailscale funnel 8080
+# Native on the host (not in Docker): Ollama (ROCm) and the rerank service (ROCm PyTorch, services/embed).
+# In Docker: the Caddy API-key gateway and n8n.
+
+services:
+  # Ollama runs natively on Ubuntu (already installed with ROCm), not in Docker.
+  # Configure it with:  sudo systemctl edit ollama   (see docs/setup.md)
+  # If you ever need a containerised Ollama instead:  docker compose --profile docker-ollama up -d
+  ollama:
+    profiles: ["docker-ollama"]
+    image: ollama/ollama:rocm
+    restart: unless-stopped
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: "3"
+      OLLAMA_KEEP_ALIVE: "24h"
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    network_mode: host   # reaches native Ollama (127.0.0.1:11434) and the rerank service (127.0.0.1:8001)
+    environment:
+      GATEWAY_KEY: ${GATEWAY_KEY:?set GATEWAY_KEY in .env}
+    volumes:
+      - ./services/gateway/Caddyfile:/etc/caddy/Caddyfile:ro
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      GENERIC_TIMEZONE: Asia/Dhaka
+      TZ: Asia/Dhaka
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set N8N_ENCRYPTION_KEY in .env}
+    volumes:
+      - n8n:/home/node/.n8n
+    ports:
+      - "127.0.0.1:5678:5678"
+
+  # Added in Step 1: MCP servers (services/mcp)
+
+volumes:
+  ollama:
+  n8n:

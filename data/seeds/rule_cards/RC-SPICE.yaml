@@ -1,0 +1,23 @@
+id: RC-SPICE
+title_en: "Very spicy food in remission"
+title_bn: "রেমিশনে খুব ঝাল খাবার"  # native-speaker review needed
+component: capsaicin_spice
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [remission]
+severity: 1
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Very spicy food is a commonly reported trigger; notice how it affects you."
+recommendation_bn: "খুব ঝাল খাবার অনেকের জন্য উপসর্গ বাড়ায় বলে জানা যায়; আপনার ক্ষেত্রে কেমন হয় খেয়াল করুন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

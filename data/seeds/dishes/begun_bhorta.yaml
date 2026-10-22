@@ -1,0 +1,32 @@
+id: dish.begun_bhorta
+name_en: "Roasted eggplant mash"
+name_bn: "বেগুন ভর্তা"
+aliases: ["begun bhorta", "begun vorta"]
+cuisine: Bangladeshi
+category: bhorta
+preparation: ["fire-roasted", "mashed with raw onion"]
+ingredients:
+  - {name: "eggplant"}
+  - {name: "raw onion"}
+  - {name: "chilli"}
+  - {name: "mustard oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.lau_ghonto, dish.pepe_bhaji]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

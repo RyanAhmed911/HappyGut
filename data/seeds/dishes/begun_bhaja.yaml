@@ -1,0 +1,31 @@
+id: dish.begun_bhaja
+name_en: "Fried eggplant"
+name_bn: "বেগুন ভাজা"
+aliases: ["begun bhaja", "begun fry"]
+cuisine: Bangladeshi
+category: vegetable
+preparation: ["shallow-fried with skin"]
+ingredients:
+  - {name: "eggplant"}
+  - {name: "oil"}
+  - {name: "turmeric"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: medium
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: medium
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.lau_ghonto, dish.pepe_bhaji]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

@@ -1,0 +1,34 @@
+id: dish.morog_polao
+name_en: "Chicken polao"
+name_bn: "মোরগ পোলাও"
+aliases: ["morog polao", "murg polao", "chicken polao"]
+cuisine: Bangladeshi
+category: rice_dish
+preparation: ["ghee", "fried onion"]
+ingredients:
+  - {name: "chicken"}
+  - {name: "aromatic rice"}
+  - {name: "ghee"}
+  - {name: "onion"}
+  - {name: "milk"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

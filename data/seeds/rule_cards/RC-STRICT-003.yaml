@@ -1,0 +1,29 @@
+id: RC-STRICT-003
+title_en: "Stricturing Crohn's: care even with small amounts of fibre"
+title_bn: "স্ট্রিকচারিং ক্রোনস: অল্প আঁশেও সাবধান"  # native-speaker review needed
+component: insoluble_fibre
+min_level: low
+applies_to:
+  diagnosis: [CD]
+  phenotype: [stricturing]
+  state: [remission, flare]
+severity: 3
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "With a stricture, even small amounts of tough fibre need care: cook vegetables soft and remove skins."
+recommendation_bn: "স্ট্রিকচার থাকলে অল্প আঁশেও সাবধান থাকুন: সবজি নরম করে রান্না করুন এবং খোসা ফেলে দিন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+  - key: AGA2024
+    citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

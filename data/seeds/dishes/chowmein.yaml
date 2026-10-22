@@ -1,0 +1,33 @@
+id: dish.chowmein
+name_en: "Chowmein"
+name_bn: "চাওমিন"
+aliases: ["chowmein", "chow mein", "noodles"]
+cuisine: Bangladeshi
+category: street_food
+preparation: ["stir-fried"]
+ingredients:
+  - {name: "wheat noodles"}
+  - {name: "vegetables"}
+  - {name: "garlic"}
+  - {name: "soy sauce"}
+  - {name: "chilli sauce"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

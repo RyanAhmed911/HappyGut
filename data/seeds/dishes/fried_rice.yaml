@@ -1,0 +1,34 @@
+id: dish.fried_rice
+name_en: "Chinese-style fried rice"
+name_bn: "ফ্রাইড রাইস"
+aliases: ["fried rice", "chinese fried rice"]
+cuisine: Bangladeshi
+category: rice_dish
+preparation: ["stir-fried"]
+ingredients:
+  - {name: "rice"}
+  - {name: "egg"}
+  - {name: "spring onion"}
+  - {name: "garlic"}
+  - {name: "vegetables"}
+  - {name: "soy sauce"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: low
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

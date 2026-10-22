@@ -1,0 +1,34 @@
+id: dish.murgir_jhol
+name_en: "Chicken curry"
+name_bn: "মুরগির তরকারি"
+aliases: ["murgir torkari", "murgir jhol", "chicken curry", "murgi"]
+cuisine: Bangladeshi
+category: curry
+preparation: ["home-style"]
+ingredients:
+  - {name: "chicken"}
+  - {name: "potato"}
+  - {name: "onion"}
+  - {name: "garlic"}
+  - {name: "chilli"}
+  - {name: "spices"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

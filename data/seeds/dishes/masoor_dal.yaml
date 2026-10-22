@@ -1,0 +1,33 @@
+id: dish.masoor_dal
+name_en: "Red lentil dal"
+name_bn: "মসুর ডাল"
+aliases: ["dal", "daal", "masoor dal", "musur dal"]
+cuisine: Bangladeshi
+category: dal
+preparation: ["simmered", "tempered with onion and garlic"]
+ingredients:
+  - {name: "red lentils"}
+  - {name: "onion"}
+  - {name: "garlic"}
+  - {name: "turmeric"}
+  - {name: "oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: medium
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.lau_ghonto]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

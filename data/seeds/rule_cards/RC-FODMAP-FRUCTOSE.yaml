@@ -1,0 +1,23 @@
+id: RC-FODMAP-FRUCTOSE
+title_en: "IBS-like symptoms: excess fructose"
+title_bn: "আইবিএস-ধরনের উপসর্গ: অতিরিক্ত ফ্রুক্টোজ"  # native-speaker review needed
+component: excess_fructose
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 1
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Foods with excess fructose (e.g. mango, honey, dates in large amounts) can cause bloating with IBS-like symptoms."
+recommendation_bn: "অতিরিক্ত ফ্রুক্টোজযুক্ত খাবার (যেমন বেশি আম, মধু বা খেজুর) আইবিএস-ধরনের উপসর্গে পেট ফাঁপাতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

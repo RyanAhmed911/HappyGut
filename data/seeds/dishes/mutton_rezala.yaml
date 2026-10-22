@@ -1,0 +1,33 @@
+id: dish.mutton_rezala
+name_en: "Mutton rezala"
+name_bn: "খাসির রেজালা"
+aliases: ["khashir rezala", "mutton rezala"]
+cuisine: Bangladeshi
+category: curry
+preparation: ["ghee", "yogurt"]
+ingredients:
+  - {name: "mutton"}
+  - {name: "yogurt"}
+  - {name: "ghee"}
+  - {name: "onion"}
+  - {name: "green chilli"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: medium
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: high
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew, dish.plain_rice]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

@@ -1,0 +1,23 @@
+id: RC-SATFAT
+title_en: "Reduce saturated fat"
+title_bn: "স্যাচুরেটেড ফ্যাট কমান"  # native-speaker review needed
+component: fat
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [remission, flare]
+severity: 1
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "IBD dietary guidance advises reducing saturated fat (ghee, butter, fatty red meat, vanaspati/dalda)."
+recommendation_bn: "আইবিডি রোগীদের জন্য স্যাচুরেটেড ফ্যাট (ঘি, মাখন, চর্বিযুক্ত লাল মাংস, ডালডা) কমানোর পরামর্শ দেওয়া হয়।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: IOIBD2020
+    citation: "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

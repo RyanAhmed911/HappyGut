@@ -1,0 +1,23 @@
+id: RC-FODMAP-GOS-M
+title_en: "IBS-like symptoms: moderate GOS"
+title_bn: "আইবিএস-ধরনের উপসর্গ: মাঝারি জিওএস"  # native-speaker review needed
+component: gos
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 1
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "A moderate portion of dal or pulses may cause bloating if you have IBS-like symptoms."
+recommendation_bn: "আইবিএস-ধরনের উপসর্গ থাকলে মাঝারি পরিমাণ ডালেও পেট ফাঁপতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

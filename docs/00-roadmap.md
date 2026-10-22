@@ -7,24 +7,26 @@
 | Step | Window | Output | Status |
 |---|---|---|---|
 | **1. Strategy & scope** | Sep 24–27 | [`01-strategy.md`](01-strategy.md): stress test, positioning, hero flow, scope tiers, KPIs, rubric map | 🟡 Draft, awaiting team review |
-| **2. Architecture & stack** | Sep 27–Oct 1 | `02-architecture.md`: agents, verdict engine, data model (SQL + graph), APIs, stack decision records, repo skeleton | ⏳ |
-| **3. Data & knowledge design** | Sep 29–Oct 3 | `03-data.md`: sources and licences, scrapers/parsers, Food KG schema, guideline corpus, synthetic cohort spec, data lifecycle, privacy | ⏳ |
+| **2. Architecture & stack** | Oct 21 | [`02-architecture.md`](02-architecture.md): system, hero-flow sequence, verdict engine, repo layout, decisions | ✅ v1.0 |
+| **3. Data & knowledge design** | Sep 29–Oct 3 | [`03-data.md`](03-data.md): sources and licences, scrapers/parsers, Food KG schema, guideline corpus, synthetic cohort spec, data lifecycle, privacy | ✅ Drafted (§1–10) |
 | **4. UX & Bangla design** | Sep 29–Oct 3 | `04-ux.md` + Figma: hero-flow screens, verdict card, check-in, Bangla copy, low-bandwidth rules | ⏳ |
 | **5. Evaluation & safety plan** | Oct 1–4 | `05-evaluation.md`: test sets, metrics, red-flag suite, bias slices | ⏳ |
 
-## Build steps
+## Build plan (Oct 21 → Oct 30)
+Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.md). Architecture: [`02-architecture.md`](02-architecture.md). Rules: [`../.specify/memory/constitution.md`](../.specify/memory/constitution.md).
 
-| Step | Window | Output |
-|---|---|---|
-| 6. Knowledge layer | Oct 1–8 | Food KG (~150 Bangladeshi dishes) in Neo4j · guideline corpus with contextual chunks in pgvector · ingestion scripts |
-| 7. **Hero vertical slice** | Oct 4–14 | Photo/voice/text → verdict + why + citations in Bangla, end to end, deployed |
-| 8. Personal intelligence | Oct 10–18 | Daily check-in · synthetic cohort · Trigger Discovery · Personal Gut Graph updates · Flare Early-Warning v0 |
-| 9. Supporting features | Oct 15–22 | Generative Dietitian · clinician pre-visit PDF · MCP server #1 · n8n jobs |
-| 10. Validate | Oct 12–26 | Eval report with real numbers · 5–10 patient interviews · 2–5 clinician interviews (Phase 3 "validation evidence") |
-| 11. Package | Oct 24–30 | Public demo URL · 180s video · 1-page summary · portal fields filled from docs |
-| **Submit** | **Oct 31** | Preliminary package |
-| 12. Harden (if selected Nov 15) | Nov 15–Dec 20 | Wearables · FL simulation + DP · research dashboard · MCP #2–3 · offline mode · pilot · security review · rehearsal |
-| **Finals** | **Dec 26** | 3-min live pitch + demo, Daffodil International University |
+| Day | Step | Spec | Done means | Status |
+|---|---|---|---|---|
+| Oct 21 | **0. Foundation** | — | Accounts + GPU machine ready ([`setup.md`](setup.md)); skeleton, constitution, AGENTS.md, skills, specs 001–002 pushed | 🟡 Repo part done; accounts pending |
+| Oct 22–23 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | ~50 dishes + ~25 Rule Cards in Neo4j; contextual hybrid RAG in pgvector; foodgraph MCP | 🟡 Drafts done (61 dishes, 25 Rule Cards); team review via [`seed-review.md`](seed-review.md) |
+| Oct 23–25 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text → Bangla verdict card with citations, end to end on a phone | 🟡 Verdict engine + red-flag sentinel done (62 tests) |
+| Oct 25–26 | **3. Personal layer** | 003 | Check-in, simulated cohort, Trigger Discovery, early-warning score, "My Gut" | ⏳ |
+| Oct 26–27 | **4. Proof** | 004 | Eval sets, red-flag suite, RAG ablation, Eval Lab; remaining MCP servers; n8n | ⏳ |
+| Oct 28 | **5. Ship** | — | Deployed URL, demo account, /docs, clinician PDF, Figma prototype | ⏳ |
+| Oct 29 | **6. Video** | — | 180s video on YouTube + Facebook, 1-page summary | ⏳ |
+| Oct 30 | **7. Reconcile & submit** | — | Checklist in `portal/submission-scope.md` §4 done; submitted a day early | ⏳ |
+
+**Cut order if behind:** smolagents → CrewAI → DSPy → embedding fine-tune → research MCP → LightGBM → dietitian agent. Never cut: hero flow, evals, video.
 
 ## Proposed role mapping (fill in names)
 

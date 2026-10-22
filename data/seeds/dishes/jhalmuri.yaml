@@ -1,0 +1,34 @@
+id: dish.jhalmuri
+name_en: "Jhalmuri"
+name_bn: "ঝালমুড়ি"
+aliases: ["jhal muri", "jhalmuri"]
+cuisine: Bangladeshi
+category: street_food
+preparation: ["mixed raw"]
+ingredients:
+  - {name: "puffed rice"}
+  - {name: "peanuts"}
+  - {name: "chanachur"}
+  - {name: "raw onion"}
+  - {name: "green chilli"}
+  - {name: "mustard oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: none
+  lactose: none
+  fructans: medium
+  gos: low
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: high
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

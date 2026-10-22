@@ -1,0 +1,32 @@
+id: dish.shak_bhaji
+name_en: "Stir-fried leafy greens"
+name_bn: "শাক ভাজি"
+aliases: ["shak bhaji", "lal shak", "palong shak"]
+cuisine: Bangladeshi
+category: vegetable
+preparation: ["stir-fried with stalks"]
+ingredients:
+  - {name: "leafy greens"}
+  - {name: "garlic"}
+  - {name: "dried chilli"}
+  - {name: "oil"}
+components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: high
+  lactose: none
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.lau_ghonto, dish.pepe_bhaji]
+sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
+needs_verification: true
+reviewed_by: null
+status: draft

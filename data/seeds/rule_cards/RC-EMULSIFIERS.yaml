@@ -1,0 +1,23 @@
+id: RC-EMULSIFIERS
+title_en: "Limit certain food emulsifiers and thickeners"
+title_bn: "কিছু ইমালসিফায়ার ও ঘনকারক কমান"  # native-speaker review needed
+component: emulsifiers
+min_level: low
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [remission, flare]
+severity: 1
+hard: false
+evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "IBD dietary guidance advises limiting processed foods containing certain emulsifiers and thickeners (e.g. carboxymethylcellulose, polysorbate-80, carrageenan, maltodextrin)."
+recommendation_bn: "আইবিডিতে কিছু ইমালসিফায়ার ও ঘনকারকযুক্ত (যেমন কার্বক্সিমিথাইলসেলুলোজ, পলিসরবেট-৮০, ক্যারাজিনান, মাল্টোডেক্সট্রিন) প্রক্রিয়াজাত খাবার কম খাওয়ার পরামর্শ দেওয়া হয়।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: IOIBD2020
+    citation: "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

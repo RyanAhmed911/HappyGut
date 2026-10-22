@@ -1,0 +1,23 @@
+id: RC-FLARE-FAT-H
+title_en: "Flare: very rich, oily or fried food"
+title_bn: "ফ্লেয়ার: খুব তৈলাক্ত বা ভাজা খাবার"  # native-speaker review needed
+component: fat
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 2
+hard: false
+evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "During a flare, rich, oily and fried foods are among the foods patients most often report as worsening symptoms; choose lighter, less oily dishes."
+recommendation_bn: "ফ্লেয়ারের সময় তৈলাক্ত, ভাজা ও ঘি-বেশি খাবারে অনেক রোগীর উপসর্গ বাড়ে বলে জানা যায়; হালকা, কম তেলের খাবার বেছে নিন।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: LIMDI2016
+    citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft

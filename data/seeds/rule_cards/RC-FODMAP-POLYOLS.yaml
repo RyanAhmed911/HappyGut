@@ -1,0 +1,23 @@
+id: RC-FODMAP-POLYOLS
+title_en: "IBS-like symptoms: polyols"
+title_bn: "আইবিএস-ধরনের উপসর্গ: পলিওল"  # native-speaker review needed
+component: polyols
+min_level: medium
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [ibs_like_symptoms]
+  state: [remission]
+severity: 1
+hard: false
+evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
+recommendation_en: "Polyols (in some fruits, cauliflower, mushrooms and sugar-free sweets) can cause bloating with IBS-like symptoms."
+recommendation_bn: "পলিওল (কিছু ফল, ফুলকপি, মাশরুম ও চিনি-মুক্ত মিষ্টিতে) আইবিএস-ধরনের উপসর্গে পেট ফাঁপাতে পারে।"
+sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+  - key: COX2020
+    citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
+    doi: ""
+    pmid: ""
+    licence: ""
+    quote: ""
+reviewed_by: null
+status: draft
