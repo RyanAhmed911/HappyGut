@@ -65,42 +65,107 @@ After the project is created:
 ### Until the repo is cloned
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
-## 2. GPU machine (Ubuntu, AMD RX 7700 XT)
-Already installed on the machine: ROCm, ROCm PyTorch, Ollama (native), llama.cpp. Still needed: Docker Engine, Tailscale, ngrok.
-
-The machine dual-boots, so **the local AI only works while it's booted into Ubuntu**. Keep it on Ubuntu during demo and judging windows; otherwise the app runs in degraded mode.
+## 2. GPU machine (Ubuntu, AMD RX 7700 XT): step by step
+Already installed: ROCm, ROCm PyTorch, Ollama (native), llama.cpp. The machine dual-boots, so **the local AI only works while it's booted into Ubuntu**; keep it on Ubuntu during demo and judging windows.
 
 | Runs natively on Ubuntu | Runs in Docker |
 |---|---|
 | Ollama (ROCm), rerank service (ROCm PyTorch, from Step 1) | Caddy API-key gateway, n8n |
 
+**1. Check what's there**
 ```bash
-# 1. Ollama settings (native systemd service)
-sudo systemctl edit ollama
-#   add, then save:
-#   [Service]
-#   Environment="OLLAMA_MAX_LOADED_MODELS=3"
-#   Environment="OLLAMA_KEEP_ALIVE=24h"
-sudo systemctl restart ollama
+rocminfo | grep -m1 gfx          # should show gfx1101 (RX 7700 XT)
+ollama --version
+systemctl status ollama --no-pager | head -3
+df -h ~                          # need ~25 GB free for the models
+```
 
-# 2. Local models
+**2. Basic tools**
+```bash
+sudo apt update && sudo apt install -y git curl gh
+curl -LsSf https://astral.sh/uv/install.sh | sh     # Python tooling; open a new terminal afterwards
+```
+
+**3. Docker Engine**
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+# log out and back in, then:
+docker run --rm hello-world
+```
+
+**4. Get the code** (after PR #9 is merged)
+```bash
+gh auth login                     # GitHub.com → HTTPS → login with a web browser
+gh repo clone RyanAhmed911/HappyGut
+cd HappyGut
+```
+
+**5. Secrets**
+```bash
+cp .env.example .env
+python3 -c "import secrets;print(secrets.token_urlsafe(32))"   # run 3 times: GATEWAY_KEY, MCP_BEARER_TOKEN, N8N_ENCRYPTION_KEY
+nano .env                         # paste every key; save with Ctrl+O, Enter, exit with Ctrl+X
+chmod 600 .env
+```
+Leave `GPU_GATEWAY_URL` empty until step 9.
+
+**6. Ollama settings**
+```bash
+sudo systemctl edit ollama
+```
+In the editor, add these lines in the empty part at the top, then save and close:
+```
+[Service]
+Environment="OLLAMA_MAX_LOADED_MODELS=3"
+Environment="OLLAMA_KEEP_ALIVE=24h"
+```
+```bash
+sudo systemctl restart ollama
+ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
+```
+
+**7. Models** (~17 GB download)
+```bash
 ollama pull gemma3:4b
 ollama pull llama3.2:3b
 ollama pull qwen2.5:7b
 ollama pull deepseek-r1:7b
 ollama pull bge-m3
-ollama run gemma3:4b "hello" && ollama ps      # PROCESSOR column should say 100% GPU
-
-# 3. Gateway + n8n (from the repo root, with .env filled in)
-docker compose up -d
-curl http://127.0.0.1:8080/health                                              # ok
-curl -H "X-HappyGut-Key: $GATEWAY_KEY" http://127.0.0.1:8080/llm/api/tags      # model list
-
-# 4. Publish the gateway (stable https://<machine>.<tailnet>.ts.net)
-sudo tailscale funnel --bg 8080
+ollama run gemma3:4b "Say hello in Bangla"
+ollama ps                         # PROCESSOR column should say 100% GPU
 ```
 
-Keep Ollama bound to `127.0.0.1` (its default). The gateway is the only way in from outside.
+**8. Gateway + n8n**
+```bash
+docker compose up -d
+docker compose ps
+curl http://127.0.0.1:8080/health                                         # ok
+KEY=$(grep '^GATEWAY_KEY=' .env | cut -d= -f2)
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8080/llm/api/tags    # 401 (no key)
+curl -s -H "X-HappyGut-Key: $KEY" http://127.0.0.1:8080/llm/api/tags | head -c 300   # model list
+```
+
+**9. Tailscale Funnel**
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up                 # open the printed link and log in
+sudo tailscale funnel --bg 8080   # first time: follow the printed link to enable Funnel, then rerun
+tailscale funnel status           # shows https://<machine>.<tailnet>.ts.net
+```
+Put that https address into `GPU_GATEWAY_URL` in `.env`. From your phone (mobile data), open `https://<machine>.<tailnet>.ts.net/health`; it should say `ok`. The first visit can take a minute while the certificate is issued.
+
+**10. ngrok agent** (used later for webhooks)
+```bash
+sudo snap install ngrok
+ngrok config add-authtoken <your-token>     # dashboard → Your Authtoken
+```
+
+**11. Tests**
+```bash
+cd engine && uv run --group dev pytest -q && cd ..
+cd pipelines && uv run python -m happygut_pipelines.seeds && uv run --group dev pytest -q && cd ..
+```
 
 **Bangla smoke test (10 minutes):** ask `gemma3:4b` to (1) rewrite a Banglish sentence in Bangla, (2) remove the name and phone number from a Bangla sentence, (3) list the dishes in a photo of a Bangladeshi meal. Note the quality in `docs/02-architecture.md` so we can pin the model.
 
