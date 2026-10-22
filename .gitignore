@@ -6,6 +6,8 @@
 # Data (raw and generated; seeds are committed)
 data/*
 !data/seeds/
+!data/gpu_jobs/
+!data/review/
 !data/README.md
 evals/results/
 

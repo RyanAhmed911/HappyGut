@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
 import struct
 import subprocess
@@ -120,6 +121,13 @@ class Ollama:
         req = urllib.request.Request(self.url + "/api/ps")
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read()).get("models", [])
+
+    def unload_all(self) -> list[str]:
+        """Free GPU and system memory held by loaded Ollama models (keep_alive 0 unloads at once)."""
+        names = [m["name"] for m in self.processor()]
+        for name in names:
+            self._post("/api/generate", {"model": name, "keep_alive": 0})
+        return names
 
 
 # ---------------------------------------------------------------- job runs
@@ -304,6 +312,12 @@ def run_g3(encode: Callable[[list[str]], list[list[float]]] | None = None, seeds
     item id and its exact text are unchanged; stopped runs resume from output.jsonl.partial."""
     device = "injected"
     if encode is None:
+        try:
+            freed = Ollama().unload_all()
+            if freed:
+                log(f"[g3] unloaded Ollama models to free memory: {', '.join(freed)}")
+        except OSError:
+            pass  # Ollama isn't running: nothing to free
         encode, device = _bge_m3_encoder()
     run = start_run("g3", jobs_dir, restart_on=("model",), log=log, model=MODELS["g3"], device=device,
                     normalized=True, dims=1024, encoding="float16 little-endian, base64", status="running")
@@ -338,6 +352,9 @@ def run_g3(encode: Callable[[list[str]], list[list[float]]] | None = None, seeds
 
 
 def _bge_m3_encoder():
+    # BAAI/bge-m3 ships only pytorch_model.bin. Transformers then starts a background download of a
+    # second 2.3 GB safetensors copy while the model loads; on a 16 GB machine that gets the job killed.
+    os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "1")
     import torch
     from sentence_transformers import SentenceTransformer
 
