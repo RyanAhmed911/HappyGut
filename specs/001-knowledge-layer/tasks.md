@@ -3,10 +3,10 @@
 **Spec**: [spec.md](spec.md) · **Plan**: [plan.md](plan.md)
 
 ## Phase 1: Storage
-- [ ] T001 Supabase migration: schemas, tables, indexes, partitions, RLS, grants (`supabase/migrations/`)
-- [ ] T002 Search functions: `knowledge.resolve_dish` (trigram over names/aliases) and `knowledge.hybrid_search` (vector + full text, Reciprocal Rank Fusion)
-- [ ] T003 PGlite test suite: migration applies cleanly, RLS isolates patients, search functions rank correctly
-- [ ] T004 Supabase-only migration: `pg_cron` jobs for cache expiry and photo retention
+- [x] T001 Supabase migration: schemas, tables, indexes, partitions, RLS, grants (`supabase/migrations/`)
+- [x] T002 Search functions: `knowledge.resolve_dish` (trigram over names/aliases) and `knowledge.hybrid_search` (vector + full text, Reciprocal Rank Fusion)
+- [x] T003 PGlite test suite: migration applies cleanly, RLS isolates patients, search functions rank correctly
+- [x] T004 Supabase-only migration: `pg_cron` jobs for cache expiry and photo retention
 
 ## Phase 2: Graph [US1, US2, US4]
 - [ ] T005 Graph model from seeds: nodes, relationships, Cypher statements with constraints and full-text index
