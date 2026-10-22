@@ -417,7 +417,7 @@ GitHub Actions
 - BGE-M3 + bge-reranker: GPU (ROCm PyTorch) for batch corpus embedding; the same models run on CPU in the always-on backend for live queries
 - Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
 - Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
-- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `keep_alive` long for online models, short for batch models
+- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `OLLAMA_KEEP_ALIVE=30m`: models load on demand and free the GPU 30 minutes after last use
 - Batch jobs run on the machine itself; the hosted backend reaches the live set through Tailscale Funnel (API-key gateway) only while the machine is online
 - Why local, privacy: batch jobs over knowledge and evaluation data stay on our hardware; when online, the GPU node adds a Bangla-aware PII pass
 - Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks

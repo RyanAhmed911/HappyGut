@@ -123,7 +123,7 @@ In the editor, add these lines in the empty part at the top, then save and close
 ```
 [Service]
 Environment="OLLAMA_MAX_LOADED_MODELS=3"
-Environment="OLLAMA_KEEP_ALIVE=24h"
+Environment="OLLAMA_KEEP_ALIVE=30m"
 ```
 ```bash
 sudo systemctl restart ollama
@@ -131,7 +131,7 @@ ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
 What this does: `systemctl edit` saves an override file (`/etc/systemd/system/ollama.service.d/override.conf`) that adds settings to the Ollama background service.
 - `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models can sit in GPU memory at once (e.g. Gemma and Llama for the enhanced mode while a batch model runs). This is already Ollama's default for one GPU; it's written down so the setup is explicit.
-- `OLLAMA_KEEP_ALIVE=24h`: while the machine is on, a model stays loaded for up to 24 h after its last use instead of the default 5 minutes, so it doesn't reload in the middle of a session or a video recording. Shutting down the PC simply unloads everything; nothing needs to stay running. Free VRAM earlier with `ollama stop <model>`.
+- `OLLAMA_KEEP_ALIVE=30m`: a model is only loaded into VRAM when something uses it, and is unloaded 30 minutes after its last use (Ollama's default is 5 minutes). That avoids reloading in the middle of a working session, and frees the GPU soon after you stop. With no HappyGut work running, Ollama uses no VRAM. Before recording the demo video, warm the models with `ollama run gemma3:4b "hi"`; free VRAM immediately with `ollama stop <model>`.
 
 The `ss` check confirms Ollama only listens on this computer, so the gateway is the only way in.
 
