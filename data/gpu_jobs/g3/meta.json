@@ -1,0 +1,15 @@
+{
+  "job": "g3",
+  "git_commit": "84b7f323f344681df94606fcf4c6b96139e75745",
+  "started_at": "2026-10-22T19:27:29+00:00",
+  "model": "BAAI/bge-m3",
+  "device": "cuda:AMD Radeon RX 7700 XT",
+  "normalized": true,
+  "dims": 1024,
+  "encoding": "float16 little-endian, base64",
+  "status": "finished",
+  "finished_at": "2026-10-22T19:27:30+00:00",
+  "items": 302,
+  "embedded": 302,
+  "seconds": 0.8
+}

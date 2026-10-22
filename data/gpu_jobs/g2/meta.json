@@ -1,0 +1,22 @@
+{
+  "job": "g2",
+  "git_commit": "3f0f521fd0b3f796e50666214d9dd1eaaf417b56",
+  "started_at": "2026-10-22T19:19:05+00:00",
+  "model": "gemma3:12b",
+  "model_digest": "b92b218582c521ba287f38f1d6057dcd3c6cbff036f13cac97b5d861f5e58ec3",
+  "prompt_id": "g2-dish-aliases",
+  "prompt_version": 2,
+  "temperature": 0.7,
+  "samples": 3,
+  "min_votes": 2,
+  "sample_seeds": [
+    1,
+    2,
+    3
+  ],
+  "status": "finished",
+  "review": "Candidates only: a native Bangla speaker reviews before they enter the seeds.",
+  "finished_at": "2026-10-22T19:21:50+00:00",
+  "items": 61,
+  "seconds": 165.0
+}
