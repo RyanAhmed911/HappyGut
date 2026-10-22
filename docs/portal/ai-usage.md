@@ -80,10 +80,10 @@
   - Why: very fast inference, separate quota
 
 **GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
-- Qwen 2.5 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
+- Qwen3 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
 - Gemma 3 12B: Bangla/Banglish spelling variants and aliases for dish names; Bangla/Banglish test utterances; Bangla draft strings for human review. The strongest Bangla of the local options that fit in 12 GB
 - Llama 3.1 8B: English test utterances and red-flag paraphrases for the evaluation sets
-- DeepSeek-R1-Distill-Qwen-14B: LLM-as-judge for the full evaluation run (does the evidence support each claim?)
+- DeepSeek-R1-0528-Qwen3-8B (distill): LLM-as-judge for the full evaluation run (does the evidence support each claim?)
 
 **Supporting models (CPU, in the always-on backend)**
 - BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder, an open-source Bengali NER model for PII scrubbing
@@ -115,7 +115,7 @@ Text path (guideline passages for the explanation)
 - Corpus: CC-licensed ESPEN / IOIBD / AGA guideline text, published FODMAP composition papers, Rule Card texts
 - Parsing: Docling, structure-aware (sections, headings; tables kept whole)
 - Variable chunking: split by section first, then semantic breakpoints (embedding-similarity drops) into ~200–500-token chunks
-- Contextual RAG: Qwen 2.5 14B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
+- Contextual RAG: Qwen3 14B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
 - Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
 - Index: pgvector HNSW (cosine, m=16, ef_construction=64)
 - Keyword search: Postgres tsvector (English) + pg_trgm (Bangla/Banglish)
@@ -302,7 +302,7 @@ Evaluation
 
 **Methods**
 - Ragas: faithfulness, context precision/recall, answer relevance
-- LLM-as-judge: an open model on Groq in CI, and local DeepSeek-R1-Distill-Qwen-14B for the full evaluation run (both different families from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
+- LLM-as-judge: an open model on Groq in CI, and local DeepSeek-R1-0528-Qwen3-8B (distill) for the full evaluation run (both different families from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
 - Human evaluation: native Bangla speakers on the team blind-rate 50 explanations (readability, accuracy)
 - Ablations: naive RAG → contextual → hybrid → reranker
 - Verdict engine vs LLM-only baseline, compared with McNemar's test
@@ -404,15 +404,15 @@ GitHub Actions
 - ✅ *Add:* Hugging Face Transformers / sentence-transformers (ROCm PyTorch for GPU jobs, CPU in the backend): corpus embeddings and embedding fine-tune as GPU jobs; BGE-M3, bge-reranker and Bengali NER for live queries
 
 **Local models we actually ran** (tick the exact versions you ran)
-- ✅ Qwen 2.5 14B Instruct (Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
+- ✅ Qwen3 14B (*add* "Qwen3" if the list only shows Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
 - ✅ Gemma 3 12B (*add*): Bangla/Banglish dish-name variants and aliases, Bangla/Banglish test utterances, Bangla draft strings
 - ✅ Llama 3.1 8B (Llama 3 / 3.1 / 3.2): English test utterances and red-flag paraphrases
-- ✅ DeepSeek-R1-Distill-Qwen-14B (*add*): LLM-as-judge for the evaluation run
+- ✅ DeepSeek-R1-0528-Qwen3-8B (distill) (*add*): LLM-as-judge for the evaluation run
 
 **Hardware, quantization, why local**
 - AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
 - Used for finite GPU jobs started by hand (each finishes on its own), never as a server; the live app runs entirely on cloud services
-- GGUF, Q4_K_M quantization, 8k context; one model at a time, so each job uses the largest model that fits alone in 12 GB (8–14B, ~5–9 GB)
+- GGUF, Q4_K_M quantization, 8k context; one model at a time, so each job uses the largest model that fits alone in 12 GB (8–14B, ~5–9.3 GB; rule: download size ≤ ~10 GB)
 - Every batch output (headers, aliases, test sets, judge scores) is stored with model name and version for provenance
 - Why local, cost: $0 with no rate limits for batch jobs over thousands of chunks and test items
 - Why local, independence: the judge model is a different family from the Gemini generator

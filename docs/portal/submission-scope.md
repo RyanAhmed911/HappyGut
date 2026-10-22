@@ -80,7 +80,7 @@
 | Gemini, Transformers (BGE-M3, reranker, Bengali NER on CPU) | A |
 | Ollama | A (GPU jobs) |
 | Groq Llama | A |
-| Local Qwen 2.5 14B, Gemma 3 12B, Llama 3.1 8B, DeepSeek-R1-Distill 14B (GPU jobs on Ubuntu) | A |
+| Local Qwen3 14B, Gemma 3 12B, Llama 3.1 8B, DeepSeek-R1 8B (Qwen3-based distill) (GPU jobs on Ubuntu) | A |
 | RAG: contextual, semantic chunking, Graph RAG, KG, hybrid, reranker | A |
 | MCP built: foodgraph | A |
 | MCP built: guidelines, evals, journal | B |
