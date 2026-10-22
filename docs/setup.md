@@ -124,6 +124,11 @@ Environment="OLLAMA_KEEP_ALIVE=24h"
 sudo systemctl restart ollama
 ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
+What this does: `systemctl edit` saves an override file (`/etc/systemd/system/ollama.service.d/override.conf`) that adds settings to the Ollama background service.
+- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models can sit in GPU memory at once (Gemma, Llama, BGE-M3). This is already Ollama's default for one GPU; it's written down so the setup is explicit.
+- `OLLAMA_KEEP_ALIVE=24h`: a model stays loaded for 24 h after its last use instead of the default 5 minutes. Without it, the first scan after a quiet period waits several seconds while the model reloads. The cost is that the VRAM stays occupied; free it with `ollama stop <model>`.
+
+The `ss` check confirms Ollama only listens on this computer, so the gateway is the only way in.
 
 **7. Models** (~17 GB download)
 ```bash
