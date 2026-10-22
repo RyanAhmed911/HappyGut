@@ -30,6 +30,13 @@ For each dish:
 - kacchi_biryani, borhani, chicken_rezala, plain_rice, murgir_patla_jhol
 - shorshe_ilish, masoor_dal, alu_bhorta, fuchka, dudh_cha
 
+## Dish-name spellings from G2 (`data/review/g2-aliases.csv`): a native Bangla speaker, ~15 minutes
+Gemma suggests extra Bangla and Banglish spellings for each dish. It is often wrong in a confident way (e.g. `gur mangsho bhuna`: *gur* is jaggery; `beef theory` for tehari), so nothing enters the seeds without a person accepting it.
+1. Windows, after G2's output is pulled: `cd pipelines; uv run python -m happygut_pipelines.aliases export`
+2. Open the CSV in Excel. For each row, write `yes` or `no` in **decision** and your initials in **reviewer**. Say yes only if you have seen people write the dish that way. `votes` (e.g. 3/3) is how often the model gave it, not proof it's right.
+3. Save as CSV (UTF-8), then: `uv run python -m happygut_pipelines.aliases apply`, `uv run python -m happygut_pipelines.seeds`, and the tests.
+4. Commit the CSV and the changed dish files together: the CSV is the record of who accepted each spelling. Rerun G3 next time Ubuntu is on.
+
 ## Done when
 - [ ] ≥ 25 Rule Cards approved (both hard rules included)
 - [ ] ≥ 50 dishes approved (all demo dishes included)

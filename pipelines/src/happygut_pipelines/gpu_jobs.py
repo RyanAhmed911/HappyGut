@@ -266,7 +266,7 @@ def embedding_items(seeds: Path = DEFAULT_SEEDS, include_drafts: bool = True) ->
             continue
         names: dict[str, str] = {}
         for a in d.get("aliases", []):
-            names[normalise_name(a)] = "banglish"
+            names[normalise_name(a)] = "bn" if re.search(r"[ঀ-৿]", a) else "banglish"
         names[normalise_name(d["name_en"])] = "en"  # the English / Bangla name wins over an identical alias
         names[normalise_name(d["name_bn"])] = "bn"
         for name, lang in sorted(names.items()):
