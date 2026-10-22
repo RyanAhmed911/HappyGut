@@ -105,11 +105,11 @@ Ubuntu is used only for GPU jobs that you start and that finish on their own. It
 
 | Job | Model / runtime | Output | When |
 |---|---|---|---|
-| G1 Contextual headers | Qwen 2.5 7B (Ollama) | headers for every guideline chunk | Step 1 |
-| G2 Bangla aliases | Gemma 3 4B (Ollama) | Bangla/Banglish name variants for dishes (reviewed before use) | Step 1 |
+| G1 Contextual headers | Qwen 2.5 14B (Ollama) | headers for every guideline chunk | Step 1 |
+| G2 Bangla aliases | Gemma 3 12B (Ollama) | Bangla/Banglish name variants for dishes (reviewed before use) | Step 1 |
 | G3 Corpus embeddings | BGE-M3 (ROCm PyTorch) | vectors for chunks, Rule Cards, dish names | Step 1 |
-| G4 Test utterances | Llama 3.2 3B (Ollama) | synthetic Bangla/Banglish/English test inputs (reviewed) | Step 4 |
-| G5 Evaluation judge | DeepSeek-R1-Distill 7B (Ollama) | judge scores for the evaluation run | Step 4 |
+| G4 Test utterances | Gemma 3 12B (Bangla/Banglish) + Llama 3.1 8B (English) | synthetic test inputs (reviewed) | Step 4 |
+| G5 Evaluation judge | DeepSeek-R1-Distill 14B (Ollama) | judge scores for the evaluation run | Step 4 |
 | G6 Dish-name fine-tune | BGE-M3 + sentence-transformers (ROCm PyTorch) | fine-tuned encoder pushed to Hugging Face | Step 4 |
 
 Docker isn't needed on Ubuntu; you can leave it installed or remove it.
@@ -122,7 +122,7 @@ sudo systemctl edit ollama
 Add these lines in the empty part at the top, then save and close:
 ```
 [Service]
-Environment="OLLAMA_MAX_LOADED_MODELS=3"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
 Environment="OLLAMA_KEEP_ALIVE=30m"
 ```
 ```bash
@@ -130,17 +130,23 @@ sudo systemctl restart ollama
 ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
 - `systemctl edit` saves an override file that adds settings to the Ollama background service.
-- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models in GPU memory at once (also Ollama's default for one GPU).
+- `OLLAMA_MAX_LOADED_MODELS=1`: one model in GPU memory at a time. Jobs run one model each, so this lets every job use the largest model that fits in 12 GB, and stops two big models fighting over VRAM.
 - `OLLAMA_KEEP_ALIVE=30m`: models load only when a job uses them and unload 30 minutes after their last use (default 5 minutes). With no job running, Ollama uses no VRAM; `ollama stop <model>` frees it immediately.
 - The `ss` check confirms Ollama only listens on this computer.
 
-**2. Models** (~17 GB download; can run while you do something else)
+**2. Models** (~31 GB download; can run while you do something else; check space with `df -h ~`)
 ```bash
-ollama pull qwen2.5:7b
-ollama pull gemma3:4b
-ollama pull llama3.2:3b
-ollama pull deepseek-r1:7b
-ollama run gemma3:4b "Say hello in Bangla" && ollama ps    # PROCESSOR should say 100% GPU
+ollama rm gemma3:4b llama3.2:3b qwen2.5:7b deepseek-r1:7b 2>/dev/null   # remove the small ones if pulled
+ollama pull qwen2.5:14b        # ~9 GB  G1 contextual headers
+ollama pull gemma3:12b         # ~8 GB  G2 Bangla aliases, G4 Bangla/Banglish test inputs
+ollama pull llama3.1:8b        # ~5 GB  G4 English test inputs
+ollama pull deepseek-r1:14b    # ~9 GB  G5 evaluation judge
+ollama ps                      # after any run: PROCESSOR should say 100% GPU
+```
+Bangla quality check (one model loads at a time):
+```bash
+ollama run gemma3:12b "Write only the answer, in Bangla script. Give 5 common ways Bangladeshis spell 'kacchi biryani' in Banglish, then its Bangla name."
+ollama run gemma3:12b "Rewrite in standard Bangla script, nothing else: ajke dupure kacchi khaisi, pete ektu betha"
 ```
 
 **3. Check ROCm PyTorch** (used by G3 and G6)

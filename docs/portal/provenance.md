@@ -11,10 +11,10 @@
 
 ## AI models
 - Gemini Flash (free tier): meal / label vision, Bangla/English explanations, meal plans, weekly summaries
-- Llama (Groq free tier): fast routing, red-flag second check, fallback explainer; local Llama 3.2 3B for synthetic test utterances (batch)
-- Gemma 3 4B (local, batch): Bangla/Banglish dish-name variants and Bangla draft strings
-- Qwen 2.5 7B (local, batch): Rule Card and dish enrichment drafts, contextual chunk headers
-- DeepSeek-R1-Distill-Qwen-7B (local, batch): LLM-as-judge for the evaluation run
+- Llama (Groq free tier): fast routing, red-flag second check, fallback explainer; local Llama 3.1 8B for English test utterances (GPU job)
+- Gemma 3 12B (local, GPU job): Bangla/Banglish dish-name variants, test utterances and Bangla draft strings
+- Qwen 2.5 14B (local, GPU job): Rule Card and dish enrichment drafts, contextual chunk headers
+- DeepSeek-R1-Distill-Qwen-14B (local, GPU job): LLM-as-judge for the evaluation run
 - BGE-M3 (fine-tuned for dish names) + bge-reranker-v2-m3 + Bengali NER: embeddings, reranking, PII detection (CPU)
 - Custom models: LightGBM flare early-warning model (+ SHAP); Bayesian N-of-1 trigger model
 - Claude (via Claude Code): development only, not at runtime
