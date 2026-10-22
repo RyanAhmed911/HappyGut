@@ -224,7 +224,7 @@ The portal rewards *documented, real* components. **Rule: we only list what we a
 | Agentic frameworks | LangGraph (orchestrator + specialist agents) |
 | Evaluation, guardrails, token optimisation | Ragas/DeepEval + promptfoo · red-flag classifier + Presidio + Pydantic schemas · prompt caching, model routing (small model for routing, large for reasoning), context compression |
 | Prompt library + context files + AI-DLC | `prompts/` versioned prompt library · `CLAUDE.md` project memory · spec-driven development documented in `docs/` |
-| Tunnelling | Tailscale Funnel / ngrok to expose the local Ollama and MCP servers for the live demo |
+| Tunnelling | ngrok to receive webhooks on the local dev server |
 
 ---
 

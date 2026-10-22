@@ -110,7 +110,7 @@
 - AI enrichment: Bangla names and aliases
 - AI enrichment: contextual chunk headers for RAG
 - Check-in range checks; missing days flagged, never silently imputed
-- PII scrubbing: Microsoft Presidio + local LLM (Bangla names, +8801 phone numbers, addresses), EXIF/GPS removal
+- PII scrubbing: Microsoft Presidio + Bangladesh rules (+8801 phone numbers, NID numbers, addresses) + Bengali NER model for Bangla names (CPU), EXIF/GPS removal
 - Timestamps stored in UTC, displayed in Asia/Dhaka
 - Provenance on every record: source, licence, retrieval time, extraction model + prompt version
 
@@ -208,7 +208,7 @@
 - ❌ Clustering (trigger-profile clustering for research is Finals)
 
 **AI / ML details**
-- Perception: vision-language model (free-tier cloud, local Qwen-VL fallback on Ollama) → dishes, ingredients, cooking method, portion, confidence (JSON)
+- Perception: vision-language model (Gemini free tier; Groq-hosted fallback) → dishes, ingredients, cooking method, portion, confidence (JSON)
 - Retrieval: BGE-M3 multilingual embeddings (Bangla + English) in pgvector HNSW + keyword/trigram search → reciprocal rank fusion → bge-reranker-v2-m3
 - Graph retrieval: Neo4j traversal Dish → Ingredient → Component → Rule Card → Paper
 - Explanation: LLM writes Bangla/English explanations only from retrieved evidence, as JSON with citation IDs
@@ -296,9 +296,8 @@
 - Evaluation exports: Parquet / CSV results + Markdown report in the repo
 
 **Embeddings / model serving**
-- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): batch jobs, plus Bangla-aware PII pass and local fallback while online
+- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): one-off batch sessions only (contextual headers, aliases, test sets, judge)
 - BGE-M3 + bge-reranker-v2-m3 (sentence-transformers) inside the always-on backend on CPU; on the GPU for batch corpus embedding
-- Tailscale Funnel exposes the GPU node's Ollama to the hosted backend while it's online (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
 
@@ -318,7 +317,7 @@
 - Microsoft Presidio: PII detection and anonymisation
 - rapidfuzz: fuzzy dish-name matching
 - BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
-- Ollama + open-weight Qwen models: local inference
+- Ollama + open-weight models (Qwen, Gemma, Llama, DeepSeek-R1-Distill): one-off local batch session
 - LangGraph: agent orchestration
 - scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
 - NumPy / SciPy: Bayesian trigger statistics, bootstrap confidence intervals
@@ -348,7 +347,7 @@
 
 **Privacy and compliance**
 - Pseudonymous patient IDs; identity kept only in Supabase Auth
-- Presidio + local LLM strip PII before any cloud AI call; EXIF / GPS removed from photos
+- Presidio + Bangladesh rules + Bengali NER strip PII before any cloud AI call; EXIF / GPS removed from photos
 - Consent scopes (care, clinician sharing, research aggregates): opt-in, revocable, logged
 - Row-level security per patient; service role only in the backend (least privilege)
 - AES-256 at rest, TLS in transit, signed expiring URLs
@@ -373,12 +372,12 @@
 - Postgres cache by image SHA-256 / prompt hash: repeat dishes need no API call
 - Model routing: small/fast model for classification, larger model only for explanations
 - Local Ollama handles PII scrubbing, Bangla normalisation, and fallback when a free-tier quota runs out
-- Per-provider quota guard with automatic fallback (Gemini → Groq → local models when the GPU node is online)
+- Per-provider quota guard with automatic fallback (Gemini → Groq)
 - Compact prompts: structured evidence (IDs + short facts) and the top 5 reranked chunks, not raw documents
 - Photos downscaled to ≤ 1024 px WebP before the vision model (fewer tokens)
 - Precomputed dish component profiles, so the verdict decision itself needs no LLM call
 - Embeddings and enrichment run as offline GPU batch jobs
-- Quantized local models (Q4_K_M) fit in 12 GB VRAM
+- Batch LLM work runs in a one-off local GPU session (Q4_K_M models) or on free cloud tiers, never as a paid API
 - SSE streaming for faster perceived response; target p90 < 5 s scan-to-verdict
 - Partitioning and indexes as in §4
 ## 11. Other data stack notes
@@ -389,7 +388,7 @@
 - Evidence-carrying verdicts: every verdict stores its evidence IDs, so any answer can be audited back to the paper
 - Licence-aware ingestion: each source's licence decides whether full text or only a cited Rule Card is stored
 - Human-in-the-loop curation: LLM extracts facts, humans approve before they enter the graph
-- Privacy before the cloud: PII removed inside our backend (plus a local model pass when available); cloud models only see de-identified text
+- Privacy before the cloud: PII removed inside our backend (Presidio + Bangladesh rules + Bengali NER); cloud models only see de-identified text
 - Synthetic cohort as test oracle: injected ground-truth triggers make trigger discovery measurable
 
 **Agent-driven data ops**
@@ -410,18 +409,11 @@
 ## 12. Publishing local environment to the internet
 
 **Tools**
-- ✅ Tailscale Funnel: publishes the GPU node while it's online (free, no card, stable `*.ts.net` HTTPS address)
-- ✅ ngrok: development only
+- ✅ ngrok: development only (on Windows)
+- ❌ Tailscale Funnel: dropped. The live app runs entirely on cloud services, so no local machine is published
 
 **Tunneling usage notes**
-- Tailscale Funnel exposes the team GPU machine at one stable HTTPS address while it's booted into Ubuntu:
-  - `/llm` → Ollama (Bangla-aware PII pass, Bangla normalisation, local fallback LLM/VLM)
-- The live app never depends on it: the always-on backend runs the standard path, and uses the GPU node as an extra when it's reachable (health-checked)
-- Security: a Caddy gateway checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
-- Security: services bound to localhost only; nothing opened on the router; Funnel adds TLS automatically
-- Security: per-key rate limiting in the gateway; request bodies not logged
-- Lifecycle: on while the machine is in use (development, batch jobs, video recording); off otherwise
-- ngrok: receives Supabase database/storage webhooks and n8n callbacks on local FastAPI during development
-- ngrok: free static domain for a stable webhook URL
-- ngrok: shared-secret header checked on every webhook
-- ngrok: started per dev session and closed afterwards, never used in production
+- ngrok exposes the local FastAPI dev server so Supabase database/storage webhooks and n8n callbacks can reach it during development
+- Free static domain, so the webhook URL stays the same between sessions
+- Every webhook carries a shared-secret header that the dev server checks
+- Started per dev session and closed afterwards; never used in production (production runs on Hugging Face Spaces)

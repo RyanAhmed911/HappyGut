@@ -103,10 +103,10 @@ For a dish judged risky, the system can suggest one or two familiar dishes with 
 - **SC-002**: Dish resolution top-1 accuracy ≥ 90% on a 100-name English/Bangla/Banglish test set.
 - **SC-003**: Rule lookup matches the expected table for 100% of the hand-made cases, including all stricturing hard rules.
 - **SC-004**: Guideline retrieval Recall@5 ≥ 0.8 on the 30-question Q&A set, and contextual hybrid retrieval beats naive vector retrieval (ablation recorded).
-- **SC-005**: A full rebuild from seeds finishes in under 15 minutes on the team GPU machine.
+- **SC-005**: A full rebuild from seeds finishes in under 30 minutes on a laptop CPU (no GPU needed).
 
 ## Assumptions
 - Dishes are curated by the team with LLM help and reviewed by a human; scale is quality over quantity for the prototype.
 - Guideline text is stored only where the licence allows; otherwise Rule Cards carry short quotes with citations.
 - Component levels are typical-recipe estimates, documented as such.
-- Embeddings and context headers are computed on the team GPU machine.
+- Embeddings are computed on CPU; context headers use a free cloud LLM tier (or local models in an optional one-off GPU session).

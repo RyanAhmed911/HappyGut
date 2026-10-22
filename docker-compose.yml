@@ -1,39 +1,7 @@
-# Services on the team GPU machine (AMD RX 7700 XT, Ubuntu). This machine is OPTIONAL at runtime:
-# the live app runs on always-on free services. Use this for batch jobs, local development and the
-# enhanced mode while the machine is on.
-# Everything binds to localhost; only the gateway is published, through Tailscale Funnel:
-#   tailscale funnel 8080
-# Native on the host (not in Docker): Ollama (ROCm), batch jobs on ROCm PyTorch.
-# In Docker: the Caddy API-key gateway, and n8n for local development (production n8n runs on Hugging Face Spaces).
+# Optional local n8n for developing workflows (Docker Desktop on Windows, or Docker on Linux).
+# Production n8n runs on Hugging Face Spaces with Supabase as its database.
 
 services:
-  # Ollama runs natively on Ubuntu (already installed with ROCm), not in Docker.
-  # Configure it with:  sudo systemctl edit ollama   (see docs/setup.md)
-  # If you ever need a containerised Ollama instead:  docker compose --profile docker-ollama up -d
-  ollama:
-    profiles: ["docker-ollama"]
-    image: ollama/ollama:rocm
-    restart: unless-stopped
-    environment:
-      OLLAMA_MAX_LOADED_MODELS: "3"
-      OLLAMA_KEEP_ALIVE: "30m"
-    volumes:
-      - ollama:/root/.ollama
-    ports:
-      - "127.0.0.1:11434:11434"
-    devices:
-      - /dev/kfd
-      - /dev/dri
-
-  gateway:
-    image: caddy:2
-    restart: unless-stopped
-    network_mode: host   # reaches native Ollama on 127.0.0.1:11434
-    environment:
-      GATEWAY_KEY: ${GATEWAY_KEY:?set GATEWAY_KEY in .env}
-    volumes:
-      - ./services/gateway/Caddyfile:/etc/caddy/Caddyfile:ro
-
   n8n:
     image: n8nio/n8n:latest
     restart: unless-stopped
@@ -46,7 +14,5 @@ services:
     ports:
       - "127.0.0.1:5678:5678"
 
-
 volumes:
-  ollama:
   n8n:

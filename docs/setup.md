@@ -1,4 +1,4 @@
-# Setup (Step 0): accounts and the GPU machine
+# Setup (Step 0): accounts and development
 
 All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env.example`). Never commit `.env`.
 
@@ -12,11 +12,10 @@ All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env
 | 5 | Langfuse Cloud | Hobby plan → new project → API keys | `LANGFUSE_*` |
 | 6 | Vercel | Hobby account, connect GitHub | — |
 | 7 | Hugging Face | Account (for Spaces + model downloads) | — |
-| 8 | Tailscale | Personal plan; install on the GPU machine; enable **Funnel** in the admin console | `GPU_GATEWAY_URL` |
-| 9 | ngrok | Free account; claim the free static domain | — |
-| 10 | api.data.gov, NCBI | Free API keys | `USDA_API_KEY`, `NCBI_API_KEY` |
+| 8 | ngrok | Free account; claim the free static domain | — |
+| 9 | api.data.gov, NCBI | Free API keys | `USDA_API_KEY`, `NCBI_API_KEY` |
 
-Generate random secrets for `GATEWAY_KEY`, `MCP_BEARER_TOKEN` and `N8N_ENCRYPTION_KEY`, e.g. `python -c "import secrets;print(secrets.token_urlsafe(32))"`.
+Generate random secrets for `MCP_BEARER_TOKEN` and `N8N_ENCRYPTION_KEY`, e.g. `python -c "import secrets;print(secrets.token_urlsafe(32))"`.
 
 ### Supabase project settings
 | Setting | Choose | Why |
@@ -55,71 +54,62 @@ After the project is created:
 5. Skip optional extras (agents, graph analytics, sample datasets).
 6. Free instances pause when unused for a few days. Resume them from the console before working or demoing.
 
-### Tailscale, ngrok and data API keys
-- **Tailscale**: install on **Ubuntu** (the GPU machine), not Windows. Funnel publishes the machine that runs the services. Install it on Windows only if you want to reach the Ubuntu box from there.
-  `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`, then enable Funnel for the tailnet in the admin console.
-- **ngrok**: on "Where do you want to begin?" choose **Share localhost**. Later on Ubuntu: install the agent, run `ngrok config add-authtoken <token>`, and claim the free static domain under **Domains**. Skip "Gateway" and "AI Gateway".
+### ngrok and data API keys
+- **ngrok**: on "Where do you want to begin?" choose **Share localhost**, and claim the free static domain under **Domains**. Skip "Gateway" and "AI Gateway".
 - **USDA FoodData Central key**: https://api.data.gov/signup/ (the same key works for FoodData Central) → `USDA_API_KEY`
 - **NCBI key**: sign in at https://www.ncbi.nlm.nih.gov/account/ → Account Settings (https://account.ncbi.nlm.nih.gov/settings/) → API Key Management → Create → `NCBI_API_KEY`
 
 ### Until the repo is cloned
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
-## 2. GPU machine (Ubuntu, AMD RX 7700 XT): step by step
-Already installed: ROCm, ROCm PyTorch, Ollama (native), llama.cpp.
+## 2. Development on Windows
+**Treat the project as having no local GPU.** The live app runs entirely on free cloud services (Hugging Face Spaces, Supabase, Neo4j, Gemini, Groq), and all development happens on Windows.
 
-**You don't need to keep this machine on.** The live app runs entirely on always-on free services (Hugging Face Spaces, Supabase, Neo4j, Gemini, Groq). Boot into Ubuntu only when you:
-- run batch jobs (building the knowledge layer, evaluations, synthetic data, fine-tuning)
-- develop locally
-- record the demo video (the enhanced mode with local models is then on)
-
-| Native on Ubuntu | Docker on Ubuntu |
-|---|---|
-| Ollama (ROCm), batch jobs on ROCm PyTorch | Caddy API-key gateway; n8n for local development |
-
-**1. Check what's there**
-```bash
-rocminfo | grep -m1 gfx          # should show gfx1101 (RX 7700 XT)
-ollama --version
-systemctl status ollama --no-pager | head -3
-df -h ~                          # need ~25 GB free for the models
+**1. Tools** (PowerShell)
+```powershell
+winget install Git.Git GitHub.cli OpenJS.NodeJS.LTS Microsoft.VisualStudioCode ngrok.ngrok
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"   # Python tooling
 ```
+Close and reopen PowerShell afterwards.
 
-**2. Basic tools**
-```bash
-sudo apt update && sudo apt install -y git curl gh
-curl -LsSf https://astral.sh/uv/install.sh | sh     # Python tooling; open a new terminal afterwards
-```
-
-**3. Docker Engine**
-```bash
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# log out and back in, then:
-docker run --rm hello-world
-```
-
-**4. Get the code** (after PR #9 is merged)
-```bash
+**2. Get the code** (after PR #9 is merged)
+```powershell
 gh auth login                     # GitHub.com → HTTPS → login with a web browser
 gh repo clone RyanAhmed911/HappyGut
 cd HappyGut
 ```
 
-**5. Secrets**
-```bash
-cp .env.example .env
-python3 -c "import secrets;print(secrets.token_urlsafe(32))"   # run 3 times: GATEWAY_KEY, MCP_BEARER_TOKEN, N8N_ENCRYPTION_KEY
-nano .env                         # paste every key; save with Ctrl+O, Enter, exit with Ctrl+X
-chmod 600 .env
+**3. Secrets**
+```powershell
+Copy-Item .env.example .env
+python -c "import secrets;print(secrets.token_urlsafe(32))"   # run twice: MCP_BEARER_TOKEN, N8N_ENCRYPTION_KEY
+code .env                         # paste every key, save
 ```
-Leave `GPU_GATEWAY_URL` empty until step 9.
 
-**6. Ollama settings**
+**4. ngrok**
+```powershell
+ngrok config add-authtoken <your-token>     # dashboard → Your Authtoken
+```
+
+**5. Tests**
+```powershell
+cd engine; uv run --group dev pytest -q; cd ..
+cd pipelines; uv run python -m happygut_pipelines.seeds; uv run --group dev pytest -q; cd ..
+```
+Expected: 62 passed and 9 passed, and the validator prints `OK`.
+
+Docker Desktop is optional: install it only if you want to run n8n locally (`docker compose up -d`). Production n8n runs on Hugging Face Spaces.
+
+## Optional: one-off GPU batch session (Ubuntu, AMD RX 7700 XT)
+Only when Claude asks for it, for a few hours at most. It runs the batch jobs listed in `docs/portal/ai-usage.md` (contextual headers, Bangla aliases, test sets, evaluation judge) with local models. Nothing live depends on it; if it never happens, the same jobs run on free cloud tiers.
+
+Already installed on the machine: ROCm, ROCm PyTorch, Ollama, llama.cpp.
+
+**Ollama settings**
 ```bash
 sudo systemctl edit ollama
 ```
-In the editor, add these lines in the empty part at the top, then save and close:
+Add these lines in the empty part at the top, then save and close:
 ```
 [Service]
 Environment="OLLAMA_MAX_LOADED_MODELS=3"
@@ -129,54 +119,21 @@ Environment="OLLAMA_KEEP_ALIVE=30m"
 sudo systemctl restart ollama
 ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
-What this does: `systemctl edit` saves an override file (`/etc/systemd/system/ollama.service.d/override.conf`) that adds settings to the Ollama background service.
-- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models can sit in GPU memory at once (e.g. Gemma and Llama for the enhanced mode while a batch model runs). This is already Ollama's default for one GPU; it's written down so the setup is explicit.
-- `OLLAMA_KEEP_ALIVE=30m`: a model is only loaded into VRAM when something uses it, and is unloaded 30 minutes after its last use (Ollama's default is 5 minutes). That avoids reloading in the middle of a working session, and frees the GPU soon after you stop. With no HappyGut work running, Ollama uses no VRAM. Before recording the demo video, warm the models with `ollama run gemma3:4b "hi"`; free VRAM immediately with `ollama stop <model>`.
+- `systemctl edit` saves an override file that adds settings to the Ollama background service.
+- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models in GPU memory at once (also Ollama's default for one GPU).
+- `OLLAMA_KEEP_ALIVE=30m`: models load only when used and unload 30 minutes after their last use (default 5 minutes), so they don't reload mid-session. With nothing running, Ollama uses no VRAM; `ollama stop <model>` frees it immediately.
+- The `ss` check confirms Ollama only listens on this computer, so nothing else on the network can use it.
 
-The `ss` check confirms Ollama only listens on this computer, so the gateway is the only way in.
-
-**7. Models** (~17 GB download)
+**Models** (~17 GB download)
 ```bash
+ollama pull qwen2.5:7b
 ollama pull gemma3:4b
 ollama pull llama3.2:3b
-ollama pull qwen2.5:7b
 ollama pull deepseek-r1:7b
-ollama run gemma3:4b "Say hello in Bangla"
-ollama ps                         # PROCESSOR column should say 100% GPU
+ollama run gemma3:4b "Say hello in Bangla" && ollama ps    # PROCESSOR should say 100% GPU
 ```
 
-**8. Gateway + n8n**
-```bash
-docker compose up -d
-docker compose ps
-curl http://127.0.0.1:8080/health                                         # ok
-KEY=$(grep '^GATEWAY_KEY=' .env | cut -d= -f2)
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8080/llm/api/tags    # 401 (no key)
-curl -s -H "X-HappyGut-Key: $KEY" http://127.0.0.1:8080/llm/api/tags | head -c 300   # model list
-```
-
-**9. Tailscale Funnel**
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up                 # open the printed link and log in
-sudo tailscale funnel --bg 8080   # first time: follow the printed link to enable Funnel, then rerun
-tailscale funnel status           # shows https://<machine>.<tailnet>.ts.net
-```
-Put that https address into `GPU_GATEWAY_URL` in `.env`. From your phone (mobile data), open `https://<machine>.<tailnet>.ts.net/health`; it should say `ok`. The first visit can take a minute while the certificate is issued.
-
-**10. ngrok agent** (used later for webhooks)
-```bash
-sudo snap install ngrok
-ngrok config add-authtoken <your-token>     # dashboard → Your Authtoken
-```
-
-**11. Tests**
-```bash
-cd engine && uv run --group dev pytest -q && cd ..
-cd pipelines && uv run python -m happygut_pipelines.seeds && uv run --group dev pytest -q && cd ..
-```
-
-**Bangla smoke test (10 minutes):** ask `gemma3:4b` to (1) rewrite a Banglish sentence in Bangla, (2) remove the name and phone number from a Bangla sentence, (3) list the dishes in a photo of a Bangladeshi meal. Note the quality in `docs/02-architecture.md` so we can pin the model.
+**Then** clone the repo, create `.env` as above (Linux: `cp .env.example .env`, `curl -LsSf https://astral.sh/uv/install.sh | sh`), and run the batch commands Claude gives you. Each job saves its outputs with model name and version.
 
 ## 3. Start collecting meal photos today
 Target ~300 photos of real Bangladeshi meals (home, restaurant, street food), 30–50 a day across the team. **Food only, no people.** Save as `data/raw/photos/<dish-id>/<n>.jpg` (this folder is gitignored) and keep a simple CSV of `file, dish_ids, taken_by`.
