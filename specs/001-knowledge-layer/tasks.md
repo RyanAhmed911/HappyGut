@@ -23,3 +23,4 @@
 ## Phase 4: Load and verify
 - [ ] T013 Loader (Windows): approved seeds + GPU-job outputs → Neo4j and Supabase
 - [ ] T014 Retrieval evaluation: 30-question set, Recall@5, ablation table
+  - Baseline (2026-10-22, G3 run on seeds before alias review): each dish's Bangla name → nearest English/Banglish name with plain BGE-M3 is the same dish for 55/61 (90%). Misses are sound-alikes (মুড়ি → murgi) and shared words (বেগুন ভাজা → beef bhuna). Target: hybrid trigram + vector beats this; G6 fine-tune beats both.

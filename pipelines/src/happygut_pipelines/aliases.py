@@ -22,13 +22,30 @@ from .gpu_jobs import JOBS_DIR, REPO
 from .seeds import DEFAULT_SEEDS, _read
 
 REVIEW_CSV = REPO / "data" / "review" / "g2-aliases.csv"
-FIELDS = ["dish_id", "name_en", "name_bn", "script", "candidate", "votes", "decision", "reviewer", "note"]
+FIELDS = ["dish_id", "name_en", "name_bn", "script", "candidate", "votes", "auto_check", "decision", "reviewer", "note"]
 YES, NO = {"yes", "y", "accept"}, {"no", "n", "reject"}
 _ALIASES_LINE = re.compile(r"^aliases: \[.*\]$", re.M)
 
 
 def _norm(text: str) -> str:
     return re.sub(r"\s+", " ", unicodedata.normalize("NFC", text).strip().lower())
+
+
+def auto_checks(dish: dict, candidate: str, names_of: dict[str, set[str]], suggested_for: dict[str, set[str]]) -> str:
+    """Objective warnings for the reviewer; the decision stays with the person."""
+    c = _norm(candidate)
+    notes = []
+    if "\u200c" in candidate or "\u200d" in candidate:
+        notes.append("contains an invisible joiner character")
+    if others := sorted(names_of.get(c, set()) - {dish["id"]}):
+        notes.append(f"already a name of {', '.join(others)}: would make search ambiguous")
+    if others := sorted(suggested_for.get(c, set()) - {dish["id"]}):
+        notes.append(f"also suggested for {', '.join(others)}")
+    words = c.split()
+    if len(words) == 1 and any(len(_norm(n).split()) > 1 and words[0] in _norm(n).split()
+                               for n in (dish["name_en"], dish["name_bn"], *dish.get("aliases", []))):
+        notes.append("one word from the dish name: may match other dishes")
+    return "; ".join(notes)
 
 
 def read_review(path: Path = REVIEW_CSV) -> list[dict]:
@@ -45,9 +62,18 @@ def export(jobs_dir: Path = JOBS_DIR, seeds: Path = DEFAULT_SEEDS, path: Path = 
         raise FileNotFoundError(f"{output} not found: run G2 on Ubuntu and pull its output first")
     decided = {(r["dish_id"], _norm(r["candidate"])): r for r in read_review(path)}
     dishes = {d["id"]: d for d in (_read(p) for p in sorted((seeds / "dishes").glob("*.yaml")))}
+    names_of: dict[str, set[str]] = {}
+    for d in dishes.values():
+        for n in (d["name_en"], d["name_bn"], *d.get("aliases", [])):
+            names_of.setdefault(_norm(n), set()).add(d["id"])
+    g2_rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines() if line.strip()]
+    suggested_for: dict[str, set[str]] = {}
+    for g2 in g2_rows:
+        for script in ("bangla", "banglish"):
+            for candidate in g2["candidates"][script]:
+                suggested_for.setdefault(_norm(candidate), set()).add(g2["id"])
     rows = []
-    for line in output.read_text(encoding="utf-8").splitlines():
-        g2 = json.loads(line)
+    for g2 in g2_rows:
         dish = dishes.get(g2["id"])
         if dish is None:
             continue
@@ -62,6 +88,7 @@ def export(jobs_dir: Path = JOBS_DIR, seeds: Path = DEFAULT_SEEDS, path: Path = 
                     "dish_id": dish["id"], "name_en": dish["name_en"], "name_bn": dish["name_bn"],
                     "script": script, "candidate": candidate,
                     "votes": f"{g2.get('votes', {}).get(script, {}).get(candidate, '')}/{len(g2.get('raw', [])) or ''}",
+                    "auto_check": auto_checks(dish, candidate, names_of, suggested_for),
                     "decision": previous.get("decision", ""), "reviewer": previous.get("reviewer", ""),
                     "note": previous.get("note", ""),
                 })

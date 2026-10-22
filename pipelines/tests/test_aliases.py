@@ -45,6 +45,18 @@ def test_export_lists_candidates_with_votes(workspace):
     assert rows["gur mangsho bhuna"]["votes"] == "3/3" and rows["beef theory"]["votes"] == "2/3"
 
 
+def test_auto_checks_flag_collisions_partial_names_and_invisible_characters():
+    dish = {"id": "dish.a", "name_en": "Dim sheddho", "name_bn": "ডিম সেদ্ধ", "aliases": []}
+    names_of = {"rui macher jhol": {"dish.b"}}
+    suggested_for = {"rui er jhol": {"dish.a", "dish.c"}}
+    assert "already a name of dish.b" in al.auto_checks(dish, "rui macher jhol", names_of, suggested_for)
+    assert "also suggested for dish.c" in al.auto_checks(dish, "rui er jhol", names_of, suggested_for)
+    assert "one word from the dish name" in al.auto_checks(dish, "dim", names_of, suggested_for)
+    assert "invisible" in al.auto_checks(dish, "ফ\u200dুচকা", names_of, suggested_for)
+    assert al.auto_checks(dish, "dim shiddho", names_of, suggested_for) == ""
+    assert al.auto_checks(dish, "sheddho dim", names_of, suggested_for) == "", "short forms with 2+ words are fine"
+
+
 def test_apply_adds_only_reviewed_acceptances_and_reexport_keeps_decisions(workspace):
     seeds, jobs, csv_path = workspace
     al.export(jobs, seeds, csv_path)
