@@ -1,0 +1,334 @@
+"""Finite GPU jobs, run by hand on the team's Ubuntu machine (AMD RX 7700 XT).
+
+Each job reads its inputs from the repo, writes its outputs to data/gpu_jobs/<job>/ and records
+provenance (model, digest, prompt version, parameters, git commit, timings) in meta.json. Jobs are
+resumable: rerunning skips items already in the output. No secrets are needed.
+
+    uv run python -m happygut_pipelines.gpu_jobs check          # Ollama + GPU + models ready?
+    uv run python -m happygut_pipelines.gpu_jobs g2              # Bangla/Banglish dish-name variants (Gemma)
+    uv run python -m happygut_pipelines.gpu_jobs g3              # BGE-M3 embeddings (ROCm PyTorch)
+    uv run python -m happygut_pipelines.gpu_jobs g1              # guideline chunk context headers (Qwen3)
+
+Then commit data/gpu_jobs/ and push; Windows loads the outputs into Supabase / Neo4j.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+import time
+import unicodedata
+import urllib.request
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Callable, Iterable
+
+from .seeds import DEFAULT_SEEDS, _read
+
+REPO = DEFAULT_SEEDS.parents[1]
+JOBS_DIR = REPO / "data" / "gpu_jobs"
+PROMPTS_DIR = REPO / "prompts" / "runtime"
+OLLAMA_URL = "http://127.0.0.1:11434"
+
+MODELS = {
+    "g1": "qwen3:14b",
+    "g2": "gemma3:12b",
+    "g3": "BAAI/bge-m3",
+}
+
+
+# ---------------------------------------------------------------- prompts
+
+@dataclass(frozen=True)
+class Prompt:
+    id: str
+    version: int
+    model: str
+    temperature: float
+    body: str
+
+    def render(self, **values) -> str:
+        text = self.body
+        for key, value in values.items():
+            text = text.replace("{" + key + "}", str(value))
+        return text
+
+
+def load_prompt(prompt_id: str, version: int | None = None) -> Prompt:
+    folder = PROMPTS_DIR / prompt_id
+    versions = sorted(int(p.stem[1:]) for p in folder.glob("v*.md"))
+    v = version or versions[-1]
+    raw = (folder / f"v{v}.md").read_text(encoding="utf-8")
+    _, front, body = raw.split("---", 2)
+    meta = dict(line.split(":", 1) for line in front.strip().splitlines() if ":" in line)
+    return Prompt(
+        id=meta["id"].strip(), version=int(meta["version"]), model=meta["model"].strip(),
+        temperature=float(meta["temperature"]), body=body.strip(),
+    )
+
+
+# ---------------------------------------------------------------- Ollama client (stdlib only)
+
+class Ollama:
+    def __init__(self, url: str = OLLAMA_URL, timeout: float = 600):
+        self.url, self.timeout = url.rstrip("/"), timeout
+
+    def _post(self, path: str, payload: dict) -> dict:
+        req = urllib.request.Request(
+            self.url + path, data=json.dumps(payload).encode(), headers={"content-type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            return json.loads(resp.read())
+
+    def chat_json(self, model: str, prompt: str, schema: dict, temperature: float, num_ctx: int = 8192) -> tuple[dict, dict]:
+        """Structured-output chat. Returns (parsed JSON, usage). Thinking is switched off."""
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "format": schema,
+            "stream": False,
+            "keep_alive": "30m",
+            "options": {"temperature": temperature, "num_ctx": num_ctx},
+        }
+        if model.startswith(("qwen3", "deepseek-r1")):
+            payload["think"] = False  # only thinking models accept this switch
+        out = self._post("/api/chat", payload)
+        usage = {"prompt_tokens": out.get("prompt_eval_count", 0), "output_tokens": out.get("eval_count", 0)}
+        return json.loads(out["message"]["content"]), usage
+
+    def digest(self, model: str) -> str:
+        req = urllib.request.Request(self.url + "/api/tags")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            for m in json.loads(resp.read()).get("models", []):
+                if m.get("name") == model or m.get("model") == model:
+                    return m.get("digest", "")
+        raise RuntimeError(f"model {model} is not pulled; run: ollama pull {model}")
+
+    def processor(self) -> list[dict]:
+        req = urllib.request.Request(self.url + "/api/ps")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read()).get("models", [])
+
+
+# ---------------------------------------------------------------- job runs
+
+def git_commit() -> str:
+    try:
+        return subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
+    except OSError:
+        return ""
+
+
+@dataclass
+class JobRun:
+    job: str
+    out_dir: Path
+    meta: dict = field(default_factory=dict)
+
+    @property
+    def output(self) -> Path:
+        return self.out_dir / "output.jsonl"
+
+    def done_ids(self) -> set[str]:
+        if not self.output.exists():
+            return set()
+        return {json.loads(line)["id"] for line in self.output.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+    def append(self, row: dict) -> None:
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        with self.output.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    def write_meta(self, **extra) -> None:
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        self.meta.update(extra)
+        (self.out_dir / "meta.json").write_text(json.dumps(self.meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def start_run(job: str, jobs_dir: Path = JOBS_DIR, **meta) -> JobRun:
+    run = JobRun(job=job, out_dir=jobs_dir / job)
+    previous = {}
+    if (run.out_dir / "meta.json").exists():
+        previous = json.loads((run.out_dir / "meta.json").read_text(encoding="utf-8"))
+    run.meta = {**previous, "job": job, "git_commit": git_commit(),
+                "started_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), **meta}
+    return run
+
+
+# ---------------------------------------------------------------- G2: dish-name variants
+
+G2_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "bangla": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+        "banglish": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+    },
+    "required": ["bangla", "banglish"],
+}
+
+_BANGLA_ONLY = re.compile(r"^[ঀ-৿‌‍ ]+$")
+_BANGLISH_ONLY = re.compile(r"^[a-z][a-z' -]*$")
+
+
+def clean_variants(raw: dict, existing: Iterable[str]) -> dict:
+    """Keep only plausible spellings: Bangla script only / Latin letters only, new, deduplicated."""
+    seen = {unicodedata.normalize("NFC", e).strip().lower() for e in existing}
+    out: dict[str, list[str]] = {"bangla": [], "banglish": []}
+    for kind, pattern in (("bangla", _BANGLA_ONLY), ("banglish", _BANGLISH_ONLY)):
+        for item in raw.get(kind, [])[:6]:
+            v = re.sub(r"\s+", " ", unicodedata.normalize("NFC", str(item)).strip().lower())
+            if not v or len(v) > 40 or not pattern.match(v) or v in seen:
+                continue
+            seen.add(v)
+            out[kind].append(v)
+    return out
+
+
+def run_g2(seeds: Path = DEFAULT_SEEDS, ollama: Ollama | None = None, jobs_dir: Path = JOBS_DIR,
+           limit: int | None = None, log: Callable[[str], None] = print) -> JobRun:
+    ollama = ollama or Ollama()
+    prompt = load_prompt("g2-dish-aliases")
+    run = start_run("g2", jobs_dir, model=prompt.model, model_digest=ollama.digest(prompt.model),
+                    prompt_id=prompt.id, prompt_version=prompt.version, temperature=prompt.temperature,
+                    status="running", review="Candidates only: a native Bangla speaker reviews before they enter the seeds.")
+    run.write_meta()
+    done = run.done_ids()
+    dishes = [_read(p) for p in sorted((seeds / "dishes").glob("*.yaml"))]
+    todo = [d for d in dishes if d["id"] not in done][: limit or None]
+    t0 = time.monotonic()
+    for i, d in enumerate(todo, 1):
+        existing = [d["name_en"], d["name_bn"], *d.get("aliases", [])]
+        text = prompt.render(name_en=d["name_en"], name_bn=d["name_bn"], existing=", ".join(existing))
+        raw, usage = ollama.chat_json(prompt.model, text, G2_SCHEMA, prompt.temperature)
+        variants = clean_variants(raw, existing)
+        run.append({"id": d["id"], "candidates": variants, "raw": raw, "usage": usage, "is_synthetic": False})
+        log(f"[g2] {i}/{len(todo)} {d['id']}: +{len(variants['bangla'])} bn, +{len(variants['banglish'])} banglish")
+    run.write_meta(status="finished", finished_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                   items=len(run.done_ids()), seconds=round(time.monotonic() - t0, 1))
+    return run
+
+
+# ---------------------------------------------------------------- G3: embeddings
+
+def embedding_items(seeds: Path = DEFAULT_SEEDS, include_drafts: bool = True) -> list[dict]:
+    """Texts to embed: every dish name / alias and every Rule Card (English and Bangla)."""
+    from .graph import normalise_name
+
+    items = []
+    for p in sorted((seeds / "dishes").glob("*.yaml")):
+        d = _read(p)
+        if not include_drafts and d.get("status") != "approved":
+            continue
+        names: dict[str, str] = {}
+        for a in d.get("aliases", []):
+            names[normalise_name(a)] = "banglish"
+        names[normalise_name(d["name_en"])] = "en"  # the English / Bangla name wins over an identical alias
+        names[normalise_name(d["name_bn"])] = "bn"
+        for name, lang in sorted(names.items()):
+            items.append({"id": f"name:{d['id']}:{name}", "kind": "dish_name", "ref": d["id"], "lang": lang, "text": name})
+    for p in sorted((seeds / "rule_cards").glob("*.yaml")):
+        r = _read(p)
+        if not include_drafts and r.get("status") != "approved":
+            continue
+        for lang in ("en", "bn"):
+            text = f"{r[f'title_{lang}']}. {r[f'recommendation_{lang}']}"
+            items.append({"id": f"rule:{r['id']}:{lang}", "kind": "rule_card", "ref": r["id"], "lang": lang, "text": text})
+    chunks = JOBS_DIR / "g1" / "output.jsonl"
+    if chunks.exists():
+        for line in chunks.read_text(encoding="utf-8").splitlines():
+            c = json.loads(line)
+            items.append({"id": f"chunk:{c['id']}", "kind": "chunk", "ref": c["id"], "lang": "en",
+                          "text": f"{c['header']}\n\n{c['text']}"})
+    return items
+
+
+def run_g3(encode: Callable[[list[str]], list[list[float]]] | None = None, seeds: Path = DEFAULT_SEEDS,
+           jobs_dir: Path = JOBS_DIR, batch_size: int = 32, log: Callable[[str], None] = print) -> JobRun:
+    device = "injected"
+    if encode is None:
+        encode, device = _bge_m3_encoder()
+    run = start_run("g3", jobs_dir, model=MODELS["g3"], device=device, normalized=True, dims=1024, status="running")
+    run.write_meta()
+    done = run.done_ids()
+    items = [i for i in embedding_items(seeds) if i["id"] not in done]
+    t0 = time.monotonic()
+    for start in range(0, len(items), batch_size):
+        batch = items[start : start + batch_size]
+        vectors = encode([b["text"] for b in batch])
+        for item, vec in zip(batch, vectors):
+            if len(vec) != 1024:
+                raise ValueError(f"expected 1024 dims, got {len(vec)}")
+            run.append({**item, "embedding": [round(float(x), 6) for x in vec]})
+        log(f"[g3] {min(start + batch_size, len(items))}/{len(items)} embedded")
+    run.write_meta(status="finished", finished_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                   items=len(run.done_ids()), seconds=round(time.monotonic() - t0, 1))
+    return run
+
+
+def _bge_m3_encoder():
+    import torch
+    from sentence_transformers import SentenceTransformer
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"  # ROCm builds expose the GPU as "cuda"
+    model = SentenceTransformer(MODELS["g3"], device=device)
+    if device == "cuda":
+        model.half()
+
+    def encode(texts: list[str]) -> list[list[float]]:
+        return model.encode(texts, batch_size=len(texts), normalize_embeddings=True).tolist()
+
+    name = torch.cuda.get_device_name(0) if device == "cuda" else "cpu"
+    return encode, f"{device}:{name}"
+
+
+# ---------------------------------------------------------------- check
+
+def check(ollama: Ollama | None = None, log: Callable[[str], None] = print) -> bool:
+    ollama = ollama or Ollama()
+    ok = True
+    for job in ("g1", "g2"):
+        try:
+            ollama.digest(MODELS[job])
+            log(f"OK   {MODELS[job]} is pulled ({job})")
+        except Exception as exc:  # noqa: BLE001
+            ok = False
+            log(f"FAIL {exc}")
+    try:
+        import torch
+
+        gpu = torch.cuda.is_available()
+        log(f"{'OK  ' if gpu else 'WARN'} torch {torch.__version__}, GPU available: {gpu}"
+            + (f" ({torch.cuda.get_device_name(0)})" if gpu else ""))
+    except ImportError:
+        log("WARN torch not importable in this environment (needed for g3; see docs/setup.md §3)")
+    return ok
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="HappyGut GPU jobs (run on Ubuntu)")
+    parser.add_argument("job", choices=["check", "g1", "g2", "g3"])
+    parser.add_argument("--limit", type=int, default=None, help="process at most N new items (for a quick try)")
+    args = parser.parse_args(argv)
+    if args.job == "check":
+        return 0 if check() else 1
+    if args.job == "g2":
+        run_g2(limit=args.limit)
+    elif args.job == "g3":
+        run_g3()
+    elif args.job == "g1":
+        try:
+            from .corpus import run_g1
+        except ImportError:
+            print("G1 needs the guideline corpus first (docs/setup.md §3 will say when it's ready).")
+            return 1
+        run_g1(limit=args.limit)
+    print(f"Done. Now: git add data/gpu_jobs && git commit -m 'GPU job {args.job} outputs' && git push")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

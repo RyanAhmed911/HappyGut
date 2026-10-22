@@ -164,13 +164,24 @@ gh auth login                                      # GitHub.com → HTTPS → we
 gh repo clone RyanAhmed911/HappyGut
 ```
 
-### Running a job (when Claude says it's ready)
+### Python environment for the jobs (once)
+Use the virtual environment where your **ROCm PyTorch already works** (installing PyTorch from PyPI would get the NVIDIA build). Activate it, then from the repo root:
+```bash
+pip install -e engine -e pipelines sentence-transformers
+python -m happygut_pipelines.gpu_jobs check     # models pulled? GPU visible to PyTorch?
+```
+
+### Running a job
 ```bash
 cd HappyGut && git pull
-# run the command Claude gives you, e.g. uv run python -m happygut_pipelines.gpu_jobs g1
-git add data/gpu_jobs && git commit -m "GPU job G1 outputs" && git push
+python -m happygut_pipelines.gpu_jobs g2 --limit 3   # quick try: 3 dishes, then look at data/gpu_jobs/g2/output.jsonl
+python -m happygut_pipelines.gpu_jobs g2             # all dishes (resumes; already-done dishes are skipped)
+python -m happygut_pipelines.gpu_jobs g3             # embeddings for dish names and Rule Cards
+git add data/gpu_jobs && git commit -m "GPU jobs G2, G3 outputs" && git push
 ```
-Then boot back into Windows, `git pull`, and load the outputs.
+A job can be stopped with Ctrl+C and rerun later; it continues where it stopped. Then boot back into Windows, `git pull`, and load the outputs.
+
+**Ready now:** G2 and G3 (their inputs are the seed files). **Later:** G1 (needs the guideline corpus), G4–G6 (Step 4).
 
 ## 4. Start collecting meal photos today
 Target ~300 photos of real Bangladeshi meals (home, restaurant, street food), 30–50 a day across the team. **Food only, no people.** Save as `data/raw/photos/<dish-id>/<n>.jpg` (this folder is gitignored) and keep a simple CSV of `file, dish_ids, taken_by`.

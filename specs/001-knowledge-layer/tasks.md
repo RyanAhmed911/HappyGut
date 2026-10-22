@@ -16,9 +16,9 @@
 ## Phase 3: Guideline corpus [US3]
 - [ ] T008 Source registry with licence gate (full text only for open licences; otherwise Rule Cards only)
 - [ ] T009 Structure-aware chunker (section → paragraph, tables kept whole, 200–500 tokens)
-- [ ] T010 GPU job framework (`data/gpu_jobs/<job>/input|output`, provenance metadata) + G1 contextual headers (Qwen3 14B via Ollama)
-- [ ] T011 G2 Bangla/Banglish alias candidates (Gemma 3 12B) → review file
-- [ ] T012 G3 corpus embeddings (BGE-M3 on ROCm PyTorch) → Parquet
+- [~] T010 GPU job framework (framework done; G1 waits for the corpus) (`data/gpu_jobs/<job>/input|output`, provenance metadata) + G1 contextual headers (Qwen3 14B via Ollama)
+- [x] T011 G2 Bangla/Banglish alias candidates (Gemma 3 12B) → review file
+- [x] T012 G3 corpus embeddings (BGE-M3 on ROCm PyTorch) → Parquet
 
 ## Phase 4: Load and verify
 - [ ] T013 Loader (Windows): approved seeds + GPU-job outputs → Neo4j and Supabase
