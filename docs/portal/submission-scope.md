@@ -16,7 +16,7 @@
 | ngrok | Free | No | Dev webhooks; one free static domain |
 | Langfuse Cloud | Hobby | No | Tracing + eval scores |
 | GitHub | Free, public repo | No | Repo, Actions CI, issues/PRs |
-| Ollama, all OSS libraries | Self-hosted | No | Ollama runs only in occasional batch sessions on the team GPU; the live app never uses it |
+| Ollama, all OSS libraries | Self-hosted | No | Ollama runs finite GPU jobs on the team GPU (Ubuntu); the live app never uses it |
 | USDA FoodData Central, NCBI | Free API keys | No | |
 | Figma, Lovable, v0, Google Stitch | Free tiers | No | Lovable/v0 have daily credit limits, so plan UI generation |
 | YouTube, Facebook | Free | No | Same 180s video on both |
@@ -78,9 +78,9 @@
 | Item | Tier |
 |---|---|
 | Gemini, Transformers (BGE-M3, reranker, Bengali NER on CPU) | A |
-| Ollama | B (GPU batch session) |
+| Ollama | A (GPU jobs) |
 | Groq Llama | A |
-| Local Qwen 2.5 7B, Gemma 3 4B, Llama 3.2 3B, DeepSeek-R1-Distill (one-off GPU batch session) | B: untick if the session doesn't happen |
+| Local Qwen 2.5 7B, Gemma 3 4B, Llama 3.2 3B, DeepSeek-R1-Distill (GPU jobs on Ubuntu) | A |
 | RAG: contextual, semantic chunking, Graph RAG, KG, hybrid, reranker | A |
 | MCP built: foodgraph | A |
 | MCP built: guidelines, evals, journal | B |

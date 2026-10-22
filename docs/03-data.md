@@ -30,7 +30,7 @@
 - Tesseract fallback
 - FHIR export
 
-**Prototype infrastructure:** one Supabase project (Postgres + pgvector + Storage) · Neo4j AuraDB Free · Hugging Face Spaces (backend + n8n) · developer laptops for batch scripts (DuckDB, Delta files) · team GPU only for an optional one-off batch session.
+**Prototype infrastructure:** one Supabase project (Postgres + pgvector + Storage) · Neo4j AuraDB Free · Hugging Face Spaces (backend + n8n) · Windows for development and loading data (DuckDB, Delta files) · finite Ubuntu GPU jobs for enrichment, embeddings, evaluation and fine-tuning.
 
 ---
 
@@ -515,7 +515,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Evaluation exports: Parquet / CSV results + Markdown report in the repo
 
 **Embeddings / model serving**
-- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): one-off batch sessions only (contextual headers, aliases, test sets, judge)
+- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): finite GPU jobs on Ubuntu (contextual headers, aliases, test sets, evaluation judge)
 - BGE-M3 + bge-reranker-v2-m3 (sentence-transformers) inside the always-on backend on CPU; on the GPU for batch corpus embedding
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
@@ -536,7 +536,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Microsoft Presidio: PII detection and anonymisation
 - rapidfuzz: fuzzy dish-name matching
 - BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
-- Ollama + open-weight models (Qwen, Gemma, Llama, DeepSeek-R1-Distill): one-off local batch session
+- Ollama + open-weight models (Qwen, Gemma, Llama, DeepSeek-R1-Distill): finite local GPU jobs
 - LangGraph: agent orchestration
 - scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
 - NumPy / SciPy: Bayesian trigger statistics, bootstrap confidence intervals
@@ -596,7 +596,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Photos downscaled to ≤ 1024 px WebP before the vision model (fewer tokens)
 - Precomputed dish component profiles, so the verdict decision itself needs no LLM call
 - Embeddings and enrichment run as offline GPU batch jobs
-- Batch LLM work runs in a one-off local GPU session (Q4_K_M models) or on free cloud tiers, never as a paid API
+- Batch LLM work and corpus embeddings run as finite local GPU jobs (Q4_K_M models, ROCm PyTorch), never as a paid API
 - SSE streaming for faster perceived response; target p90 < 5 s scan-to-verdict
 - Partitioning and indexes as in §4
 

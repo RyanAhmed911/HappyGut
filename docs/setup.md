@@ -100,12 +100,22 @@ Expected: 62 passed and 9 passed, and the validator prints `OK`.
 
 Docker Desktop is optional: install it only if you want to run n8n locally (`docker compose up -d`). Production n8n runs on Hugging Face Spaces.
 
-## Optional: one-off GPU batch session (Ubuntu, AMD RX 7700 XT)
-Only when Claude asks for it, for a few hours at most. It runs the batch jobs listed in `docs/portal/ai-usage.md` (contextual headers, Bangla aliases, test sets, evaluation judge) with local models. Nothing live depends on it; if it never happens, the same jobs run on free cloud tiers.
+## 3. Ubuntu: GPU jobs (finite, started by hand)
+Ubuntu is used only for GPU jobs that you start and that finish on their own. It is never a server, and it needs **no `.env`**: each job reads its inputs from the repo and commits its outputs back as versioned files, which Windows then loads into Supabase / Neo4j.
 
-Already installed on the machine: ROCm, ROCm PyTorch, Ollama, llama.cpp.
+| Job | Model / runtime | Output | When |
+|---|---|---|---|
+| G1 Contextual headers | Qwen 2.5 7B (Ollama) | headers for every guideline chunk | Step 1 |
+| G2 Bangla aliases | Gemma 3 4B (Ollama) | Bangla/Banglish name variants for dishes (reviewed before use) | Step 1 |
+| G3 Corpus embeddings | BGE-M3 (ROCm PyTorch) | vectors for chunks, Rule Cards, dish names | Step 1 |
+| G4 Test utterances | Llama 3.2 3B (Ollama) | synthetic Bangla/Banglish/English test inputs (reviewed) | Step 4 |
+| G5 Evaluation judge | DeepSeek-R1-Distill 7B (Ollama) | judge scores for the evaluation run | Step 4 |
+| G6 Dish-name fine-tune | BGE-M3 + sentence-transformers (ROCm PyTorch) | fine-tuned encoder pushed to Hugging Face | Step 4 |
 
-**Ollama settings**
+Docker isn't needed on Ubuntu; you can leave it installed or remove it.
+
+### One-time preparation (~30 minutes plus model downloads)
+**1. Ollama settings**
 ```bash
 sudo systemctl edit ollama
 ```
@@ -121,10 +131,10 @@ ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
 - `systemctl edit` saves an override file that adds settings to the Ollama background service.
 - `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models in GPU memory at once (also Ollama's default for one GPU).
-- `OLLAMA_KEEP_ALIVE=30m`: models load only when used and unload 30 minutes after their last use (default 5 minutes), so they don't reload mid-session. With nothing running, Ollama uses no VRAM; `ollama stop <model>` frees it immediately.
-- The `ss` check confirms Ollama only listens on this computer, so nothing else on the network can use it.
+- `OLLAMA_KEEP_ALIVE=30m`: models load only when a job uses them and unload 30 minutes after their last use (default 5 minutes). With no job running, Ollama uses no VRAM; `ollama stop <model>` frees it immediately.
+- The `ss` check confirms Ollama only listens on this computer.
 
-**Models** (~17 GB download)
+**2. Models** (~17 GB download; can run while you do something else)
 ```bash
 ollama pull qwen2.5:7b
 ollama pull gemma3:4b
@@ -133,7 +143,27 @@ ollama pull deepseek-r1:7b
 ollama run gemma3:4b "Say hello in Bangla" && ollama ps    # PROCESSOR should say 100% GPU
 ```
 
-**Then** clone the repo, create `.env` as above (Linux: `cp .env.example .env`, `curl -LsSf https://astral.sh/uv/install.sh | sh`), and run the batch commands Claude gives you. Each job saves its outputs with model name and version.
+**3. Check ROCm PyTorch** (used by G3 and G6)
+```bash
+python3 -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+It should print your torch version, `True` and the Radeon GPU's name. (ROCm builds of PyTorch use the `cuda` names.)
 
-## 3. Start collecting meal photos today
+**4. Tools and code (no secrets)**
+```bash
+sudo apt install -y git gh
+curl -LsSf https://astral.sh/uv/install.sh | sh    # then open a new terminal
+gh auth login                                      # GitHub.com → HTTPS → web browser
+gh repo clone RyanAhmed911/HappyGut
+```
+
+### Running a job (when Claude says it's ready)
+```bash
+cd HappyGut && git pull
+# run the command Claude gives you, e.g. uv run python -m happygut_pipelines.gpu_jobs g1
+git add data/gpu_jobs && git commit -m "GPU job G1 outputs" && git push
+```
+Then boot back into Windows, `git pull`, and load the outputs.
+
+## 4. Start collecting meal photos today
 Target ~300 photos of real Bangladeshi meals (home, restaurant, street food), 30–50 a day across the team. **Food only, no people.** Save as `data/raw/photos/<dish-id>/<n>.jpg` (this folder is gitignored) and keep a simple CSV of `file, dish_ids, taken_by`.

@@ -41,7 +41,7 @@
 ## Deployment method
 - Frontend PWA: Vercel (free)
 - Backend API: FastAPI in Docker on Hugging Face Spaces (free CPU tier, no card)
-- Team GPU (AMD RX 7700 XT): Ollama for one-off batch sessions only; nothing live runs on it
+- Team GPU (AMD RX 7700 XT, Ubuntu): finite GPU jobs (Ollama + ROCm PyTorch) that exchange files with the Windows dev setup through git; nothing live runs on it
 - n8n and the MCP servers: on Hugging Face Spaces alongside the backend
 - Managed data: Supabase (Postgres + pgvector + Auth + Storage, Mumbai/Singapore region), Neo4j AuraDB Free
 - CI/CD: GitHub Actions (tests, evaluation regression gate); Vercel preview deploys per PR

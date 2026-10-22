@@ -79,7 +79,7 @@
   - fallback explainer when the Gemini quota runs out
   - Why: very fast inference, separate quota
 
-**Batch jobs (one-off session on the team GPU, Ollama)**
+**GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
 - Qwen 2.5 7B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
 - Gemma 3 4B: Bangla/Banglish spelling variants and aliases for dish names; Bangla draft strings for human review. Strong multilingual
 - Llama 3.2 3B: synthetic Bangla/Banglish/English test utterances for the evaluation sets
@@ -89,8 +89,7 @@
 - BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder, an open-source Bengali NER model for PII scrubbing
 
 **Notes**
-- The live app never uses the local GPU; it's used only for occasional batch sessions
-- If that session doesn't happen, the same batch jobs run on the Gemini/Groq free tiers. Then untick the local models in the portal
+- The live app never uses the local GPU. GPU jobs are started by hand, finish on their own, and store their outputs with model name and version
 - Privacy: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
 
 ## Retrieval & RAG (tick)
@@ -116,7 +115,7 @@ Text path (guideline passages for the explanation)
 - Corpus: CC-licensed ESPEN / IOIBD / AGA guideline text, published FODMAP composition papers, Rule Card texts
 - Parsing: Docling, structure-aware (sections, headings; tables kept whole)
 - Variable chunking: split by section first, then semantic breakpoints (embedding-similarity drops) into ~200–500-token chunks
-- Contextual RAG: an LLM (Qwen in the GPU batch session, or Gemini free tier) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
+- Contextual RAG: Qwen 2.5 7B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
 - Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
 - Index: pgvector HNSW (cosine, m=16, ef_construction=64)
 - Keyword search: Postgres tsvector (English) + pg_trgm (Bangla/Banglish)
@@ -247,7 +246,7 @@ Evaluation
 - Pydantic-AI: typed agent nodes (perception, resolver, explainer, dietitian) inside the LangGraph graph
 - MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
-- Ollama (llama.cpp runtime): local quantized inference for one-off batch sessions on the team GPU
+- Ollama (llama.cpp runtime): local quantized inference in finite GPU jobs on the team GPU
 - Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: batch knowledge extraction, Bangla aliases, synthetic test sets, LLM-as-judge
 - BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking (CPU in the backend, GPU for batch)
 - sentence-transformers: fine-tuning the dish-name embedding model
@@ -286,7 +285,7 @@ Evaluation
 - LiteLLM retries and cross-provider fallbacks
 
 ## Fine-tuning / adaptation
-- Embedding fine-tuning (planned for Oct 31): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
+- Embedding fine-tuning (GPU job on Ubuntu, ROCm PyTorch): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
   - Training pairs: Banglish / Bangla / English dish names ↔ canonical dish IDs, from Dakshina transliterations, graph aliases and reviewed synthetic spellings
   - Measured by dish-resolution Recall@1 against the base model
 - Adaptation without weight changes: few-shot examples of Bangladeshi dishes, a Bangla medical glossary in prompts, retrieval grounding
@@ -398,11 +397,11 @@ GitHub Actions
 - Block the merge on regression; post an eval summary comment on the PR
 
 ## Local / on-device LLMs
-> Tick these only if the one-off GPU batch session actually happens before submission.
+> Local models run as finite GPU jobs on Ubuntu (the team's dual-boot PC). Outputs are versioned files, loaded into the cloud services from Windows.
 
 **Runtimes**
-- ✅ Ollama: runs the local LLMs (GGUF) during batch sessions on the team GPU
-- ✅ *Add:* Hugging Face Transformers / sentence-transformers: BGE-M3, bge-reranker and the Bengali NER model on CPU in the backend; embedding fine-tune
+- ✅ Ollama: runs the local LLMs (GGUF) in GPU jobs on the team GPU
+- ✅ *Add:* Hugging Face Transformers / sentence-transformers (ROCm PyTorch for GPU jobs, CPU in the backend): corpus embeddings and embedding fine-tune as GPU jobs; BGE-M3, bge-reranker and Bengali NER for live queries
 
 **Local models we actually ran** (tick the exact versions you ran)
 - ✅ Qwen 2.5 7B Instruct (Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
@@ -412,7 +411,7 @@ GitHub Actions
 
 **Hardware, quantization, why local**
 - AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
-- Used for scheduled batch sessions, not as a server; the live app runs entirely on cloud services
+- Used for finite GPU jobs started by hand (each finishes on its own), never as a server; the live app runs entirely on cloud services
 - GGUF, Q4_K_M quantization, 8k context; one 7B model at a time (~5 GB), 3–4B models alongside
 - Every batch output (headers, aliases, test sets, judge scores) is stored with model name and version for provenance
 - Why local, cost: $0 with no rate limits for batch jobs over thousands of chunks and test items
@@ -463,7 +462,7 @@ GitHub Actions
 - Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
 - Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording
 - Model and data cards: one page per model role and per dataset (purpose, limits, licence, evaluation results), published in `/docs`
-- Cost-aware AI: runs at $0 on free tiers through caching and routing; a single consumer GPU is used only for occasional batch jobs, a realistic path for low-resource settings
+- Cost-aware AI: runs at $0 on free tiers through caching and routing; a single consumer GPU runs finite batch jobs only, a realistic path for low-resource settings
 - Privacy by architecture: PII is removed inside our own backend before any cloud call; cloud models only see food photos and de-identified text
 - Known limits, stated openly: not a medical device; flare prediction not yet validated on real patients; dish recognition limited to dishes in our graph (unknown → ⚪ "Not sure")
 - Next: federated learning across users, QLoRA-tuned Bangla explainer, on-device small model for offline use, clinical validation with partner gastroenterologists

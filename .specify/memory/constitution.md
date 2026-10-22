@@ -42,7 +42,7 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 - Frontend: React + Vite PWA, Tailwind, shadcn/ui, Zod, react-i18next (bn/en). Hosted on Vercel.
 - Backend: Python 3.11, FastAPI, Pydantic v2, LangGraph + Pydantic-AI, LiteLLM. Docker on Hugging Face Spaces.
 - Data: Supabase (Postgres + pgvector + pg_trgm + Storage + Auth), Neo4j AuraDB Free, DuckDB/Parquet for evaluation data.
-- Local AI: treat the project as having no local GPU. The team's AMD RX 7700 XT is used at most for occasional one-off batch sessions (Ollama). The live app and day-to-day development never depend on it.
+- Machines: one dual-boot PC. Windows holds day-to-day development and the `.env` secrets. Ubuntu runs finite GPU jobs on the AMD RX 7700 XT (Ollama + ROCm PyTorch) that are started by hand and finish on their own; it is never a server. GPU jobs exchange inputs and outputs with Windows as versioned files in git and need no `.env`. The live app runs entirely on cloud services.
 - Interfaces: REST (`/v1`, OpenAPI) and MCP servers (FastMCP; stdio + Streamable HTTP; read-only tools).
 
 ## Development Workflow and Quality Gates
@@ -55,4 +55,4 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 ## Governance
 This constitution takes precedence over other practices in this repository. `CLAUDE.md` and `AGENTS.md` carry the same rules for coding agents and must stay consistent with it. Amendments are made by pull request with a one-line reason, reviewed by the Team Leader, and versioned semantically (MAJOR: a principle removed or redefined; MINOR: a principle or section added; PATCH: wording). Every spec and plan includes a constitution check before implementation starts.
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-22
+**Version**: 1.3.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-22

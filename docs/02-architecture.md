@@ -20,9 +20,9 @@ flowchart LR
         GROQ["Groq Llama<br/>routing · fallback"]
         LF["Langfuse<br/>traces · scores"]
     end
-    subgraph Batch["Batch jobs · run occasionally, nothing live"]
-        PIPE["Pipelines on a laptop or GitHub Actions<br/>knowledge build · evals · synthetic data"]
-        OLL["Optional one-off GPU session<br/>Ollama: Qwen · Gemma · Llama · R1-Distill"]
+    subgraph PC["Team PC (dual-boot) · nothing live"]
+        PIPE["Windows: development, .env,<br/>load data into Supabase / Neo4j"]
+        OLL["Ubuntu GPU jobs (finite, started by hand)<br/>Ollama: Qwen · Gemma · Llama · R1-Distill<br/>ROCm PyTorch: embeddings · fine-tune"]
     end
     PWA -- HTTPS + Supabase JWT --> API
     PWA -- auth · realtime --> SB
@@ -35,10 +35,10 @@ flowchart LR
     N8N --> SB
     PIPE --> SB
     PIPE --> NEO
-    PIPE -.-> OLL
+    PIPE -. "files via git" .- OLL
 ```
 
-**Treat the project as having no local GPU.** Everything a judge or user touches runs on always-on free services. Batch jobs (knowledge build, evaluations, synthetic data) run on a laptop CPU or GitHub Actions, using free cloud LLM tiers where an LLM is needed. The team's AMD GPU is used at most for an occasional one-off batch session with local models; nothing depends on it.
+**The live app runs entirely on always-on cloud services.** The team has one dual-boot PC. On **Windows** it's used for development, secrets and loading data. On **Ubuntu** it runs finite GPU jobs that are started by hand and finish on their own: contextual headers, Bangla aliases, corpus embeddings, synthetic test sets, evaluation judging and fine-tuning. GPU jobs read their inputs from git and commit their outputs back as versioned files, so Ubuntu needs no secrets.
 
 **The live app never depends on the GPU machine.** Everything a judge or user touches runs on always-on free services. The GPU machine (dual-boot, usually off) does batch work when it's switched on: building the knowledge layer, evaluations, synthetic data and fine-tuning. While it's online, the backend also uses it for an extra Bangla-aware PII pass and as a local fallback model.
 
@@ -137,4 +137,5 @@ docker-compose.yml   optional local n8n for development
 | AR11 | ~~(superseded by AR14)~~ GPU machine is an AMD RX 7700 XT on Ubuntu with ROCm already installed: native Ollama (incl. BGE-M3 embeddings) and a native rerank service on ROCm PyTorch; only the gateway and n8n run in Docker (gateway uses host networking, localhost-only) | Reuses the working native ROCm stack; avoids GPU passthrough into containers | Ollama ROCm container; CPU reranker |
 | AR12 | Cloud-first runtime: backend, PII scrub (Presidio + Bangladesh rules), BGE-M3 query embeddings, reranker, foodgraph MCP and n8n run on always-on free services (HF Spaces + Supabase). The GPU machine is for batch jobs and an optional enhanced mode | The GPU machine dual-boots and is usually off; judges test the live link at any time | Keeping the PC on Ubuntu 24/7 |
 | AR13 | One embedding implementation everywhere: BGE-M3 via sentence-transformers (GPU for batch corpus embedding, CPU for live queries) | Corpus and query vectors must come from the same model build; Ollama's quantized `bge-m3` would differ | Ollama `bge-m3` for the corpus |
-| AR14 | No live or development dependency on the local GPU. It's used at most for occasional one-off batch sessions (Ollama). Tailscale Funnel and the Caddy gateway are dropped. Batch jobs default to laptop CPU / GitHub Actions + free cloud LLM tiers. PII scrubbing uses Presidio + Bangladesh rules + an open-source Bengali NER model on CPU | The GPU machine dual-boots and is very rarely on Ubuntu | Using the GPU as an always-on or on-demand server |
+| AR14 | The local GPU is never a server. The live app runs on cloud services; Tailscale Funnel and the Caddy gateway are dropped. PII scrubbing uses Presidio + Bangladesh rules + an open-source Bengali NER model on CPU | The PC dual-boots and is usually on Windows | Using the GPU as an always-on or on-demand server |
+| AR15 | Windows for development, secrets and data loading; Ubuntu only for finite GPU jobs (Ollama, ROCm PyTorch). Jobs exchange inputs/outputs as versioned files in git (`data/gpu_jobs/`), so Ubuntu holds no `.env`; only Hugging Face login for pushing the fine-tuned model | One PC; keep secrets in one place; every GPU output is reproducible and reviewable | `.env` on both systems; shared NTFS folder |
