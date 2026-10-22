@@ -13,7 +13,7 @@ International AI Builders Congress 2026 · HealthSphere AI · ChronicCare AI
 | [Step 2: Architecture](docs/02-architecture.md) | System, hero-flow sequence, verdict engine, decisions |
 | [Step 3: Data lifecycle](docs/03-data.md) | Sources, licences, storage, ML, governance |
 | [Submission scope](docs/portal/submission-scope.md) | What is real in the prototype vs designed |
-| [Setup](docs/setup.md) | Free accounts and GPU machine |
+| [Setup](docs/setup.md) | Free accounts, Windows dev setup, optional GPU batch session |
 | [Constitution](.specify/memory/constitution.md) | Rules every change follows |
 | [Specs](specs/) | Spec-Kit feature specs |
 | [Prompt library](prompts/) | Versioned prompts used to design and build HappyGut |

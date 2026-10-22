@@ -1,4 +1,4 @@
-# Setup (Step 0): accounts and the GPU machine
+# Setup (Step 0): accounts and development
 
 All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env.example`). Never commit `.env`.
 
@@ -12,11 +12,10 @@ All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env
 | 5 | Langfuse Cloud | Hobby plan → new project → API keys | `LANGFUSE_*` |
 | 6 | Vercel | Hobby account, connect GitHub | — |
 | 7 | Hugging Face | Account (for Spaces + model downloads) | — |
-| 8 | Tailscale | Personal plan; install on the GPU machine; enable **Funnel** in the admin console | `GPU_GATEWAY_URL` |
-| 9 | ngrok | Free account; claim the free static domain | — |
-| 10 | api.data.gov, NCBI | Free API keys | `USDA_API_KEY`, `NCBI_API_KEY` |
+| 8 | ngrok | Free account; claim the free static domain | — |
+| 9 | api.data.gov, NCBI | Free API keys | `USDA_API_KEY`, `NCBI_API_KEY` |
 
-Generate random secrets for `GATEWAY_KEY`, `MCP_BEARER_TOKEN` and `N8N_ENCRYPTION_KEY`, e.g. `python -c "import secrets;print(secrets.token_urlsafe(32))"`.
+Generate random secrets for `MCP_BEARER_TOKEN` and `N8N_ENCRYPTION_KEY`, e.g. `python -c "import secrets;print(secrets.token_urlsafe(32))"`.
 
 ### Supabase project settings
 | Setting | Choose | Why |
@@ -55,119 +54,134 @@ After the project is created:
 5. Skip optional extras (agents, graph analytics, sample datasets).
 6. Free instances pause when unused for a few days. Resume them from the console before working or demoing.
 
-### Tailscale, ngrok and data API keys
-- **Tailscale**: install on **Ubuntu** (the GPU machine), not Windows. Funnel publishes the machine that runs the services. Install it on Windows only if you want to reach the Ubuntu box from there.
-  `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`, then enable Funnel for the tailnet in the admin console.
-- **ngrok**: on "Where do you want to begin?" choose **Share localhost**. Later on Ubuntu: install the agent, run `ngrok config add-authtoken <token>`, and claim the free static domain under **Domains**. Skip "Gateway" and "AI Gateway".
+### ngrok and data API keys
+- **ngrok**: on "Where do you want to begin?" choose **Share localhost**, and claim the free static domain under **Domains**. Skip "Gateway" and "AI Gateway".
 - **USDA FoodData Central key**: https://api.data.gov/signup/ (the same key works for FoodData Central) → `USDA_API_KEY`
 - **NCBI key**: sign in at https://www.ncbi.nlm.nih.gov/account/ → Account Settings (https://account.ncbi.nlm.nih.gov/settings/) → API Key Management → Create → `NCBI_API_KEY`
 
 ### Until the repo is cloned
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
-## 2. GPU machine (Ubuntu, AMD RX 7700 XT): step by step
-Already installed: ROCm, ROCm PyTorch, Ollama (native), llama.cpp. The machine dual-boots, so **the local AI only works while it's booted into Ubuntu**; keep it on Ubuntu during demo and judging windows.
+## 2. Development on Windows
+**Treat the project as having no local GPU.** The live app runs entirely on free cloud services (Hugging Face Spaces, Supabase, Neo4j, Gemini, Groq), and all development happens on Windows.
 
-| Runs natively on Ubuntu | Runs in Docker |
-|---|---|
-| Ollama (ROCm), rerank service (ROCm PyTorch, from Step 1) | Caddy API-key gateway, n8n |
-
-**1. Check what's there**
-```bash
-rocminfo | grep -m1 gfx          # should show gfx1101 (RX 7700 XT)
-ollama --version
-systemctl status ollama --no-pager | head -3
-df -h ~                          # need ~25 GB free for the models
+**1. Tools** (PowerShell)
+```powershell
+winget install Git.Git GitHub.cli OpenJS.NodeJS.LTS Microsoft.VisualStudioCode ngrok.ngrok
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"   # Python tooling
 ```
+Close and reopen PowerShell afterwards.
 
-**2. Basic tools**
-```bash
-sudo apt update && sudo apt install -y git curl gh
-curl -LsSf https://astral.sh/uv/install.sh | sh     # Python tooling; open a new terminal afterwards
-```
-
-**3. Docker Engine**
-```bash
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# log out and back in, then:
-docker run --rm hello-world
-```
-
-**4. Get the code** (after PR #9 is merged)
-```bash
+**2. Get the code** (after PR #9 is merged)
+```powershell
 gh auth login                     # GitHub.com → HTTPS → login with a web browser
 gh repo clone RyanAhmed911/HappyGut
 cd HappyGut
 ```
 
-**5. Secrets**
-```bash
-cp .env.example .env
-python3 -c "import secrets;print(secrets.token_urlsafe(32))"   # run 3 times: GATEWAY_KEY, MCP_BEARER_TOKEN, N8N_ENCRYPTION_KEY
-nano .env                         # paste every key; save with Ctrl+O, Enter, exit with Ctrl+X
-chmod 600 .env
+**3. Secrets**
+```powershell
+Copy-Item .env.example .env
+python -c "import secrets;print(secrets.token_urlsafe(32))"   # run twice: MCP_BEARER_TOKEN, N8N_ENCRYPTION_KEY
+code .env                         # paste every key, save
 ```
-Leave `GPU_GATEWAY_URL` empty until step 9.
 
-**6. Ollama settings**
+**4. ngrok**
+```powershell
+ngrok config add-authtoken <your-token>     # dashboard → Your Authtoken
+```
+
+**5. Tests**
+```powershell
+cd engine; uv run --group dev pytest -q; cd ..
+cd pipelines; uv run python -m happygut_pipelines.seeds; uv run --group dev pytest -q; cd ..
+```
+Expected: 62 passed and 9 passed, and the validator prints `OK`.
+
+Docker Desktop is optional: install it only if you want to run n8n locally (`docker compose up -d`). Production n8n runs on Hugging Face Spaces.
+
+## 3. Ubuntu: GPU jobs (finite, started by hand)
+Ubuntu is used only for GPU jobs that you start and that finish on their own. It is never a server, and it needs **no `.env`**: each job reads its inputs from the repo and commits its outputs back as versioned files, which Windows then loads into Supabase / Neo4j.
+
+| Job | Model / runtime | Output | When |
+|---|---|---|---|
+| G1 Contextual headers | Qwen3 14B (Ollama) | headers for every guideline chunk | Step 1 |
+| G2 Bangla aliases | Gemma 3 12B (Ollama) | Bangla/Banglish name variants for dishes (reviewed before use) | Step 1 |
+| G3 Corpus embeddings | BGE-M3 (ROCm PyTorch) | vectors for chunks, Rule Cards, dish names | Step 1 |
+| G4 Test utterances | Gemma 3 12B (Bangla/Banglish) + Llama 3.1 8B (English) | synthetic test inputs (reviewed) | Step 4 |
+| G5 Evaluation judge | DeepSeek-R1 8B (Qwen3-based distill) (Ollama) | judge scores for the evaluation run | Step 4 |
+| G6 Dish-name fine-tune | BGE-M3 + sentence-transformers (ROCm PyTorch) | fine-tuned encoder pushed to Hugging Face | Step 4 |
+
+Docker isn't needed on Ubuntu; you can leave it installed or remove it.
+
+### One-time preparation (~30 minutes plus model downloads)
+**1. Ollama settings**
 ```bash
 sudo systemctl edit ollama
 ```
-In the editor, add these lines in the empty part at the top, then save and close:
+Add these lines in the empty part at the top, then save and close:
 ```
 [Service]
-Environment="OLLAMA_MAX_LOADED_MODELS=3"
-Environment="OLLAMA_KEEP_ALIVE=24h"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_KEEP_ALIVE=30m"
 ```
 ```bash
 sudo systemctl restart ollama
 ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
+- `systemctl edit` saves an override file that adds settings to the Ollama background service.
+- `OLLAMA_MAX_LOADED_MODELS=1`: one model in GPU memory at a time. Jobs run one model each, so this lets every job use the largest model that fits in 12 GB, and stops two big models fighting over VRAM.
+- `OLLAMA_KEEP_ALIVE=30m`: models load only when a job uses them and unload 30 minutes after their last use (default 5 minutes). With no job running, Ollama uses no VRAM; `ollama stop <model>` frees it immediately.
+- The `ss` check confirms Ollama only listens on this computer.
 
-**7. Models** (~17 GB download)
+**2. Models** (~28 GB download; can run while you do something else; check space with `df -h ~`)
 ```bash
-ollama pull gemma3:4b
-ollama pull llama3.2:3b
-ollama pull qwen2.5:7b
-ollama pull deepseek-r1:7b
-ollama pull bge-m3
-ollama run gemma3:4b "Say hello in Bangla"
-ollama ps                         # PROCESSOR column should say 100% GPU
+ollama list                    # remove any small models from earlier with: ollama rm <name>
+ollama pull qwen3:14b          # ~9.3 GB G1 contextual headers (thinking switched off in the job)
+ollama pull gemma3:12b         # ~8 GB  G2 Bangla aliases, G4 Bangla/Banglish test inputs
+ollama pull llama3.1:8b        # ~5 GB  G4 English test inputs
+ollama pull deepseek-r1:8b     # ~5 GB  G5 evaluation judge (R1-0528 distill on Qwen3 8B)
+ollama ps                      # after any run: PROCESSOR should say 100% GPU (a CPU/GPU split means it doesn't fit)
+# Check ollama.com/library first: if a newer generation exists with a download of ~10 GB or less, use it.
+```
+Bangla quality check (one model loads at a time):
+```bash
+ollama run gemma3:12b "Write only the answer, in Bangla script. Give 5 common ways Bangladeshis spell 'kacchi biryani' in Banglish, then its Bangla name."
+ollama run gemma3:12b "Rewrite in standard Bangla script, nothing else: ajke dupure kacchi khaisi, pete ektu betha"
 ```
 
-**8. Gateway + n8n**
+**3. Check ROCm PyTorch** (used by G3 and G6)
 ```bash
-docker compose up -d
-docker compose ps
-curl http://127.0.0.1:8080/health                                         # ok
-KEY=$(grep '^GATEWAY_KEY=' .env | cut -d= -f2)
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8080/llm/api/tags    # 401 (no key)
-curl -s -H "X-HappyGut-Key: $KEY" http://127.0.0.1:8080/llm/api/tags | head -c 300   # model list
+python3 -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+It should print your torch version, `True` and the Radeon GPU's name. (ROCm builds of PyTorch use the `cuda` names.)
+
+**4. Tools and code (no secrets)**
+```bash
+sudo apt install -y git gh
+curl -LsSf https://astral.sh/uv/install.sh | sh    # then open a new terminal
+gh auth login                                      # GitHub.com → HTTPS → web browser
+gh repo clone RyanAhmed911/HappyGut
 ```
 
-**9. Tailscale Funnel**
+### Python environment for the jobs (once)
+Use the virtual environment where your **ROCm PyTorch already works** (installing PyTorch from PyPI would get the NVIDIA build). Activate it, then from the repo root:
 ```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up                 # open the printed link and log in
-sudo tailscale funnel --bg 8080   # first time: follow the printed link to enable Funnel, then rerun
-tailscale funnel status           # shows https://<machine>.<tailnet>.ts.net
-```
-Put that https address into `GPU_GATEWAY_URL` in `.env`. From your phone (mobile data), open `https://<machine>.<tailnet>.ts.net/health`; it should say `ok`. The first visit can take a minute while the certificate is issued.
-
-**10. ngrok agent** (used later for webhooks)
-```bash
-sudo snap install ngrok
-ngrok config add-authtoken <your-token>     # dashboard → Your Authtoken
+pip install -e engine -e pipelines sentence-transformers
+python -m happygut_pipelines.gpu_jobs check     # models pulled? GPU visible to PyTorch?
 ```
 
-**11. Tests**
+### Running a job
 ```bash
-cd engine && uv run --group dev pytest -q && cd ..
-cd pipelines && uv run python -m happygut_pipelines.seeds && uv run --group dev pytest -q && cd ..
+cd HappyGut && git pull
+python -m happygut_pipelines.gpu_jobs g2 --limit 3   # quick try: 3 dishes, then look at data/gpu_jobs/g2/output.jsonl
+python -m happygut_pipelines.gpu_jobs g2             # all dishes (resumes; already-done dishes are skipped)
+python -m happygut_pipelines.gpu_jobs g3             # embeddings for dish names and Rule Cards
+git add data/gpu_jobs && git commit -m "GPU jobs G2, G3 outputs" && git push
 ```
+A job can be stopped with Ctrl+C and rerun later; it continues where it stopped. Then boot back into Windows, `git pull`, and load the outputs.
 
-**Bangla smoke test (10 minutes):** ask `gemma3:4b` to (1) rewrite a Banglish sentence in Bangla, (2) remove the name and phone number from a Bangla sentence, (3) list the dishes in a photo of a Bangladeshi meal. Note the quality in `docs/02-architecture.md` so we can pin the model.
+**Ready now:** G2 and G3 (their inputs are the seed files). **Later:** G1 (needs the guideline corpus), G4–G6 (Step 4).
 
-## 3. Start collecting meal photos today
+## 4. Start collecting meal photos today
 Target ~300 photos of real Bangladeshi meals (home, restaurant, street food), 30–50 a day across the team. **Food only, no people.** Save as `data/raw/photos/<dish-id>/<n>.jpg` (this folder is gitignored) and keep a simple CSV of `file, dish_ids, taken_by`.

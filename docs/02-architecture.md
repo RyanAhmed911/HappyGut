@@ -9,23 +9,20 @@ flowchart LR
     subgraph Phone["📱 Patient phone"]
         PWA["React + Vite PWA<br/>(Vercel)"]
     end
-    subgraph HF["Hugging Face Spaces (free CPU)"]
-        API["FastAPI /v1<br/>LangGraph meal-check graph<br/>verdict engine"]
+    subgraph HF["Hugging Face Spaces (free CPU) · always on"]
+        API["FastAPI /v1<br/>LangGraph meal-check graph · verdict engine<br/>Presidio + Bengali NER PII scrub<br/>BGE-M3 + reranker (CPU)<br/>MCP servers (Streamable HTTP)"]
+        N8N["n8n<br/>(workflows stored in Supabase)"]
     end
-    subgraph Cloud["Free cloud services"]
+    subgraph Cloud["Free cloud services · always on"]
         SB[("Supabase<br/>Postgres + pgvector<br/>Auth · Storage · Realtime")]
         NEO[("Neo4j AuraDB Free<br/>Food KG + Personal Gut Graph")]
         GEM["Gemini (AI Studio)<br/>vision + explanation"]
         GROQ["Groq Llama<br/>routing · fallback"]
         LF["Langfuse<br/>traces · scores"]
     end
-    subgraph GPU["Team GPU machine · Ubuntu · RX 7700 XT 12 GB"]
-        GW["Caddy API-key gateway"]
-        OLL["Ollama (ROCm, RX 7700 XT)<br/>Gemma 3 4B · Llama 3.2 3B · BGE-M3<br/>Qwen 2.5 7B · R1-Distill 7B"]
-        EMB["Rerank service (ROCm PyTorch)<br/>bge-reranker-v2-m3"]
-        MCP["MCP servers<br/>foodgraph · guidelines · journal · evals · research"]
-        N8N["n8n"]
-        PIPE["Knowledge pipelines<br/>(batch)"]
+    subgraph PC["Team PC (dual-boot) · nothing live"]
+        PIPE["Windows: development, .env,<br/>load data into Supabase / Neo4j"]
+        OLL["Ubuntu GPU jobs (finite, started by hand)<br/>Ollama: Qwen · Gemma · Llama · R1-Distill<br/>ROCm PyTorch: embeddings · fine-tune"]
     end
     PWA -- HTTPS + Supabase JWT --> API
     PWA -- auth · realtime --> SB
@@ -33,15 +30,17 @@ flowchart LR
     API --> NEO
     API --> GEM
     API --> GROQ
-    API -- "Tailscale Funnel" --> GW
-    GW --> OLL
-    GW --> EMB
-    GW --> MCP
     API --> LF
     N8N --> API
+    N8N --> SB
     PIPE --> SB
     PIPE --> NEO
+    PIPE -. "files via git" .- OLL
 ```
+
+**The live app runs entirely on always-on cloud services.** The team has one dual-boot PC. On **Windows** it's used for development, secrets and loading data. On **Ubuntu** it runs finite GPU jobs that are started by hand and finish on their own: contextual headers, Bangla aliases, corpus embeddings, synthetic test sets, evaluation judging and fine-tuning. GPU jobs read their inputs from git and commit their outputs back as versioned files, so Ubuntu needs no secrets.
+
+**The live app never depends on the GPU machine.** Everything a judge or user touches runs on always-on free services. The GPU machine (dual-boot, usually off) does batch work when it's switched on: building the knowledge layer, evaluations, synthetic data and fine-tuning. While it's online, the backend also uses it for an extra Bangla-aware PII pass and as a local fallback model.
 
 ## 2. Meal-check request flow (the hero flow)
 
@@ -49,13 +48,13 @@ flowchart LR
 sequenceDiagram
     participant U as PWA
     participant A as FastAPI (LangGraph)
-    participant L as Local (Gemma, embed)
+    participant L as Backend CPU (Presidio, BGE-M3, reranker)
     participant G as Gemini
     participant K as Neo4j + pgvector
     participant E as Verdict engine
     U->>A: POST /v1/meal-checks (photo or text, lang)
     A->>A: Safety Sentinel (red-flag rules) → stop + escalate if triggered
-    A->>L: PII scrub (text only)
+    A->>L: PII scrub (Presidio + Bangladesh rules + Bengali NER, text only)
     A->>G: Perception: photo → dishes, ingredients, method, portion, confidence
     A-->>U: SSE: dishes found
     A->>K: Resolve dishes (trigram + embeddings) → components → Rule Cards → papers
@@ -69,7 +68,7 @@ sequenceDiagram
     A->>K: Store meal_check (evidence IDs, model + prompt versions)
 ```
 
-If the GPU machine is unreachable, PII scrubbing falls back to Presidio-only rules, embeddings fall back to keyword + trigram search, and the UI shows a degraded-mode banner.
+The whole path runs on always-on services. If a Gemini free-tier quota runs out, Groq takes over.
 
 ## 3. Verdict engine (`engine/`, pure Python, no network)
 
@@ -97,7 +96,6 @@ All weights and thresholds live in one versioned config file. Every branch has a
 apps/web/            React + Vite PWA (Lovable syncs here)
 services/api/        FastAPI app, LangGraph graph, Pydantic-AI agent nodes
 services/mcp/        FastMCP servers: foodgraph, guidelines, journal, evals, research
-services/gateway/    Caddyfile for the API-key gateway on the GPU machine
 engine/              Verdict engine + Trigger Discovery (pure Python, unit-tested)
 pipelines/           Knowledge build: crawl → parse → resolve → enrich → load
 evals/               Test sets, promptfoo config, Ragas runs, Streamlit Eval Lab
@@ -105,7 +103,7 @@ prompts/runtime/     Versioned runtime prompts (id, version, model, schema)
 data/                Raw / bronze files (gitignored), seeds (committed)
 specs/               Spec-Kit feature specs (spec, plan, tasks)
 docs/                Strategy, data, architecture, portal texts
-docker-compose.yml   GPU machine services
+docker-compose.yml   optional local n8n for development
 ```
 
 ## 5. Interfaces
@@ -120,7 +118,7 @@ docker-compose.yml   GPU machine services
   - `GET /foods/search`
   - `GET /health`
 - Auth: Supabase JWT verified in FastAPI; row-level security in Postgres as a second line.
-- MCP: read-only tools only; Streamable HTTP routes go through the gateway with an API key + bearer token.
+- MCP: read-only tools only; Streamable HTTP served by the backend on Hugging Face Spaces with a bearer token.
 
 ## 6. Decision log
 
@@ -128,12 +126,16 @@ docker-compose.yml   GPU machine services
 |---|---|---|---|
 | AR1 | React + Vite PWA, not Next.js | Lovable generates React + Vite; no server rendering needed | Next.js (adds a server, doesn't match Lovable) |
 | AR2 | FastAPI in Docker on Hugging Face Spaces | Free with no card, sleeps only after long idle; keeps the app up when the GPU machine is off | Render (slow cold starts), the GPU machine (single point of failure), Google Cloud Run (needs a card) |
-| AR3 | GPU services via Tailscale Funnel behind a Caddy API-key gateway | Free, no card, stable `*.ts.net` address; Ollama has no built-in auth | Cloudflare named tunnel (needs a paid domain), quick tunnels (URL changes on restart) |
+| AR3 | ~~GPU services via Tailscale Funnel behind a Caddy API-key gateway~~ superseded by AR14 | Free, no card, stable `*.ts.net` address; Ollama has no built-in auth | Cloudflare named tunnel (needs a paid domain), quick tunnels (URL changes on restart) |
 | AR4 | Deterministic verdict engine as a separate package | Safety, testability, explainability (Constitution III) | LLM-decided verdicts |
 | AR5 | LangGraph + Pydantic-AI | Graph control flow + typed agent nodes; one interface to Gemini, Groq and Ollama | CrewAI / AutoGen as the main orchestrator |
 | AR6 | LiteLLM router with cross-provider fallback | Free-tier quotas run out; routing keeps the demo alive | Single provider |
 | AR7 | Supabase for Postgres, vectors, auth, storage, realtime | One free service instead of five | Separate vector DB, auth provider, object store |
 | AR8 | Neo4j AuraDB Free for the knowledge graph | Graph RAG and the Personal Gut Graph need real graph traversal | Recursive SQL over tables |
 | AR9 | ~50 dishes and ~25 Rule Cards for the prototype | 10 days left; depth and correctness beat breadth | 150 dishes |
-| AR10 | Degraded mode when the GPU machine is offline | The demo must survive the team machine being off | No fallback |
-| AR11 | GPU machine is an AMD RX 7700 XT on Ubuntu with ROCm already installed: native Ollama (incl. BGE-M3 embeddings) and a native rerank service on ROCm PyTorch; only the gateway and n8n run in Docker (gateway uses host networking, localhost-only) | Reuses the working native ROCm stack; avoids GPU passthrough into containers | Ollama ROCm container; CPU reranker |
+| AR10 | ~~Degraded mode when the GPU machine is offline~~ superseded by AR12 | — | — |
+| AR11 | ~~(superseded by AR14)~~ GPU machine is an AMD RX 7700 XT on Ubuntu with ROCm already installed: native Ollama (incl. BGE-M3 embeddings) and a native rerank service on ROCm PyTorch; only the gateway and n8n run in Docker (gateway uses host networking, localhost-only) | Reuses the working native ROCm stack; avoids GPU passthrough into containers | Ollama ROCm container; CPU reranker |
+| AR12 | Cloud-first runtime: backend, PII scrub (Presidio + Bangladesh rules), BGE-M3 query embeddings, reranker, foodgraph MCP and n8n run on always-on free services (HF Spaces + Supabase). The GPU machine is for batch jobs and an optional enhanced mode | The GPU machine dual-boots and is usually off; judges test the live link at any time | Keeping the PC on Ubuntu 24/7 |
+| AR13 | One embedding implementation everywhere: BGE-M3 via sentence-transformers (GPU for batch corpus embedding, CPU for live queries) | Corpus and query vectors must come from the same model build; Ollama's quantized `bge-m3` would differ | Ollama `bge-m3` for the corpus |
+| AR14 | The local GPU is never a server. The live app runs on cloud services; Tailscale Funnel and the Caddy gateway are dropped. PII scrubbing uses Presidio + Bangladesh rules + an open-source Bengali NER model on CPU | The PC dual-boots and is usually on Windows | Using the GPU as an always-on or on-demand server |
+| AR15 | Windows for development, secrets and data loading; Ubuntu only for finite GPU jobs (Ollama, ROCm PyTorch). Jobs exchange inputs/outputs as versioned files in git (`data/gpu_jobs/`), so Ubuntu holds no `.env`; only Hugging Face login for pushing the fine-tuned model | One PC; keep secrets in one place; every GPU output is reproducible and reviewable | `.env` on both systems; shared NTFS folder |

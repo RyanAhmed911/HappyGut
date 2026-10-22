@@ -11,13 +11,12 @@
 | Neo4j AuraDB | Free | No | Node/relationship caps; pauses when idle (*check current terms*) |
 | Gemini API | **Google AI Studio** key, free tier | No | Use AI Studio, **not** Google Cloud / Vertex. Rate-limited; free-tier data may be used by Google, so we send food photos + de-identified text only |
 | Groq | Free | No | Rate-limited |
-| Hugging Face Spaces | CPU Basic | No | Hosts the FastAPI Docker container; sleeps after long inactivity |
+| Hugging Face Spaces | CPU Basic | No | Always-on runtime: FastAPI backend (incl. embeddings, reranker, foodgraph MCP) and n8n (workflows stored in Supabase). Spaces sleep after ~48 h without traffic, so a scheduled GitHub Actions ping keeps them awake |
 | Vercel | Hobby | No | Frontend PWA |
-| Tailscale | Personal | No | Funnel = stable public HTTPS address for the GPU machine |
 | ngrok | Free | No | Dev webhooks; one free static domain |
 | Langfuse Cloud | Hobby | No | Tracing + eval scores |
 | GitHub | Free, public repo | No | Repo, Actions CI, issues/PRs |
-| n8n, Ollama, all OSS libraries | Self-hosted | No | On the team GPU machine |
+| Ollama, all OSS libraries | Self-hosted | No | Ollama runs finite GPU jobs on the team GPU (Ubuntu); the live app never uses it |
 | USDA FoodData Central, NCBI | Free API keys | No | |
 | Figma, Lovable, v0, Google Stitch | Free tiers | No | Lovable/v0 have daily credit limits, so plan UI generation |
 | YouTube, Facebook | Free | No | Same 180s video on both |
@@ -73,14 +72,15 @@
 | Anomaly z-score, LightGBM | B |
 | n8n (reminders, nightly), Supabase webhooks, Realtime, exports, GitHub Actions gate | B |
 | PII scrub (Presidio + Gemma), row-level security, SSE streaming, REST API | A |
-| Tailscale Funnel | A |
 | ngrok | B |
 
 ### AI usage form
 | Item | Tier |
 |---|---|
-| Gemini, Gemma 3 4B, Ollama, Transformers | A |
-| Groq Llama, local Llama 3.2 3B, Qwen 2.5 7B, DeepSeek-R1-Distill judge | B |
+| Gemini, Transformers (BGE-M3, reranker, Bengali NER on CPU) | A |
+| Ollama | A (GPU jobs) |
+| Groq Llama | A |
+| Local Qwen3 14B, Gemma 3 12B, Llama 3.1 8B, DeepSeek-R1 8B (Qwen3-based distill) (GPU jobs on Ubuntu) | A |
 | RAG: contextual, semantic chunking, Graph RAG, KG, hybrid, reranker | A |
 | MCP built: foodgraph | A |
 | MCP built: guidelines, evals, journal | B |
@@ -103,7 +103,7 @@
 ## 4. Reconciliation checklist (Oct 30, before submitting)
 - [ ] Untick every C item that wasn't built (CrewAI, smolagents, DSPy, fine-tune, research MCP if missing)
 - [ ] Replace estimates with real numbers: % AI-built UI, MCP endpoints called, eval metrics
-- [ ] Fill in versions and URLs: exact model versions, GPU model, repo / deploy / Funnel URLs
+- [ ] Fill in versions and URLs: exact model versions, repo / deploy URLs
 - [ ] Re-paste any portal text changed since it was first entered (see git history of `docs/portal/`)
 - [ ] Label all simulated results as simulated in the app, video, /docs and README
 - [ ] Make the repo public; check no keys are in git history

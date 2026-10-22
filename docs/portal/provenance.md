@@ -11,11 +11,11 @@
 
 ## AI models
 - Gemini Flash (free tier): meal / label vision, Bangla/English explanations, meal plans, weekly summaries
-- Llama (Groq free tier + local Llama 3.2 3B): fast routing, red-flag second check, fallback explainer
-- Gemma 3 4B (local, Ollama): PII scrubbing, Bangla/Banglish normalisation, vision fallback
-- Qwen 2.5 7B (local): batch Rule Card extraction, dish enrichment, contextual chunk headers
-- DeepSeek-R1-Distill-Qwen-7B (local): LLM-as-judge for evaluation
-- BGE-M3 (fine-tuned for dish names) + bge-reranker-v2-m3: multilingual embeddings and reranking
+- Llama (Groq free tier): fast routing, red-flag second check, fallback explainer; local Llama 3.1 8B for English test utterances (GPU job)
+- Gemma 3 12B (local, GPU job): Bangla/Banglish dish-name variants, test utterances and Bangla draft strings
+- Qwen3 14B (local, GPU job): Rule Card and dish enrichment drafts, contextual chunk headers
+- DeepSeek-R1-0528-Qwen3-8B (distill) (local, GPU job): LLM-as-judge for the evaluation run
+- BGE-M3 (fine-tuned for dish names) + bge-reranker-v2-m3 + Bengali NER: embeddings, reranking, PII detection (CPU)
 - Custom models: LightGBM flare early-warning model (+ SHAP); Bayesian N-of-1 trigger model
 - Claude (via Claude Code): development only, not at runtime
 
@@ -24,7 +24,7 @@
 - Graded verdicts, never "safe"; ⚪ "Not sure" when evidence is weak; every claim cites a source
 - Red-flag symptoms stop diet advice and direct the user to a doctor or emergency care; no medication advice, ever
 - Stricturing Crohn's safety rules applied before any AI output
-- Privacy: PII stripped by a local model before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
+- Privacy: PII stripped inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
 - Free-tier cloud APIs only receive food photos and de-identified text
 - Bias checks: metrics broken down by language (Bangla / English / Banglish), sex and disease phenotype; native-speaker review of Bangla output
 - Transparency: evidence bar, citations, SHAP factors on alerts, model/data cards, prompt and model versions logged per verdict
@@ -41,7 +41,8 @@
 ## Deployment method
 - Frontend PWA: Vercel (free)
 - Backend API: FastAPI in Docker on Hugging Face Spaces (free CPU tier, no card)
-- GPU services: Ollama, embedding/rerank service, MCP servers and n8n in Docker Compose on the team GPU machine, exposed via Tailscale Funnel
+- Team GPU (AMD RX 7700 XT, Ubuntu): finite GPU jobs (Ollama + ROCm PyTorch) that exchange files with the Windows dev setup through git; nothing live runs on it
+- n8n and the MCP servers: on Hugging Face Spaces alongside the backend
 - Managed data: Supabase (Postgres + pgvector + Auth + Storage, Mumbai/Singapore region), Neo4j AuraDB Free
 - CI/CD: GitHub Actions (tests, evaluation regression gate); Vercel preview deploys per PR
 
@@ -49,7 +50,7 @@
 - Frontend: React, Vite (PWA), Tailwind, shadcn/ui, Zod, Recharts, D3.js
 - Backend: FastAPI, Pydantic, LiteLLM, Supabase client
 - AI / agents: LangGraph, Pydantic-AI, Instructor, CrewAI, smolagents, MCP Python SDK (FastMCP), langchain-mcp-adapters
-- Retrieval: pgvector, Neo4j, BGE-M3 via Ollama, bge-reranker via sentence-transformers
+- Retrieval: pgvector, Neo4j, BGE-M3 + bge-reranker via sentence-transformers
 - Data: Docling, Crawl4AI, Scrapy, pandas, DuckDB, Delta Lake, Pandera, Presidio
 - ML: LightGBM, scikit-learn, SHAP, NumPy/SciPy
 - Eval / ops: Ragas, promptfoo, Langfuse, pytest, Schemathesis, Streamlit, Plotly
@@ -94,7 +95,7 @@ Used
 - journal: bearer token per clinician, limited to patients who shared by QR consent; revocable; every call audit-logged
 - research: aggregates only, k ≥ 10 suppression; no row-level access
 - evals: stdio only (local dev); runs test suites, can't modify code or data
-- Remote servers (Streamable HTTP) sit behind Tailscale Funnel + an API-key gateway, with rate limits and Langfuse tracing
+- Remote servers (Streamable HTTP) run on the always-on backend with bearer tokens, rate limits and Langfuse tracing
 - Supabase MCP: read-only mode; schema changes only through reviewed migration files (Supabase CLI); the prototype holds simulated data only
 - Neo4j Cypher MCP: read tools only; fixes go into reviewed seed files and the graph is rebuilt from them
 - Filesystem MCP: limited to the `data/` folder

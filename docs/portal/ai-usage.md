@@ -40,7 +40,7 @@
 - Gemini implicit context caching: static prefix first (system prompt + glossary + few-shots), variable content last
 - Compact evidence packets: top-5 reranked chunks reduced to short fact lines with IDs (~300 tokens) instead of raw documents
 - Images downscaled to ≤ 1024 px before the vision model
-- Local models (Ollama) handle high-volume, low-value work: PII scrubbing, Bangla normalisation, classification. Zero API tokens
+- Batch work (contextual headers, dish enrichment, evaluation judging, synthetic data) runs on local models (Ollama) at zero API cost; rule-based PII scrubbing in the backend costs no tokens
 - Batch jobs on the local GPU: Rule Card extraction, dish enrichment, contextual chunk headers are computed once at ingestion, never per query
 - Semantic dedup: duplicate chunks removed by content hash before embedding
 - Stateless calls, no chat history; weekly summaries are written from SQL-computed statistics, not raw logs
@@ -66,33 +66,31 @@
 - ❌ ChatGPT, Kimi, DeepSeek, Mistral, Grok (not used; tick ChatGPT only if the team really uses it)
 
 ## How and why we use these LLMs
-- Claude (via Claude Code): development only: architecture docs, code generation, refactoring, tests, reviews; project memory in CLAUDE.md. Not called at runtime (no free API tier)
-- Gemini Flash (free tier): primary runtime model
+**Live app (cloud only, always on)**
+- Claude (via Claude Code): development only: architecture docs, code generation, refactoring, tests, reviews; CLAUDE.md project memory. Not called at runtime
+- Gemini Flash (free tier, Google AI Studio): primary runtime model
   - meal/label photo → dishes JSON
   - Bangla/English evidence explanations
-  - meal plans
-  - weekly summaries
+  - meal plans, weekly summaries
   - Why: strong vision + Bangla, JSON-schema output, free tier
-- Llama (via Groq free tier): low-latency tasks
+- Llama (via Groq free tier): low-latency runtime tasks
   - text-input intent routing
   - second check on red-flag free text
   - fallback explainer when the Gemini quota runs out
-  - Also run locally (Llama 3.2 3B) as the offline router / red-flag fallback
   - Why: very fast inference, separate quota
-- Gemma (local, Ollama, Gemma 3 4B Q4_K_M): privacy and local tasks
-  - PII scrubbing (raw text never leaves our machine)
-  - Bangla/Banglish normalisation
-  - local vision fallback
-  - Why: open weights, strong multilingual, fits 12 GB VRAM
-- Qwen (local, Ollama, ~7–8B quantized): offline batch knowledge work
-  - Rule Card extraction
-  - dish enrichment
-  - contextual chunk headers
-  - synthetic Bangla/Banglish evaluation sets
-  - Why: strong structured output, free unlimited batch runs
-- DeepSeek-R1-Distill-Qwen-7B (local): LLM-as-judge for evaluation (claim-vs-evidence support checks), a different model from the Gemini generator to reduce self-bias
-- Supporting (non-LLM) models: BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder
-- Privacy note: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
+
+**GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
+- Qwen3 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
+- Gemma 3 12B: Bangla/Banglish spelling variants and aliases for dish names; Bangla/Banglish test utterances; Bangla draft strings for human review. The strongest Bangla of the local options that fit in 12 GB
+- Llama 3.1 8B: English test utterances and red-flag paraphrases for the evaluation sets
+- DeepSeek-R1-0528-Qwen3-8B (distill): LLM-as-judge for the full evaluation run (does the evidence support each claim?)
+
+**Supporting models (CPU, in the always-on backend)**
+- BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder, an open-source Bengali NER model for PII scrubbing
+
+**Notes**
+- The live app never uses the local GPU. GPU jobs are started by hand, finish on their own, and store their outputs with model name and version
+- Privacy: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
 
 ## Retrieval & RAG (tick)
 - ✅ Contextual RAG (Anthropic-style context per chunk)
@@ -117,7 +115,7 @@ Text path (guideline passages for the explanation)
 - Corpus: CC-licensed ESPEN / IOIBD / AGA guideline text, published FODMAP composition papers, Rule Card texts
 - Parsing: Docling, structure-aware (sections, headings; tables kept whole)
 - Variable chunking: split by section first, then semantic breakpoints (embedding-similarity drops) into ~200–500-token chunks
-- Contextual RAG: local Qwen writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
+- Contextual RAG: Qwen3 14B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
 - Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
 - Index: pgvector HNSW (cosine, m=16, ef_construction=64)
 - Keyword search: Postgres tsvector (English) + pg_trgm (Bangla/Banglish)
@@ -142,7 +140,7 @@ Evaluation
 - # tools: 3
 - Transport: stdio, Streamable HTTP
 - Language / SDK: Python, MCP Python SDK (FastMCP)
-- Repo / deploy URL: GitHub repo path `mcp/foodgraph` + Tailscale Funnel URL *(after build)*
+- Repo / deploy URL: GitHub repo path `services/mcp` + Hugging Face Spaces URL *(after build)*
 - Purpose: exposes the HappyGut Food Knowledge Graph (Bangladeshi dishes → ingredients → gut-relevant components → cited IBD Rule Cards) as read-only tools, so the app's agent, our dev tools and clinicians' AI clients share one trusted source of food evidence instead of duplicating graph queries. No patient data.
 - Tools:
   - `search_dish(query, lang)`: Bangla/English/Banglish name → canonical dishes
@@ -233,14 +231,14 @@ Evaluation
 - One foodgraph server serves the app agent, Claude Code curation and the Claude Desktop demo, so there's a single source of graph logic
 - All built tools are read-only; writes go only through the reviewed ingestion pipeline
 - Data separation: food knowledge (foodgraph) vs consented patient data (journal); research gets aggregates only
-- Auth: bearer tokens on Streamable HTTP, published through Tailscale Funnel behind an API-key gateway; stdio local only
-- Rate limits: per-token limits in the server and the gateway
+- Auth: bearer tokens on Streamable HTTP, served from the always-on backend on Hugging Face Spaces; stdio local only
+- Rate limits: per-token limits in the server
 - Observability: every tool call traced in Langfuse (tool, latency, caller)
 - Typed contracts: Pydantic input/output models generate the tool JSON schemas
 
 ### Anything else about MCP
 - Design choice: MCP for knowledge access, but the verdict engine itself stays in-process (deterministic, unit-tested), so the same decision logic isn't spread across tools
-- Gotcha planned for: free quick-tunnel URLs change on restart, so we use Tailscale Funnel's stable `*.ts.net` address (free, no domain needed)
+- Gotcha planned for: free Hugging Face Spaces sleep after ~48 h without traffic, so a scheduled GitHub Actions ping keeps the MCP endpoint awake
 - Next: `happygut-research` (aggregated, privacy-protected trigger statistics for researchers), plus MCP resources for Rule Cards and the prompt library
 
 ## Open-source tools & libraries (AI)
@@ -248,9 +246,9 @@ Evaluation
 - Pydantic-AI: typed agent nodes (perception, resolver, explainer, dietitian) inside the LangGraph graph
 - MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
-- Ollama (llama.cpp runtime): local quantized inference on the team GPU
-- Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, offline routing, LLM-as-judge
-- BGE-M3 (served by Ollama) + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
+- Ollama (llama.cpp runtime): local quantized inference in finite GPU jobs on the team GPU
+- Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: batch knowledge extraction, Bangla aliases, synthetic test sets, LLM-as-judge
+- BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking (CPU in the backend, GPU for batch)
 - sentence-transformers: fine-tuning the dish-name embedding model
 - pgvector + Neo4j: vector index and knowledge graph for Graph RAG
 - Docling + Crawl4AI: guideline documents → structured, chunkable text
@@ -266,7 +264,7 @@ Evaluation
 **Meal-check graph (LangGraph state machine)**
 1. Router: input type (photo / text) and language
 2. Safety Sentinel: red-flag rules + LLM second check; can stop the graph and show the escalation screen
-3. Privacy node: local Gemma + Presidio strip PII
+3. Privacy node: Presidio + Bangladesh-specific rules + an open-source Bengali NER model (CPU) strip PII
 4. Perception agent (Gemini vision): dishes, ingredients, method, portion → JSON
 5. Dish Resolver agent: calls the `search_dish` MCP tool; ambiguous match → interrupt to ask the user (human-in-the-loop)
 6. Evidence Retriever, two parallel branches: graph path (`explain_verdict_path` MCP tool + personal edges) and hybrid RAG
@@ -287,7 +285,7 @@ Evaluation
 - LiteLLM retries and cross-provider fallbacks
 
 ## Fine-tuning / adaptation
-- Embedding fine-tuning (planned for Oct 31): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
+- Embedding fine-tuning (GPU job on Ubuntu, ROCm PyTorch): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
   - Training pairs: Banglish / Bangla / English dish names ↔ canonical dish IDs, from Dakshina transliterations, graph aliases and reviewed synthetic spellings
   - Measured by dish-resolution Recall@1 against the base model
 - Adaptation without weight changes: few-shot examples of Bangladeshi dishes, a Bangla medical glossary in prompts, retrieval grounding
@@ -304,7 +302,7 @@ Evaluation
 
 **Methods**
 - Ragas: faithfulness, context precision/recall, answer relevance
-- LLM-as-judge: local DeepSeek-R1-Distill-Qwen-7B (a different model from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
+- LLM-as-judge: an open model on Groq in CI, and local DeepSeek-R1-0528-Qwen3-8B (distill) for the full evaluation run (both different families from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
 - Human evaluation: native Bangla speakers on the team blind-rate 50 explanations (readability, accuracy)
 - Ablations: naive RAG → contextual → hybrid → reranker
 - Verdict engine vs LLM-only baseline, compared with McNemar's test
@@ -315,7 +313,7 @@ Evaluation
 ## Guardrails, safety & privacy
 **Input**
 - Red-flag Safety Sentinel runs first (rules + LLM second check) → escalation screen, no diet advice
-- PII scrubbing: Presidio + local Gemma (Bangla names, +8801 phone numbers, NID numbers, addresses) before any cloud call
+- PII scrubbing in our backend before any cloud call: Presidio + Bangladesh rules (+8801 phone numbers, NID numbers, emails, addresses) + an open-source Bengali NER model for Bangla names (CPU)
 - EXIF/GPS stripped from photos; "photograph the food, not people" hint
 - Non-food image → rejected
 - Prompt-injection defence: text read from labels/menus is treated as data inside delimiters, never as instructions
@@ -383,7 +381,7 @@ n8n
 - Nightly alerts: push "rising flare risk" with top factors, and "new trigger found" insights
 - Weekly digest (Sunday): Weekly Summary agent writes a Bangla/English digest from SQL-computed statistics → push + in-app card
 - Weekly clinician report: pre-visit PDF (WeasyPrint) → signed expiring link
-- Knowledge ingestion: Supabase Storage upload webhook → parse → chunk → contextual headers (local Qwen) → embed (BGE-M3) → Rule Card candidates → review-queue notice
+- Knowledge ingestion: Supabase Storage upload webhook → parse → chunk → contextual headers (Gemini free tier) → embed (BGE-M3, CPU) → Rule Card candidates → review-queue notice
 - Knowledge-gap loop (daily): collects ⚪ "Not sure" / unmatched dishes → Knowledge Enrichment agent drafts graph facts → human review
 - Error workflow: any failed run → team chat webhook alert
 
@@ -399,41 +397,38 @@ GitHub Actions
 - Block the merge on regression; post an eval summary comment on the PR
 
 ## Local / on-device LLMs
-**Runtimes**
-- ✅ Ollama: serves all local LLMs (GGUF)
-- ✅ *Add:* Hugging Face Transformers / sentence-transformers on ROCm PyTorch: bge-reranker cross-encoder, embedding fine-tune
-- ➕ LM Studio: tick only if the team really uses it to benchmark models side by side
+> Local models run as finite GPU jobs on Ubuntu (the team's dual-boot PC). Outputs are versioned files, loaded into the cloud services from Windows.
 
-**Local models we actually run** (tick the exact versions you run)
-- ✅ Gemma 3 4B (*add*): online PII scrubbing, Bangla/Banglish normalisation, local vision fallback
-- ✅ Qwen 2.5 7B Instruct: nightly batch work (Rule Card extraction, dish enrichment, contextual chunk headers, synthetic Bangla eval sets)
-- ✅ Llama 3.2 3B: always-on offline router and red-flag second check when the Groq quota runs out
-- ✅ DeepSeek-R1-Distill-Qwen-7B (*add*): LLM-as-judge (does the evidence support each claim?)
+**Runtimes**
+- ✅ Ollama: runs the local LLMs (GGUF) in GPU jobs on the team GPU
+- ✅ *Add:* Hugging Face Transformers / sentence-transformers (ROCm PyTorch for GPU jobs, CPU in the backend): corpus embeddings and embedding fine-tune as GPU jobs; BGE-M3, bge-reranker and Bengali NER for live queries
+
+**Local models we actually ran** (tick the exact versions you ran)
+- ✅ Qwen3 14B (*add* "Qwen3" if the list only shows Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
+- ✅ Gemma 3 12B (*add*): Bangla/Banglish dish-name variants and aliases, Bangla/Banglish test utterances, Bangla draft strings
+- ✅ Llama 3.1 8B (Llama 3 / 3.1 / 3.2): English test utterances and red-flag paraphrases
+- ✅ DeepSeek-R1-0528-Qwen3-8B (distill) (*add*): LLM-as-judge for the evaluation run
 
 **Hardware, quantization, why local**
-- GPU: AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
-- Format: GGUF, Q4_K_M quantization, 8k context
-- Online set (always loaded, ~8–9 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 (Ollama) + bge-reranker (ROCm PyTorch), all on the GPU
-- Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
-- Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
-- Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `keep_alive` long for online models, short for batch models
-- Reached by the hosted backend through Tailscale Funnel (API-key gateway)
-- Why local, privacy: raw text that may contain PII never leaves our machine; cloud models only see de-identified text
-- Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks
-- Why local, resilience: automatic fallback when free-tier cloud quotas run out
-- Why local, sovereignty: inference runs on team hardware in Bangladesh
-- Why local, roadmap: the same small models are candidates for the offline/on-device app
+- AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
+- Used for finite GPU jobs started by hand (each finishes on its own), never as a server; the live app runs entirely on cloud services
+- GGUF, Q4_K_M quantization, 8k context; one model at a time, so each job uses the largest model that fits alone in 12 GB (8–14B, ~5–9.3 GB; rule: download size ≤ ~10 GB)
+- Every batch output (headers, aliases, test sets, judge scores) is stored with model name and version for provenance
+- Why local, cost: $0 with no rate limits for batch jobs over thousands of chunks and test items
+- Why local, independence: the judge model is a different family from the Gemini generator
+- Why local, privacy: knowledge and evaluation data stay on our hardware during batch work
+- Why local, reproducibility: pinned model versions and quantization
 
 ## Agentic frameworks used
 - ✅ LangGraph: orchestrates the meal-check graph (sentinel → privacy → perception → resolver → retrieval → verdict engine → explainer → guard), the dietitian generator–critic loop, interrupts, Postgres checkpointing
 - ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
-- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with local models. Tick only if done
-- ✅ CrewAI: offline knowledge-curation crew for Rule Cards, run on local models
+- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with free cloud models or in a GPU batch session. Tick only if done
+- ✅ CrewAI: offline knowledge-curation crew for Rule Cards, run on free cloud models (Groq)
   - Researcher agent: finds passages via Europe PMC + guideline RAG
   - Extractor agent: drafts the Rule Card with an exact quote
   - Critic agent: checks the quote supports the rule
   - Output → human review queue
-- ✅ smolagents: data-ops code agent (local Qwen, sandboxed). Writes and runs read-only pandas / Cypher analysis on unmatched ingredients, orphan graph nodes and evaluation failures, then proposes fixes as reviewable diffs
+- ✅ smolagents: data-ops code agent (Groq-hosted open model, sandboxed). Writes and runs read-only pandas / Cypher analysis on unmatched ingredients, orphan graph nodes and evaluation failures, then proposes fixes as reviewable diffs
 - ❌ AutoGen, Swarm, OpenAI Agents SDK, Letta, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
 
 ## AI Development Lifecycle (AI-DLC)
@@ -467,7 +462,7 @@ GitHub Actions
 - Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
 - Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording
 - Model and data cards: one page per model role and per dataset (purpose, limits, licence, evaluation results), published in `/docs`
-- Cost-aware AI: runs at $0 on free tiers + one 12 GB GPU through caching, routing and local fallbacks, a realistic path for low-resource settings
-- Privacy by architecture: local models handle anything that might contain PII; cloud models only see food photos and de-identified text
+- Cost-aware AI: runs at $0 on free tiers through caching and routing; a single consumer GPU runs finite batch jobs only, a realistic path for low-resource settings
+- Privacy by architecture: PII is removed inside our own backend before any cloud call; cloud models only see food photos and de-identified text
 - Known limits, stated openly: not a medical device; flare prediction not yet validated on real patients; dish recognition limited to dishes in our graph (unknown → ⚪ "Not sure")
 - Next: federated learning across users, QLoRA-tuned Bangla explainer, on-device small model for offline use, clinical validation with partner gastroenterologists
