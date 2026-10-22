@@ -180,6 +180,8 @@ python -m happygut_pipelines.gpu_jobs g3             # embeddings for dish names
 git add data/gpu_jobs && git commit -m "GPU jobs G2, G3 outputs" && git push
 ```
 A job can be stopped with Ctrl+C and rerun later; it continues where it stopped. Then boot back into Windows, `git pull`, and load the outputs.
+- **G2** asks the model 3 times per dish (fixed seeds) and keeps a spelling only if at least 2 answers contain it, so one-off inventions are dropped. `votes` in the output shows the counts. If the prompt version or model changes, the next run starts fresh and moves the old output to `output.superseded.jsonl` (not committed).
+- **G3** rebuilds `output.jsonl` for the current seeds, reusing a vector only when the text is unchanged. Vectors are stored as float16 in base64 (the model runs in fp16, so nothing is lost).
 
 **Ready now:** G2 and G3 (their inputs are the seed files). **Later:** G1 (needs the guideline corpus), G4–G6 (Step 4).
 

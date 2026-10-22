@@ -9,9 +9,9 @@ class FakeOllama:
     def __init__(self, reply):
         self.reply, self.calls = reply, []
 
-    def chat_json(self, model, prompt, schema, temperature, num_ctx=8192):
-        self.calls.append((model, prompt))
-        return self.reply(prompt), {"prompt_tokens": 10, "output_tokens": 5}
+    def chat_json(self, model, prompt, schema, temperature, num_ctx=8192, seed=None):
+        self.calls.append((model, prompt, seed))
+        return self.reply(prompt, seed), {"prompt_tokens": 10, "output_tokens": 5}
 
     def digest(self, model):
         return "sha256:fake"
@@ -19,7 +19,8 @@ class FakeOllama:
 
 def test_prompts_are_versioned_and_render():
     p = gj.load_prompt("g2-dish-aliases")
-    assert p.version == 1 and p.model == "gemma3:12b"
+    assert p.version == 2 and p.model == "gemma3:12b" and p.params["samples"] == "3"
+    assert gj.load_prompt("g2-dish-aliases", version=1).temperature == 0.2
     text = p.render(name_en="Kacchi biryani", name_bn="কাচ্চি বিরিয়ানি", existing="kacchi")
     assert "Kacchi biryani" in text and "{name_en}" not in text
     assert gj.load_prompt("g1-context-header").model == "qwen3:14b"
@@ -36,17 +37,40 @@ def test_clean_variants_rejects_mixed_scripts_and_duplicates():
 
 
 def test_g2_writes_outputs_and_provenance(tmp_path):
-    fake = FakeOllama(lambda prompt: {"bangla": [], "banglish": ["test spelling"]})
+    fake = FakeOllama(lambda prompt, seed: {"bangla": [], "banglish": ["test spelling"]})
     run = gj.run_g2(ollama=fake, jobs_dir=tmp_path, limit=3, log=lambda m: None)
-    rows = [json.loads(l) for l in run.output.read_text(encoding="utf-8").splitlines()]
+    rows = run.rows()
     assert len(rows) == 3 and all(r["candidates"]["banglish"] == ["test spelling"] for r in rows)
+    assert [c[2] for c in fake.calls[:3]] == [1, 2, 3], "three seeded samples per dish"
     meta = json.loads((tmp_path / "g2" / "meta.json").read_text())
     assert meta["status"] == "finished" and meta["model"] == "gemma3:12b"
-    assert meta["model_digest"] == "sha256:fake" and meta["prompt_version"] == 1
+    assert meta["model_digest"] == "sha256:fake" and meta["prompt_version"] == 2 and meta["min_votes"] == 2
+
+
+def test_g2_vote_drops_one_off_inventions(tmp_path):
+    def reply(prompt, seed):
+        invented = {1: ["beef therri"], 2: ["beef theri"], 3: []}[seed]
+        return {"bangla": ["গরুর তেহারি", "বিফ থেরী"] if seed == 1 else ["গরুর তেহারি"],
+                "banglish": ["bif tehari", *invented]}
+    row = gj.run_g2(ollama=FakeOllama(reply), jobs_dir=tmp_path, limit=1, log=lambda m: None).rows()[0]
+    assert row["candidates"] == {"bangla": ["গরুর তেহারি"], "banglish": ["bif tehari"]}
+    assert row["votes"]["banglish"]["bif tehari"] == 3 and row["votes"]["bangla"]["বিফ থেরী"] == 1
+    assert len(row["raw"]) == 3
+
+
+def test_changed_prompt_version_starts_fresh(tmp_path):
+    out = tmp_path / "g2"
+    out.mkdir()
+    (out / "meta.json").write_text(json.dumps({"model": "gemma3:12b", "prompt_version": 1}))
+    (out / "output.jsonl").write_text(json.dumps({"id": "dish.alu_bhorta"}) + "\n")
+    fake = FakeOllama(lambda prompt, seed: {"bangla": [], "banglish": []})
+    run = gj.run_g2(ollama=fake, jobs_dir=tmp_path, limit=1, log=lambda m: None)
+    assert [r["id"] for r in run.rows()] == ["dish.alu_bhorta"] and fake.calls, "v1 row was not reused"
+    assert (out / "output.superseded.jsonl").exists()
 
 
 def test_g2_resumes_without_repeating_work(tmp_path):
-    fake = FakeOllama(lambda prompt: {"bangla": [], "banglish": []})
+    fake = FakeOllama(lambda prompt, seed: {"bangla": [], "banglish": []})
     gj.run_g2(ollama=fake, jobs_dir=tmp_path, limit=2, log=lambda m: None)
     gj.run_g2(ollama=fake, jobs_dir=tmp_path, limit=2, log=lambda m: None)
     ids = [json.loads(l)["id"] for l in (tmp_path / "g2" / "output.jsonl").read_text().splitlines()]
@@ -65,9 +89,32 @@ def test_embedding_items_cover_names_and_rules():
 def test_g3_with_injected_encoder(tmp_path):
     encode = lambda texts: [[0.0] * 1023 + [1.0] for _ in texts]
     run = gj.run_g3(encode=encode, jobs_dir=tmp_path, log=lambda m: None)
-    first = json.loads(run.output.read_text(encoding="utf-8").splitlines()[0])
-    assert len(first["embedding"]) == 1024
+    first = run.rows()[0]
+    assert gj.decode_vector(first["embedding_f16"]) == [0.0] * 1023 + [1.0]
     assert json.loads((tmp_path / "g3" / "meta.json").read_text())["dims"] == 1024
+    assert not (tmp_path / "g3" / "output.jsonl.partial").exists()
+
+
+def test_g3_reuses_only_unchanged_texts(tmp_path):
+    calls = []
+
+    def encode(texts):
+        calls.append(len(texts))
+        return [[0.5] * 1024 for _ in texts]
+
+    first = gj.run_g3(encode=encode, jobs_dir=tmp_path, log=lambda m: None)
+    total = len(first.rows())
+    rows = first.rows()
+    rows[0]["text"] = "an older wording of this item"  # as if the seed text changed after the last run
+    first.output.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    calls.clear()
+    second = gj.run_g3(encode=encode, jobs_dir=tmp_path, log=lambda m: None)
+    assert sum(calls) == 1 and len(second.rows()) == total
+
+
+def test_vector_encoding_round_trips_fp16():
+    vec = [0.1, -0.25, 0.0, 1.0]
+    assert gj.decode_vector(gj.encode_vector(vec)) == pytest.approx(vec, abs=1e-3)
 
 
 def test_g3_rejects_wrong_dimensions(tmp_path):
