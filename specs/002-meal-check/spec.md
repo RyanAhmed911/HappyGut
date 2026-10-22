@@ -78,7 +78,7 @@ Every checked meal is saved to the patient's history with its verdict and eviden
 ### Edge Cases
 - Several dishes on one plate → each dish gets its own verdict; the meal verdict is the riskiest one.
 - The cloud model's free quota is used up → automatic fallback to another provider or a local model; the flow still completes.
-- The GPU machine is offline → degraded mode (rules-based PII scrub, keyword retrieval); a banner says so.
+- The GPU machine is offline (its normal state) → the standard cloud path runs fully; nothing visible changes.
 - The explanation contradicts the engine verdict, or cites an ID that wasn't retrieved → it is rejected and regenerated once, otherwise a safe template is shown.
 - Text inside the photo (e.g. a menu) tries to give instructions → it is treated as data only.
 
@@ -96,7 +96,7 @@ Every checked meal is saved to the patient's history with its verdict and eviden
 - **FR-009**: Low confidence or weak evidence MUST produce ⚪ "Not sure" with a clarifying question.
 - **FR-010**: Each meal check MUST be stored with its evidence IDs and the model and prompt versions used.
 - **FR-011**: The patient MUST be able to give "Was this right for you?" feedback on any past check.
-- **FR-012**: The flow MUST keep working when a cloud model's quota runs out or the GPU machine is offline (degraded mode).
+- **FR-012**: The flow MUST work fully with the GPU machine off, and keep working when a cloud model's quota runs out.
 
 ### Key Entities
 - **Patient profile**: diagnosis (CD/UC), phenotype (incl. stricturing), current state, language, known triggers.
@@ -112,7 +112,7 @@ Every checked meal is saved to the patient's history with its verdict and eviden
 - **SC-003**: Red-flag recall = 100% on the test suite.
 - **SC-004**: 100% of explanations cite only retrieved evidence IDs and match the engine verdict (output guard).
 - **SC-005**: Dish recognition top-3 accuracy ≥ 80% on the team's meal-photo set.
-- **SC-006**: The flow completes with the GPU machine offline (degraded mode) in a recorded test.
+- **SC-006**: The full flow, including embeddings and reranking, completes with the GPU machine switched off, in a recorded test.
 
 ## Assumptions
 - The demo persona and its history are simulated and labelled as such.

@@ -1,8 +1,10 @@
-# Services that run on the team GPU machine: AMD Radeon RX 7700 XT (12 GB, ROCm) on Ubuntu.
+# Services on the team GPU machine (AMD RX 7700 XT, Ubuntu). This machine is OPTIONAL at runtime:
+# the live app runs on always-on free services. Use this for batch jobs, local development and the
+# enhanced mode while the machine is on.
 # Everything binds to localhost; only the gateway is published, through Tailscale Funnel:
 #   tailscale funnel 8080
-# Native on the host (not in Docker): Ollama (ROCm) and the rerank service (ROCm PyTorch, services/embed).
-# In Docker: the Caddy API-key gateway and n8n.
+# Native on the host (not in Docker): Ollama (ROCm), batch jobs on ROCm PyTorch.
+# In Docker: the Caddy API-key gateway, and n8n for local development (production n8n runs on Hugging Face Spaces).
 
 services:
   # Ollama runs natively on Ubuntu (already installed with ROCm), not in Docker.
@@ -26,7 +28,7 @@ services:
   gateway:
     image: caddy:2
     restart: unless-stopped
-    network_mode: host   # reaches native Ollama (127.0.0.1:11434) and the rerank service (127.0.0.1:8001)
+    network_mode: host   # reaches native Ollama on 127.0.0.1:11434
     environment:
       GATEWAY_KEY: ${GATEWAY_KEY:?set GATEWAY_KEY in .env}
     volumes:
@@ -44,7 +46,6 @@ services:
     ports:
       - "127.0.0.1:5678:5678"
 
-  # Added in Step 1: MCP servers (services/mcp)
 
 volumes:
   ollama:

@@ -20,7 +20,7 @@ Snap a Bangladeshi dish or label, or type Bangla/English/Banglish → **personal
 4. Stricturing Crohn's rules (avoid insoluble fibre, skins, seeds, nuts) apply before any LLM output.
 5. Red-flag symptoms (heavy bleeding, fever + abdominal pain, signs of obstruction, severe dehydration) → stop diet advice and escalate to a clinician or emergency care.
 6. Never suggest starting, stopping or changing medication.
-7. Scrub PII with the local model before any cloud LLM call. Never commit real patient data or secrets. Synthetic data is flagged `is_synthetic` and labelled "simulated".
+7. Scrub PII inside our backend (Presidio + Bangladesh rules; plus local Gemma when the GPU node is online) before any cloud LLM call. The live app must never depend on the GPU machine. Never commit real patient data or secrets. Synthetic data is flagged `is_synthetic` and labelled "simulated".
 8. Only legally licensed data sources; record each licence in `docs/03-data.md` before ingesting.
 9. Every user-facing string exists in Bangla and English (i18n files).
 10. Free tiers with no card only. No Google Cloud / Vertex, AWS or paid domains.

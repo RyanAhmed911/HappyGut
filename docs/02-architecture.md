@@ -9,23 +9,21 @@ flowchart LR
     subgraph Phone["📱 Patient phone"]
         PWA["React + Vite PWA<br/>(Vercel)"]
     end
-    subgraph HF["Hugging Face Spaces (free CPU)"]
-        API["FastAPI /v1<br/>LangGraph meal-check graph<br/>verdict engine"]
+    subgraph HF["Hugging Face Spaces (free CPU) · always on"]
+        API["FastAPI /v1<br/>LangGraph meal-check graph · verdict engine<br/>Presidio PII scrub · BGE-M3 + reranker (CPU)<br/>foodgraph MCP (Streamable HTTP)"]
+        N8N["n8n<br/>(workflows stored in Supabase)"]
     end
-    subgraph Cloud["Free cloud services"]
+    subgraph Cloud["Free cloud services · always on"]
         SB[("Supabase<br/>Postgres + pgvector<br/>Auth · Storage · Realtime")]
         NEO[("Neo4j AuraDB Free<br/>Food KG + Personal Gut Graph")]
         GEM["Gemini (AI Studio)<br/>vision + explanation"]
         GROQ["Groq Llama<br/>routing · fallback"]
         LF["Langfuse<br/>traces · scores"]
     end
-    subgraph GPU["Team GPU machine · Ubuntu · RX 7700 XT 12 GB"]
+    subgraph GPU["Team GPU machine · Ubuntu · RX 7700 XT · on only when in use"]
+        PIPE["Batch jobs<br/>knowledge build · evals · synthetic data · fine-tune"]
+        OLL["Ollama (ROCm)<br/>Gemma 3 4B · Llama 3.2 3B<br/>Qwen 2.5 7B · R1-Distill 7B"]
         GW["Caddy API-key gateway"]
-        OLL["Ollama (ROCm, RX 7700 XT)<br/>Gemma 3 4B · Llama 3.2 3B · BGE-M3<br/>Qwen 2.5 7B · R1-Distill 7B"]
-        EMB["Rerank service (ROCm PyTorch)<br/>bge-reranker-v2-m3"]
-        MCP["MCP servers<br/>foodgraph · guidelines · journal · evals · research"]
-        N8N["n8n"]
-        PIPE["Knowledge pipelines<br/>(batch)"]
     end
     PWA -- HTTPS + Supabase JWT --> API
     PWA -- auth · realtime --> SB
@@ -33,15 +31,17 @@ flowchart LR
     API --> NEO
     API --> GEM
     API --> GROQ
-    API -- "Tailscale Funnel" --> GW
-    GW --> OLL
-    GW --> EMB
-    GW --> MCP
     API --> LF
     N8N --> API
+    N8N --> SB
+    PIPE --> OLL
     PIPE --> SB
     PIPE --> NEO
+    API -. "optional: Tailscale Funnel, only when the GPU node is online" .-> GW
+    GW -.-> OLL
 ```
+
+**The live app never depends on the GPU machine.** Everything a judge or user touches runs on always-on free services. The GPU machine (dual-boot, usually off) does batch work when it's switched on: building the knowledge layer, evaluations, synthetic data and fine-tuning. While it's online, the backend also uses it for an extra Bangla-aware PII pass and as a local fallback model.
 
 ## 2. Meal-check request flow (the hero flow)
 
@@ -49,13 +49,13 @@ flowchart LR
 sequenceDiagram
     participant U as PWA
     participant A as FastAPI (LangGraph)
-    participant L as Local (Gemma, embed)
+    participant L as Backend CPU (Presidio, BGE-M3, reranker)
     participant G as Gemini
     participant K as Neo4j + pgvector
     participant E as Verdict engine
     U->>A: POST /v1/meal-checks (photo or text, lang)
     A->>A: Safety Sentinel (red-flag rules) → stop + escalate if triggered
-    A->>L: PII scrub (text only)
+    A->>L: PII scrub (text only; + local Gemma pass if the GPU node is online)
     A->>G: Perception: photo → dishes, ingredients, method, portion, confidence
     A-->>U: SSE: dishes found
     A->>K: Resolve dishes (trigram + embeddings) → components → Rule Cards → papers
@@ -69,7 +69,7 @@ sequenceDiagram
     A->>K: Store meal_check (evidence IDs, model + prompt versions)
 ```
 
-If the GPU machine is unreachable, PII scrubbing falls back to Presidio-only rules, embeddings fall back to keyword + trigram search, and the UI shows a degraded-mode banner.
+The standard path needs only the always-on services. If the GPU node is online, the backend adds a local Gemma PII pass for Bangla names and can use local models when cloud quotas run out. If a cloud quota runs out and the GPU node is off, Groq takes over from Gemini.
 
 ## 3. Verdict engine (`engine/`, pure Python, no network)
 
@@ -135,5 +135,7 @@ docker-compose.yml   GPU machine services
 | AR7 | Supabase for Postgres, vectors, auth, storage, realtime | One free service instead of five | Separate vector DB, auth provider, object store |
 | AR8 | Neo4j AuraDB Free for the knowledge graph | Graph RAG and the Personal Gut Graph need real graph traversal | Recursive SQL over tables |
 | AR9 | ~50 dishes and ~25 Rule Cards for the prototype | 10 days left; depth and correctness beat breadth | 150 dishes |
-| AR10 | Degraded mode when the GPU machine is offline | The demo must survive the team machine being off | No fallback |
+| AR10 | ~~Degraded mode when the GPU machine is offline~~ superseded by AR12 | — | — |
 | AR11 | GPU machine is an AMD RX 7700 XT on Ubuntu with ROCm already installed: native Ollama (incl. BGE-M3 embeddings) and a native rerank service on ROCm PyTorch; only the gateway and n8n run in Docker (gateway uses host networking, localhost-only) | Reuses the working native ROCm stack; avoids GPU passthrough into containers | Ollama ROCm container; CPU reranker |
+| AR12 | Cloud-first runtime: backend, PII scrub (Presidio + Bangladesh rules), BGE-M3 query embeddings, reranker, foodgraph MCP and n8n run on always-on free services (HF Spaces + Supabase). The GPU machine is for batch jobs and an optional enhanced mode | The GPU machine dual-boots and is usually off; judges test the live link at any time | Keeping the PC on Ubuntu 24/7 |
+| AR13 | One embedding implementation everywhere: BGE-M3 via sentence-transformers (GPU for batch corpus embedding, CPU for live queries) | Corpus and query vectors must come from the same model build; Ollama's quantized `bge-m3` would differ | Ollama `bge-m3` for the corpus |

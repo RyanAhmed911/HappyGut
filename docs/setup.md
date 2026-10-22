@@ -66,11 +66,16 @@ After the project is created:
 Keep every key in a password manager or private note (not chat, email or GitHub). On the first clone, copy `.env.example` to `.env` and paste them in.
 
 ## 2. GPU machine (Ubuntu, AMD RX 7700 XT): step by step
-Already installed: ROCm, ROCm PyTorch, Ollama (native), llama.cpp. The machine dual-boots, so **the local AI only works while it's booted into Ubuntu**; keep it on Ubuntu during demo and judging windows.
+Already installed: ROCm, ROCm PyTorch, Ollama (native), llama.cpp.
 
-| Runs natively on Ubuntu | Runs in Docker |
+**You don't need to keep this machine on.** The live app runs entirely on always-on free services (Hugging Face Spaces, Supabase, Neo4j, Gemini, Groq). Boot into Ubuntu only when you:
+- run batch jobs (building the knowledge layer, evaluations, synthetic data, fine-tuning)
+- develop locally
+- record the demo video (the enhanced mode with local models is then on)
+
+| Native on Ubuntu | Docker on Ubuntu |
 |---|---|
-| Ollama (ROCm), rerank service (ROCm PyTorch, from Step 1) | Caddy API-key gateway, n8n |
+| Ollama (ROCm), batch jobs on ROCm PyTorch | Caddy API-key gateway; n8n for local development |
 
 **1. Check what's there**
 ```bash
@@ -125,8 +130,8 @@ sudo systemctl restart ollama
 ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```
 What this does: `systemctl edit` saves an override file (`/etc/systemd/system/ollama.service.d/override.conf`) that adds settings to the Ollama background service.
-- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models can sit in GPU memory at once (Gemma, Llama, BGE-M3). This is already Ollama's default for one GPU; it's written down so the setup is explicit.
-- `OLLAMA_KEEP_ALIVE=24h`: a model stays loaded for 24 h after its last use instead of the default 5 minutes. Without it, the first scan after a quiet period waits several seconds while the model reloads. The cost is that the VRAM stays occupied; free it with `ollama stop <model>`.
+- `OLLAMA_MAX_LOADED_MODELS=3`: up to 3 models can sit in GPU memory at once (e.g. Gemma and Llama for the enhanced mode while a batch model runs). This is already Ollama's default for one GPU; it's written down so the setup is explicit.
+- `OLLAMA_KEEP_ALIVE=24h`: while the machine is on, a model stays loaded for up to 24 h after its last use instead of the default 5 minutes, so it doesn't reload in the middle of a session or a video recording. Shutting down the PC simply unloads everything; nothing needs to stay running. Free VRAM earlier with `ollama stop <model>`.
 
 The `ss` check confirms Ollama only listens on this computer, so the gateway is the only way in.
 
@@ -136,7 +141,6 @@ ollama pull gemma3:4b
 ollama pull llama3.2:3b
 ollama pull qwen2.5:7b
 ollama pull deepseek-r1:7b
-ollama pull bge-m3
 ollama run gemma3:4b "Say hello in Bangla"
 ollama ps                         # PROCESSOR column should say 100% GPU
 ```

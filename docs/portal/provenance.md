@@ -12,7 +12,7 @@
 ## AI models
 - Gemini Flash (free tier): meal / label vision, Bangla/English explanations, meal plans, weekly summaries
 - Llama (Groq free tier + local Llama 3.2 3B): fast routing, red-flag second check, fallback explainer
-- Gemma 3 4B (local, Ollama): PII scrubbing, Bangla/Banglish normalisation, vision fallback
+- Gemma 3 4B (local, Ollama): Bangla-aware PII pass and Bangla/Banglish normalisation when the GPU node is online, vision fallback
 - Qwen 2.5 7B (local): batch Rule Card extraction, dish enrichment, contextual chunk headers
 - DeepSeek-R1-Distill-Qwen-7B (local): LLM-as-judge for evaluation
 - BGE-M3 (fine-tuned for dish names) + bge-reranker-v2-m3: multilingual embeddings and reranking
@@ -24,7 +24,7 @@
 - Graded verdicts, never "safe"; ⚪ "Not sure" when evidence is weak; every claim cites a source
 - Red-flag symptoms stop diet advice and direct the user to a doctor or emergency care; no medication advice, ever
 - Stricturing Crohn's safety rules applied before any AI output
-- Privacy: PII stripped by a local model before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
+- Privacy: PII stripped inside our backend (Presidio + Bangladesh rules, plus a local model pass when available) before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
 - Free-tier cloud APIs only receive food photos and de-identified text
 - Bias checks: metrics broken down by language (Bangla / English / Banglish), sex and disease phenotype; native-speaker review of Bangla output
 - Transparency: evidence bar, citations, SHAP factors on alerts, model/data cards, prompt and model versions logged per verdict
@@ -49,7 +49,7 @@
 - Frontend: React, Vite (PWA), Tailwind, shadcn/ui, Zod, Recharts, D3.js
 - Backend: FastAPI, Pydantic, LiteLLM, Supabase client
 - AI / agents: LangGraph, Pydantic-AI, Instructor, CrewAI, smolagents, MCP Python SDK (FastMCP), langchain-mcp-adapters
-- Retrieval: pgvector, Neo4j, BGE-M3 via Ollama, bge-reranker via sentence-transformers
+- Retrieval: pgvector, Neo4j, BGE-M3 + bge-reranker via sentence-transformers
 - Data: Docling, Crawl4AI, Scrapy, pandas, DuckDB, Delta Lake, Pandera, Presidio
 - ML: LightGBM, scikit-learn, SHAP, NumPy/SciPy
 - Eval / ops: Ragas, promptfoo, Langfuse, pytest, Schemathesis, Streamlit, Plotly

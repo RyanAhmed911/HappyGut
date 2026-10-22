@@ -22,7 +22,7 @@ LLMs handle perception (photos, labels, Bangla text) and explanation. The verdic
 - Only legally licensed data is ingested, and each source's licence is recorded in `docs/03-data.md` before ingestion.
 
 ### V. Privacy by Architecture
-- Text that may contain PII is scrubbed by a local model on team hardware before any cloud AI call. Cloud free-tier APIs receive only food photos and de-identified text.
+- Text that may contain PII is scrubbed inside our own backend (Presidio + Bangladesh-specific rules, plus a local open-weight model pass when the team GPU node is online) before any cloud AI call. Cloud free-tier APIs receive only food photos and de-identified text.
 - No real patient data in the repo or the prototype. Simulated data carries `is_synthetic = true` and is labelled "simulated" wherever it is shown.
 - Secrets live only in `.env` files that are never committed.
 
@@ -42,7 +42,7 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 - Frontend: React + Vite PWA, Tailwind, shadcn/ui, Zod, react-i18next (bn/en). Hosted on Vercel.
 - Backend: Python 3.11, FastAPI, Pydantic v2, LangGraph + Pydantic-AI, LiteLLM. Docker on Hugging Face Spaces.
 - Data: Supabase (Postgres + pgvector + pg_trgm + Storage + Auth), Neo4j AuraDB Free, DuckDB/Parquet for evaluation data.
-- Local AI: Ollama on the team GPU machine (12 GB VRAM), reached through Tailscale Funnel behind an API-key gateway. The app keeps working with cloud models only when that machine is offline.
+- Local AI: Ollama on the team GPU machine (AMD RX 7700 XT, 12 GB) for batch jobs and an optional enhanced mode through Tailscale Funnel behind an API-key gateway. The live app never depends on that machine.
 - Interfaces: REST (`/v1`, OpenAPI) and MCP servers (FastMCP; stdio + Streamable HTTP; read-only tools).
 
 ## Development Workflow and Quality Gates
@@ -55,4 +55,4 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 ## Governance
 This constitution takes precedence over other practices in this repository. `CLAUDE.md` and `AGENTS.md` carry the same rules for coding agents and must stay consistent with it. Amendments are made by pull request with a one-line reason, reviewed by the Team Leader, and versioned semantically (MAJOR: a principle removed or redefined; MINOR: a principle or section added; PATCH: wording). Every spec and plan includes a constitution check before implementation starts.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-21
+**Version**: 1.1.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-22

@@ -11,13 +11,13 @@
 | Neo4j AuraDB | Free | No | Node/relationship caps; pauses when idle (*check current terms*) |
 | Gemini API | **Google AI Studio** key, free tier | No | Use AI Studio, **not** Google Cloud / Vertex. Rate-limited; free-tier data may be used by Google, so we send food photos + de-identified text only |
 | Groq | Free | No | Rate-limited |
-| Hugging Face Spaces | CPU Basic | No | Hosts the FastAPI Docker container; sleeps after long inactivity |
+| Hugging Face Spaces | CPU Basic | No | Always-on runtime: FastAPI backend (incl. embeddings, reranker, foodgraph MCP) and n8n (workflows stored in Supabase). Spaces sleep after ~48 h without traffic, so a scheduled GitHub Actions ping keeps them awake |
 | Vercel | Hobby | No | Frontend PWA |
 | Tailscale | Personal | No | Funnel = stable public HTTPS address for the GPU machine |
 | ngrok | Free | No | Dev webhooks; one free static domain |
 | Langfuse Cloud | Hobby | No | Tracing + eval scores |
 | GitHub | Free, public repo | No | Repo, Actions CI, issues/PRs |
-| n8n, Ollama, all OSS libraries | Self-hosted | No | On the team GPU machine |
+| Ollama, all OSS libraries | Self-hosted | No | On the team GPU machine, which is only on for batch jobs and development; the live app never depends on it |
 | USDA FoodData Central, NCBI | Free API keys | No | |
 | Figma, Lovable, v0, Google Stitch | Free tiers | No | Lovable/v0 have daily credit limits, so plan UI generation |
 | YouTube, Facebook | Free | No | Same 180s video on both |

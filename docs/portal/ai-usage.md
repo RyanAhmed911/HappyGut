@@ -40,7 +40,7 @@
 - Gemini implicit context caching: static prefix first (system prompt + glossary + few-shots), variable content last
 - Compact evidence packets: top-5 reranked chunks reduced to short fact lines with IDs (~300 tokens) instead of raw documents
 - Images downscaled to ≤ 1024 px before the vision model
-- Local models (Ollama) handle high-volume, low-value work: PII scrubbing, Bangla normalisation, classification. Zero API tokens
+- Batch work (contextual headers, dish enrichment, evaluation judging, synthetic data) runs on local models (Ollama) at zero API cost; rule-based PII scrubbing in the backend costs no tokens
 - Batch jobs on the local GPU: Rule Card extraction, dish enrichment, contextual chunk headers are computed once at ingestion, never per query
 - Semantic dedup: duplicate chunks removed by content hash before embedding
 - Stateless calls, no chat history; weekly summaries are written from SQL-computed statistics, not raw logs
@@ -79,8 +79,8 @@
   - fallback explainer when the Gemini quota runs out
   - Also run locally (Llama 3.2 3B) as the offline router / red-flag fallback
   - Why: very fast inference, separate quota
-- Gemma (local, Ollama, Gemma 3 4B Q4_K_M): privacy and local tasks
-  - PII scrubbing (raw text never leaves our machine)
+- Gemma (local, Ollama, Gemma 3 4B Q4_K_M): Bangla-aware tasks on our own hardware
+  - extra PII pass for Bangla names when the GPU node is online (the backend always runs Presidio + rules first)
   - Bangla/Banglish normalisation
   - local vision fallback
   - Why: open weights, strong multilingual, fits 12 GB VRAM
@@ -250,7 +250,7 @@ Evaluation
 - LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
 - Ollama (llama.cpp runtime): local quantized inference on the team GPU
 - Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: PII scrubbing, Bangla normalisation, batch knowledge extraction, offline routing, LLM-as-judge
-- BGE-M3 (served by Ollama) + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
+- BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking (CPU in the backend, GPU for batch)
 - sentence-transformers: fine-tuning the dish-name embedding model
 - pgvector + Neo4j: vector index and knowledge graph for Graph RAG
 - Docling + Crawl4AI: guideline documents → structured, chunkable text
@@ -266,7 +266,7 @@ Evaluation
 **Meal-check graph (LangGraph state machine)**
 1. Router: input type (photo / text) and language
 2. Safety Sentinel: red-flag rules + LLM second check; can stop the graph and show the escalation screen
-3. Privacy node: local Gemma + Presidio strip PII
+3. Privacy node: Presidio + Bangladesh-specific rules strip PII (plus a local Gemma pass when the GPU node is online)
 4. Perception agent (Gemini vision): dishes, ingredients, method, portion → JSON
 5. Dish Resolver agent: calls the `search_dish` MCP tool; ambiguous match → interrupt to ask the user (human-in-the-loop)
 6. Evidence Retriever, two parallel branches: graph path (`explain_verdict_path` MCP tool + personal edges) and hybrid RAG
@@ -315,7 +315,7 @@ Evaluation
 ## Guardrails, safety & privacy
 **Input**
 - Red-flag Safety Sentinel runs first (rules + LLM second check) → escalation screen, no diet advice
-- PII scrubbing: Presidio + local Gemma (Bangla names, +8801 phone numbers, NID numbers, addresses) before any cloud call
+- PII scrubbing in our backend before any cloud call: Presidio + Bangladesh rules (+8801 phone numbers, NID numbers, emails, addresses), plus a local Gemma pass for Bangla names when the GPU node is online
 - EXIF/GPS stripped from photos; "photograph the food, not people" hint
 - Non-food image → rejected
 - Prompt-injection defence: text read from labels/menus is treated as data inside delimiters, never as instructions
@@ -405,7 +405,7 @@ GitHub Actions
 - ➕ LM Studio: tick only if the team really uses it to benchmark models side by side
 
 **Local models we actually run** (tick the exact versions you run)
-- ✅ Gemma 3 4B (*add*): online PII scrubbing, Bangla/Banglish normalisation, local vision fallback
+- ✅ Gemma 3 4B (*add*): Bangla-aware PII pass and Bangla/Banglish normalisation when the GPU node is online; local vision fallback
 - ✅ Qwen 2.5 7B Instruct: nightly batch work (Rule Card extraction, dish enrichment, contextual chunk headers, synthetic Bangla eval sets)
 - ✅ Llama 3.2 3B: always-on offline router and red-flag second check when the Groq quota runs out
 - ✅ DeepSeek-R1-Distill-Qwen-7B (*add*): LLM-as-judge (does the evidence support each claim?)
@@ -413,12 +413,13 @@ GitHub Actions
 **Hardware, quantization, why local**
 - GPU: AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
 - Format: GGUF, Q4_K_M quantization, 8k context
-- Online set (always loaded, ~8–9 GB): Gemma 3 4B + Llama 3.2 3B + BGE-M3 (Ollama) + bge-reranker (ROCm PyTorch), all on the GPU
+- Live set (only while the GPU node is online; the app never depends on it): Gemma 3 4B + Llama 3.2 3B
+- BGE-M3 + bge-reranker: GPU (ROCm PyTorch) for batch corpus embedding; the same models run on CPU in the always-on backend for live queries
 - Batch set (swapped in at night): Qwen 2.5 7B, DeepSeek-R1-Distill 7B (~5 GB each)
 - Models capped at ≤ 7B per slot, because 16 GB RAM leaves no room for CPU offload of larger models
 - Ollama settings: `OLLAMA_MAX_LOADED_MODELS=3`, `keep_alive` long for online models, short for batch models
-- Reached by the hosted backend through Tailscale Funnel (API-key gateway)
-- Why local, privacy: raw text that may contain PII never leaves our machine; cloud models only see de-identified text
+- Batch jobs run on the machine itself; the hosted backend reaches the live set through Tailscale Funnel (API-key gateway) only while the machine is online
+- Why local, privacy: batch jobs over knowledge and evaluation data stay on our hardware; when online, the GPU node adds a Bangla-aware PII pass
 - Why local, cost: $0, with no rate limits for batch jobs over thousands of chunks
 - Why local, resilience: automatic fallback when free-tier cloud quotas run out
 - Why local, sovereignty: inference runs on team hardware in Bangladesh
@@ -468,6 +469,6 @@ GitHub Actions
 - Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording
 - Model and data cards: one page per model role and per dataset (purpose, limits, licence, evaluation results), published in `/docs`
 - Cost-aware AI: runs at $0 on free tiers + one 12 GB GPU through caching, routing and local fallbacks, a realistic path for low-resource settings
-- Privacy by architecture: local models handle anything that might contain PII; cloud models only see food photos and de-identified text
+- Privacy by architecture: PII is removed inside our own backend before any cloud call; cloud models only see food photos and de-identified text
 - Known limits, stated openly: not a medical device; flare prediction not yet validated on real patients; dish recognition limited to dishes in our graph (unknown → ⚪ "Not sure")
 - Next: federated learning across users, QLoRA-tuned Bangla explainer, on-device small model for offline use, clinical validation with partner gastroenterologists

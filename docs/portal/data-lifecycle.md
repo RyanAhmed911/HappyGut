@@ -296,9 +296,9 @@
 - Evaluation exports: Parquet / CSV results + Markdown report in the repo
 
 **Embeddings / model serving**
-- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): PII scrubbing, Bangla normalisation, local VLM/LLM fallback, BGE-M3 embeddings
-- Rerank service (bge-reranker-v2-m3 on ROCm PyTorch) on the GPU machine behind FastAPI
-- Tailscale Funnel exposes the local Ollama and embedding services to the hosted backend (through an API-key gateway)
+- Ollama on the team GPU (AMD RX 7700 XT, 12 GB, ROCm; quantized Q4_K_M): batch jobs, plus Bangla-aware PII pass and local fallback while online
+- BGE-M3 + bge-reranker-v2-m3 (sentence-transformers) inside the always-on backend on CPU; on the GPU for batch corpus embedding
+- Tailscale Funnel exposes the GPU node's Ollama to the hosted backend while it's online (through an API-key gateway)
 - MCP server we expose: `happygut-foodgraph` over Streamable HTTP (search_dish, get_components, explain_verdict_path)
 - Free-tier cloud LLM/VLM APIs for primary reasoning and vision (models listed in the AI section)
 
@@ -317,7 +317,7 @@
 - Pandera: DataFrame quality checks
 - Microsoft Presidio: PII detection and anonymisation
 - rapidfuzz: fuzzy dish-name matching
-- BGE-M3 (via Ollama) + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
+- BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking
 - Ollama + open-weight Qwen models: local inference
 - LangGraph: agent orchestration
 - scikit-learn + LightGBM + SHAP: flare model, baselines, explanations
@@ -373,7 +373,7 @@
 - Postgres cache by image SHA-256 / prompt hash: repeat dishes need no API call
 - Model routing: small/fast model for classification, larger model only for explanations
 - Local Ollama handles PII scrubbing, Bangla normalisation, and fallback when a free-tier quota runs out
-- Per-provider quota guard with automatic fallback to local models
+- Per-provider quota guard with automatic fallback (Gemini → Groq → local models when the GPU node is online)
 - Compact prompts: structured evidence (IDs + short facts) and the top 5 reranked chunks, not raw documents
 - Photos downscaled to ≤ 1024 px WebP before the vision model (fewer tokens)
 - Precomputed dish component profiles, so the verdict decision itself needs no LLM call
@@ -389,7 +389,7 @@
 - Evidence-carrying verdicts: every verdict stores its evidence IDs, so any answer can be audited back to the paper
 - Licence-aware ingestion: each source's licence decides whether full text or only a cited Rule Card is stored
 - Human-in-the-loop curation: LLM extracts facts, humans approve before they enter the graph
-- Dual-model privacy: local model scrubs PII; cloud models only see de-identified text
+- Privacy before the cloud: PII removed inside our backend (plus a local model pass when available); cloud models only see de-identified text
 - Synthetic cohort as test oracle: injected ground-truth triggers make trigger discovery measurable
 
 **Agent-driven data ops**
@@ -410,20 +410,17 @@
 ## 12. Publishing local environment to the internet
 
 **Tools**
-- ✅ Tailscale Funnel: always-on during judging (free, no card, stable `*.ts.net` HTTPS address)
+- ✅ Tailscale Funnel: publishes the GPU node while it's online (free, no card, stable `*.ts.net` HTTPS address)
 - ✅ ngrok: development only
 
 **Tunneling usage notes**
-- Tailscale Funnel exposes one stable HTTPS address for the team GPU machine, routed by path:
-  - `/llm` → Ollama API (local PII scrubbing, Bangla normalisation, fallback LLM/VLM)
-  - `/embed` → reranker service (embeddings go through `/llm`, Ollama's BGE-M3)
-  - `/mcp` → MCP servers (Streamable HTTP)
-- Security: a Caddy gateway in front of every route checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
+- Tailscale Funnel exposes the team GPU machine at one stable HTTPS address while it's booted into Ubuntu:
+  - `/llm` → Ollama (Bangla-aware PII pass, Bangla normalisation, local fallback LLM/VLM)
+- The live app never depends on it: the always-on backend runs the standard path, and uses the GPU node as an extra when it's reachable (health-checked)
+- Security: a Caddy gateway checks a secret API-key header; Ollama itself has no auth, so it is never exposed directly
 - Security: services bound to localhost only; nothing opened on the router; Funnel adds TLS automatically
-- Security: MCP servers also need a bearer token and are read-only
 - Security: per-key rate limiting in the gateway; request bodies not logged
-- Lifecycle: Tailscale + Docker Compose run as system services with auto-restart during the submission and judging windows; health-check endpoint
-- Fallback: if the tunnel or machine is offline, the backend switches to cloud-only models (degraded-mode banner)
+- Lifecycle: on while the machine is in use (development, batch jobs, video recording); off otherwise
 - ngrok: receives Supabase database/storage webhooks and n8n callbacks on local FastAPI during development
 - ngrok: free static domain for a stable webhook URL
 - ngrok: shared-secret header checked on every webhook
