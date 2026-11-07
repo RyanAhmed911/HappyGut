@@ -186,4 +186,6 @@ A job can be stopped with Ctrl+C and rerun later; it continues where it stopped.
 **Ready now:** G2 and G3 (their inputs are the seed files). **Later:** G1 (needs the guideline corpus), G4–G6 (Step 4).
 
 ## 4. Start collecting meal photos today
+> **Update 2026-11-07:** open datasets can cover most of the evaluation set. Candidates and the licence check are in [`03-data.md`](03-data.md) (OD-8). Record each licence before downloading; take your own photos only for dishes no dataset covers.
+
 Target ~300 photos of real Bangladeshi meals (home, restaurant, street food), 30–50 a day across the team. **Food only, no people.** Save as `data/raw/photos/<dish-id>/<n>.jpg` (this folder is gitignored) and keep a simple CSV of `file, dish_ids, taken_by`.

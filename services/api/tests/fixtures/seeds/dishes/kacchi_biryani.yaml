@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.kacchi_biryani
+name_en: "Kacchi biryani"
+name_bn: "কাচ্চি বিরিয়ানি"
+aliases: ["kacchi", "kachchi biriyani", "কাচ্চি"]
+cuisine: Bangladeshi
+category: test
+components:
+  fat: high
+  insoluble_fibre: none
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: high
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.plain_rice]
+sources: []
+reviewed_by: test
+status: approved

@@ -18,6 +18,9 @@ jobs:
       - name: MCP servers (in-process MCP client)
         working-directory: services/mcp
         run: uv run --group dev pytest -q
+      - name: Backend API (meal-check flow, guard, PII incl. Presidio, auth)
+        working-directory: services/api
+        run: uv run --group dev --extra pii pytest -q
       - name: Knowledge seeds (validator + engine sanity on real seeds)
         working-directory: pipelines
         run: |

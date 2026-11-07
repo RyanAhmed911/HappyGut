@@ -87,6 +87,19 @@
 | OD-6 | **Mozilla Common Voice: Bengali** | Evaluate voice-logging speech recognition accuracy (evaluation only) | CC0 | Finals |
 | OD-7 | **IBDMDB / HMP2 public metadata** (Inflammatory Bowel Disease Multi'omics Database) | Real longitudinal IBD disease-activity and diet-questionnaire data, used to **calibrate and sanity-check** the synthetic cohort and early-warning score | Public research data (*verify terms of use*) | Finals |
 | OD-8 | **Open food-image datasets** with Bangladeshi/South Asian dishes (Kaggle / Hugging Face) | Evaluate dish recognition. We use a vision-language model and don't train a vision model from scratch | *Select only datasets with a clear licence* | MVP (eval) |
+
+**OD-8 candidates (found 2026-11-07, licences not yet verified).** Open each page, read the licence field or LICENSE file, and fill in the licence column before downloading anything. Use only datasets whose licence allows our use (evaluation, and sending images to Gemini's free tier, whose inputs Google may use); prefer CC BY / CC0. Images the authors scraped from the web inherit unclear rights, so note how each was collected.
+
+| Candidate | What it is | Licence | Decision |
+|---|---|---|---|
+| BD-Food33 (Mendeley Data, DOI 10.17632/8wt48bjmx3.1) | ~1,200 images, 33 Bangladeshi food classes; partly collected from websites and blogs | *to check* | — |
+| DeshiFoodBD (Mendeley Data, tczzndbprx) | ~5,400 images, 19 Bangladeshi foods | *to check* | — |
+| PUST Cafeteria Food Image Dataset (Mendeley Data, DOI 10.17632/fn6yhzjz83.2) | Real Bangladeshi cafeteria platters with boxes/polygons (multi-dish plates) | *to check (ships a LICENSE.txt)* | — |
+| Bangladeshi Street Food (Mendeley Data, DOI 10.17632/pjkrx3kk8h.2) | 5 Dhaka street-food categories | *to check* | — |
+| Roboflow "food_calories" (17 Indian classes incl. biryani, dal, samosa) | Indian dishes that overlap ours | listed CC BY 4.0, *confirm image provenance* | — |
+| Roboflow "INDIANFOODCLASSIFICATION" (12 classes incl. biryani, samosa, jalebi, rasgulla) | Indian dishes that overlap ours | listed CC BY 4.0, *confirm image provenance* | — |
+
+Evaluation only: dataset photos never train a model and never enter the app. Map each class to our dish IDs (e.g. "biryani" → `dish.kacchi_biryani` only when the photos really are kacchi) and keep a handful of the team's own photos for the dishes no dataset covers.
 | OD-9 | **LOINC** | Standard codes for lab tests (CRP, faecal calprotectin, haemoglobin, albumin) from uploaded reports | Free with licence acceptance and attribution | Finals |
 
 #### E. User uploads and bulk import

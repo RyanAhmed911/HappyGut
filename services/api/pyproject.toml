@@ -1,0 +1,48 @@
+[project]
+name = "happygut-api"
+version = "0.1.0"
+description = "HappyGut backend: /v1 REST API with SSE, LangGraph meal-check flow, PII scrub. Verdicts come from happygut-engine."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.3",
+  "python-multipart>=0.0.9",
+  "langgraph>=1.0,<2",
+  "pydantic-ai-slim[google,groq]>=2.0,<3",
+  "pillow>=10",
+  "psycopg[binary]>=3.2",
+  "pyjwt[crypto]>=2.8",
+  "happygut-engine",
+  "happygut-pipelines",
+]
+
+[project.optional-dependencies]
+# Installed in the Docker image: Presidio with the small spaCy English model (MIT).
+pii = [
+  "presidio-analyzer>=2.2",
+  "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+]
+# Bengali NER for Bangla-script names. Choose the model and record its licence in docs/03-data.md first.
+bengali-ner = ["transformers>=4.40", "torch>=2.2"]
+
+[tool.uv.sources]
+happygut-engine = { path = "../../engine", editable = true }
+happygut-pipelines = { path = "../../pipelines", editable = true }
+
+[dependency-groups]
+dev = ["pytest>=8", "httpx>=0.27", "anyio>=4"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/happygut_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.metadata]
+allow-direct-references = true  # the spaCy model wheel in the pii extra

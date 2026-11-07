@@ -1,0 +1,24 @@
+# Test fixture only (not real knowledge).
+id: RC-TEST-STRICT
+title_en: "Stricturing: avoid insoluble fibre"
+title_bn: "স্ট্রিকচার: অদ্রবণীয় আঁশ এড়িয়ে চলুন"
+component: insoluble_fibre
+min_level: medium
+applies_to:
+  diagnosis: [CD]
+  phenotype: [stricturing]
+  state: [remission, flare]
+severity: 3
+hard: true
+evidence_level: guideline
+recommendation_en: "Choose soft, well-cooked, low-fibre food."
+recommendation_bn: "নরম, ভালোভাবে রান্না করা, কম আঁশের খাবার বেছে নিন।"
+sources:
+  - key: TEST2026
+    citation: "Test citation, not a real paper."
+    doi: ""
+    pmid: ""
+    licence: "test"
+    quote: "test quote"
+reviewed_by: test
+status: approved
