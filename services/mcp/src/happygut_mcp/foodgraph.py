@@ -1,7 +1,7 @@
 """happygut-foodgraph: read-only MCP server over the HappyGut food knowledge graph.
 
 Tools
-- search_dish:          English / Bangla / Banglish name (or a sentence) → candidate dishes
+- search_dish:          English / Bangla name (or a sentence) → candidate dishes
 - get_components:       a dish's gut-relevant components, ingredients, alternatives and sources
 - explain_verdict_path: dish → component → Rule Card → cited source paths that apply to a profile
 
@@ -119,7 +119,7 @@ def build_server(graph: GraphBackend) -> MCPServer:
 
     @server.tool(annotations=READ_ONLY)
     def search_dish(
-        query: str = Field(min_length=1, max_length=200, description="Dish name or a sentence, in English, Bangla or Banglish"),
+        query: str = Field(min_length=1, max_length=200, description="Dish name or a sentence, in English or Bangla (English-letter dish names like 'kacchi' work)"),
         limit: int = Field(default=5, ge=1, le=20),
     ) -> DishSearchResult:
         """Find dishes by name. Handles misspellings, Bangla script and names inside a sentence."""

@@ -1,11 +1,11 @@
 ---
 name: add-dish
-description: Add or update a Bangladeshi dish in the HappyGut food knowledge seeds (data/seeds/dishes). Use when asked to add a dish, fix a dish's ingredients or components, or add Bangla/Banglish aliases.
+description: Add or update a Bangladeshi dish in the HappyGut food knowledge seeds (data/seeds/dishes). Use when asked to add a dish, fix a dish's ingredients or components, or add Bangla names and English-letter spellings.
 ---
 
 # Add a dish to the food knowledge graph seeds
 
-1. Check the dish isn't already there: search `data/seeds/dishes/` for its English name, Bangla name and common Banglish spellings.
+1. Check the dish isn't already there: search `data/seeds/dishes/` for its English name, Bangla name and common English-letter spellings.
 2. Gather facts only from licensed sources listed in `docs/03-data.md` (Wikipedia/Wikidata, Food Composition Table for Bangladesh, USDA). Never invent composition values.
 3. Write `data/seeds/dishes/<file>.yaml` (the id must be `dish.<file name>`):
 
@@ -13,7 +13,7 @@ description: Add or update a Bangladeshi dish in the HappyGut food knowledge see
 id: dish.kacchi_biryani
 name_en: "Kacchi biryani"
 name_bn: "কাচ্চি বিরিয়ানি"
-aliases: ["kacchi", "kachchi biriyani"]      # Banglish + spelling variants; must be unique across dishes
+aliases: ["kacchi", "kachchi biriyani"]      # English-letter spellings + variants; must be unique across dishes
 cuisine: Bangladeshi
 category: rice_dish
 preparation: ["dum-cooked", "ghee", "fried onion"]

@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Meal check hero flow: photo or Bangla/English/Banglish text to a graded personal verdict with reasons, citations and an alternative"
+**Input**: User description: "Meal check hero flow: photo or Bangla/English text to a graded personal verdict with reasons, citations and an alternative"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -29,7 +29,7 @@ A patient with IBD takes a photo of a plate of Bangladeshi food. Within seconds 
 
 ### User Story 2 - Check a meal by typing (Priority: P1)
 
-The patient types what they ate or plan to eat in English, Bangla or Banglish ("ajke dupure kacchi khabo"). The app resolves the dishes and gives the same kind of verdict.
+The patient types what they ate or plan to eat in English or Bangla ("kacchi biryani for lunch", "আজ দুপুরে কাচ্চি খাবো"). The app resolves the dishes and gives the same kind of verdict.
 
 **Why this priority**: Works without a camera, on low bandwidth, and for meals already eaten.
 
@@ -37,7 +37,7 @@ The patient types what they ate or plan to eat in English, Bangla or Banglish ("
 
 **Acceptance Scenarios**:
 
-1. **Given** Banglish text naming a seeded dish, **Then** the dish is resolved and a verdict is shown.
+1. **Given** Bangla or English text naming a seeded dish (including English-letter names such as "kacchi"), **Then** the dish is resolved and a verdict is shown.
 2. **Given** text containing a phone number or name, **Then** those details are removed before any cloud AI call.
 
 ---
@@ -63,7 +63,7 @@ If the patient's text mentions a red-flag symptom (heavy bleeding, fever with ab
 
 **Why this priority**: Safety (Constitution II).
 
-**Independent Test**: The red-flag test suite (Bangla, English, Banglish) triggers escalation for 100% of positive cases.
+**Independent Test**: The red-flag test suite (Bangla and English, plus romanised-Bangla phrases kept as a safety net) triggers escalation for 100% of positive cases.
 
 ---
 
@@ -84,7 +84,7 @@ Every checked meal is saved to the patient's history with its verdict and eviden
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
-- **FR-001**: The system MUST accept a photo or text (English, Bangla, Banglish) as meal-check input.
+- **FR-001**: The system MUST accept a photo or text (Bangla or English) as meal-check input.
 - **FR-002**: The system MUST run the red-flag check before any other processing and stop with an escalation screen when it triggers.
 - **FR-003**: The system MUST remove personal identifiers from text locally before any cloud AI call, and strip photo metadata (EXIF/GPS).
 - **FR-004**: The system MUST identify dishes with a confidence value and resolve them through the knowledge layer (feature 001).

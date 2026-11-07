@@ -21,7 +21,7 @@ For each card:
 
 ## Dishes (`data/seeds/dishes/`, 61 files)
 For each dish:
-1. Check the Bangla name and add common Banglish spellings you actually see people type.
+1. Check the Bangla name and add common English-letter spellings you actually see people type (e.g. "kacchi", "kachchi").
 2. Check each component level against the typical home or restaurant recipe. If you're unsure, use `unknown` rather than guessing.
 3. Add at least one source: the Wikipedia page (`{ref: "wikipedia:en:<Page_title>", licence: "CC BY-SA 4.0"}`) and/or the Food Composition Table for Bangladesh entry.
 4. Set `reviewed_by` and `status: approved`, and delete `needs_verification` once the levels are checked.
@@ -31,7 +31,7 @@ For each dish:
 - shorshe_ilish, masoor_dal, alu_bhorta, fuchka, dudh_cha
 
 ## Dish-name spellings from G2 (`data/review/g2-aliases.csv`): a native Bangla speaker, ~15 minutes
-Gemma suggests extra Bangla and Banglish spellings for each dish. It is often wrong in a confident way (e.g. `gur mangsho bhuna`: *gur* is jaggery; `beef theory` for tehari), so nothing enters the seeds without a person accepting it.
+Gemma suggests extra Bangla and English-letter spellings for each dish. It is often wrong in a confident way (e.g. `gur mangsho bhuna`: *gur* is jaggery; `beef theory` for tehari), so nothing enters the seeds without a person accepting it.
 1. Windows, after G2's output is pulled: `cd pipelines; uv run python -m happygut_pipelines.aliases export`
 2. Open the CSV in Excel. For each row, write `yes` or `no` in **decision** and your initials in **reviewer**. Say yes only if you have seen people write the dish that way. `votes` (e.g. 3/3) is how often the model gave it, not proof it's right.
 3. Save as CSV (UTF-8), then: `uv run python -m happygut_pipelines.aliases apply`, `uv run python -m happygut_pipelines.seeds`, and the tests.

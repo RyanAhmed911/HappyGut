@@ -3,15 +3,15 @@
 > Status: **§0 prototype selections + §1–12 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
-**Tier legend:** **MVP** = needed for the hero flow by Oct 31 · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
+**Tier legend:** **MVP** = needed for the hero flow by the Nov 20 preliminary deadline · **Finals** = Nov–Dec hardening · **Roadmap** = pitch only
 
 ---
 
-## 0. Prototype portal selections (authoritative for the Oct 31 form)
+## 0. Prototype portal selections (authoritative for the preliminary form (deadline Nov 20))
 
-> **Rule:** tick an item only if it earns points (under the cap or a bonus) **and** will really exist by Oct 31. §1–5 below are the full design; anything tagged *Finals* there is **not** entered in the preliminary form.
+> **Rule:** tick an item only if it earns points (under the cap or a bonus) **and** will really exist by the Nov 20 deadline. §1–5 below are the full design; anything tagged *Finals* there is **not** entered in the preliminary form.
 
-| Form section | Tick for Oct 31 | Finals only (not in the form yet) |
+| Form section | Tick for Nov 20 | Finals only (not in the form yet) |
 |---|---|---|
 | Data sources | Internal · External APIs · Public Web · Open Datasets · User Uploads · Synthetic | IoT / Sensor |
 | Acquisition | Web Scrapers · AI Extraction · MCP · Bulk Upload · Automated Flows · API Pull | RSS · OCR (the vision model does it) · Speech-to-Text |
@@ -47,7 +47,7 @@
 | User Uploads / Bulk Import | ✅ | Meal/label/menu photos, voice notes, lab reports, wearable exports, admin knowledge uploads |
 | IoT / Sensor / Streaming | ❌ *(Finals)* | Wearable heart rate, HRV, sleep and steps |
 | Third-party / Partner Data | ❌ | We have no partner data agreements. We're already at 5/5 points for source types, so ticking it gains nothing and a judge could question it |
-| Synthetic / AI-generated Data | ✅ | Simulated patient cohort with injected triggers, generated Bangla/Banglish evaluation sets |
+| Synthetic / AI-generated Data | ✅ | Simulated patient cohort with injected triggers, generated Bangla/English evaluation sets |
 
 ### 1.2 Source catalogue
 
@@ -83,7 +83,7 @@
 | OD-2 | **USDA FoodData Central bulk download** | Offline copy of API-1 for batch knowledge-graph builds | CC0 | MVP |
 | OD-3 | **Wikidata** | Dish ↔ ingredient relations, **Bangla labels** and aliases, cuisine of origin | CC0 | MVP |
 | OD-4 | **Published FODMAP composition tables** (peer-reviewed papers, e.g. Varney et al. 2017) | Fructan/GOS/polyol/lactose/excess-fructose levels per food. *Monash University's app database is proprietary and is not used* | Facts extracted with citation (*verify per paper*) | MVP |
-| OD-5 | **Google Dakshina dataset** (Bengali romanisation subset) | Banglish ↔ Bangla transliteration pairs, so "kacchi", "bhorta" and "dal" resolve to dishes | CC BY-SA 4.0 | MVP |
+| OD-5 | ~~**Google Dakshina dataset** (Bengali romanisation subset)~~ | Dropped 2026-11-07 (Banglish is no longer a supported input language). English-letter dish names such as "kacchi" and "bhorta" are covered by the reviewed dish aliases | CC BY-SA 4.0 | — |
 | OD-6 | **Mozilla Common Voice: Bengali** | Evaluate voice-logging speech recognition accuracy (evaluation only) | CC0 | Finals |
 | OD-7 | **IBDMDB / HMP2 public metadata** (Inflammatory Bowel Disease Multi'omics Database) | Real longitudinal IBD disease-activity and diet-questionnaire data, used to **calibrate and sanity-check** the synthetic cohort and early-warning score | Public research data (*verify terms of use*) | Finals |
 | OD-8 | **Open food-image datasets** with Bangladeshi/South Asian dishes (Kaggle / Hugging Face) | Evaluate dish recognition. We use a vision-language model and don't train a vision model from scratch | *Select only datasets with a clear licence* | MVP (eval) |
@@ -93,7 +93,7 @@
 | ID | Input | Use | Tier |
 |---|---|---|---|
 | UP-1 | **Meal, plate, menu and label photos** | Main input to the hero flow (vision → dishes/ingredients) | MVP |
-| UP-2 | **Voice notes** (Bangla / English / Banglish) | Hands-free meal logging and check-ins | MVP |
+| UP-2 | **Voice notes** (Bangla / English) | Hands-free meal logging and check-ins | MVP |
 | UP-3 | **Lab report photos/PDFs** | Extract CRP, calprotectin, Hb and albumin trends for the early warning and pre-visit report | Finals |
 | UP-4 | **Wearable export files** (Google Takeout Fitbit / Samsung Health CSV/JSON) | Wearable signals without a live API integration | MVP (demo) |
 | UP-5 | **Admin knowledge upload** | Team uploads guideline PDFs and curated dish lists, which trigger the ingestion pipeline | MVP |
@@ -110,8 +110,8 @@
 |---|---|---|---|---|
 | SYN-1 | **Synthetic IBD patient cohort** (e.g. 500 patients × 180 days) | Python simulator: diets drawn from real Bangladeshi dishes (OD-1/OD-3), symptom model with **known injected triggers**, noise and confounders (stress, sleep, missed doses, menstrual cycle), parameters taken from literature | Validates Trigger Discovery (precision/recall, days-to-detection); trains early-warning v1; runs the federated-learning simulation | MVP |
 | SYN-2 | **Demo persona history** | 60-day history for the video persona, generated by SYN-1 | Believable, honest demo | MVP |
-| SYN-3 | **Bangla/Banglish evaluation utterances** | Generated with an LLM (local Llama 3.2 in a GPU session, or a free cloud tier), then reviewed by the team | Tests voice/text understanding and dish-name resolution | MVP |
-| SYN-4 | **Red-flag test suite** | Paraphrases of emergency symptoms in Bangla, English and Banglish, generated and then reviewed | Safety tests (target: 100% recall) | MVP |
+| SYN-3 | **Bangla/English evaluation utterances** | Generated with an LLM (local Llama 3.2 in a GPU session, or a free cloud tier), then reviewed by the team | Tests voice/text understanding and dish-name resolution | MVP |
+| SYN-4 | **Red-flag test suite** | Paraphrases of emergency symptoms in Bangla and English (plus romanised-Bangla phrases as a safety net), generated and then reviewed | Safety tests (target: 100% recall) | MVP |
 | SYN-5 | **Guideline Q&A evaluation set** | Question–answer–source triples generated from Rule Cards, then reviewed | RAG retrieval and faithfulness evaluation | MVP |
 
 ### 1.3 Deliberately **not** used
@@ -126,7 +126,7 @@
 ### 1.4 Portal text: "Data source details"
 > Plain text, ready to paste.
 
-HappyGut's prototype combines six types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, and open-access ESPEN, IOIBD and AGA guideline documents. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, and Google's Dakshina dataset for Banglish-to-Bangla transliteration. User uploads: meal, menu and label photos, plus a team-captured set of about 300 real Bangladeshi meal photos used as our test set. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and human-reviewed Bangla/Banglish, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records. Wearables, voice notes, lab reports and a Bangladeshi medicine registry are planned for the finals phase.
+HappyGut's prototype combines six types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, and open-access ESPEN, IOIBD and AGA guideline documents. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, and Google's Dakshina dataset for Banglish-to-Bangla transliteration. User uploads: meal, menu and label photos, plus a team-captured set of about 300 real Bangladeshi meal photos used as our test set. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and human-reviewed Bangla/English, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records. Wearables, voice notes, lab reports and a Bangladeshi medicine registry are planned for the finals phase.
 
 ---
 
@@ -144,7 +144,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 | RSS / Atom Feeds | ❌ *(Finals)* | PubMed saved-search and journal feeds for new IBD diet research (Finals) |
 | Email Inbox | ❌ | Not needed |
 | OCR | ❌ | The vision-language model reads labels and menus; Tesseract and lab-report OCR are Finals |
-| Speech-to-Text | ❌ *(Finals)* | Bangla/English/Banglish voice logging |
+| Speech-to-Text | ❌ *(Finals)* | Bangla/English voice logging |
 
 ### 2.2 Scrapers / crawlers
 - **Scrapy spiders**: Wikipedia Bangladeshi and Bengali cuisine categories, English and Bangla
@@ -195,7 +195,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → human review
 - Wikipedia text → LLM → dish–ingredient graph candidates with provenance → human review
 - Lab reports: OCR + LLM → LOINC-coded values (Finals)
-- Voice: faster-whisper (local GPU) → Banglish transliteration (Dakshina) → intent and entity extraction
+- Voice: faster-whisper (local GPU) → intent and entity extraction
 - Every output is validated against a Pydantic schema; low confidence → ⚪ "Not sure" or human review
 
 ## 3. Parsing, formats and cleaning
@@ -247,7 +247,6 @@ HappyGut's prototype combines six types of data source, each with a documented l
 
 ### 3.4 Data cleaning and enrichment
 - Bangla text: Unicode NFC normalisation, Bangla ↔ ASCII digits (০–৯), zero-width character cleanup
-- Banglish → Bangla transliteration (Dakshina-based) before matching
 - Units: nutrients per 100 g edible portion; kJ ↔ kcal; mg / g harmonised
 - Local portions → grams (plate, bati, cup, piece)
 - Entity resolution: dish names across Wikipedia EN/BN, Wikidata, food table, USDA and user text → one canonical dish ID
@@ -326,7 +325,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 ### 4.4 Indexes
 - B-tree: `(patient_id, created_at DESC)` on all event tables
 - GIN: JSONB dishes/evidence, tsvector full text
-- pg_trgm trigram: Bangla and Banglish name search (Postgres has no Bangla stemmer)
+- pg_trgm trigram: Bangla and English name search, including English-letter spellings of dish names (Postgres has no Bangla stemmer)
 - HNSW (pgvector, cosine, m=16, ef_construction=64): chunk embeddings
 - BRIN: wearable timestamps *(Finals)*
 - Partial index: unresolved red-flag events
@@ -448,7 +447,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Metrics: trigger recovery precision / recall / F1 and days-to-detection
 - Metrics: flare model AUROC, AUPRC, Brier score, calibration curve, alert lead time
 - Metrics: red-flag recall (target 100%); p90 scan-to-verdict latency (< 5 s)
-- Bias slices: Bangla vs English vs Banglish input, sex, disease phenotype
+- Bias slices: Bangla vs English input, sex, disease phenotype
 - Honesty: flare-model and trigger results are reported as results on simulated data
 
 **Non-AI analytics**
@@ -456,7 +455,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Hard overrides before any LLM output: stricturing Crohn's (insoluble fibre, skins, seeds, nuts → 🔴); red-flag symptoms → escalation
 - Clinical indices: Harvey-Bradshaw Index and SCCAI computed from check-in items with standard published activity thresholds
 - Early warning v0: rule score (index rise, blood, missed doses, weight loss past a threshold)
-- Red-flag rule set: structured answers + Bangla/English/Banglish keyword patterns, run before the LLM
+- Red-flag rule set: structured answers + Bangla/English keyword patterns (romanised-Bangla phrases kept as a safety net), run before the LLM
 - SQL aggregations: medication adherence %, symptom-free days and streaks, weekly averages, exposures per component
 - Evaluation statistics: bootstrap 95% confidence intervals on every metric
 - Evaluation statistics: McNemar's test, verdict engine vs an LLM-only baseline
@@ -648,4 +647,4 @@ HappyGut's prototype combines six types of data source, each with a documented l
 | DA3 | Dish recognition uses a vision-language model; image datasets are for evaluation only | Free-tier budget, no time to train a vision model, and zero-shot VLMs handle new dishes |
 | DA4 | Team-captured meal photos are the primary test set | Fully licensed, and genuinely Bangladeshi meals |
 | DA5 | Synthetic data is always labelled; real longitudinal data (IBDMDB) only calibrates it | Rigour without fabricated results |
-| DA6 | Portal ticks only for items that earn points **and** exist by Oct 31 (§0); the full design stays in §1–5 with Finals tags | Avoids overbuilding and claims we can't demo |
+| DA6 | Portal ticks only for items that earn points **and** exist by the Nov 20 deadline (§0); the full design stays in §1–5 with Finals tags | Avoids overbuilding and claims we can't demo |

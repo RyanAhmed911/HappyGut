@@ -6,13 +6,13 @@
 - Scraped / crawled: Wikipedia Bangladeshi cuisine pages, English + Bangla (CC BY-SA); open-access ESPEN, IOIBD and AGA guideline documents
 - Open datasets: Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0), published FODMAP composition tables, Google Dakshina (CC BY-SA)
 - User uploads: meal / menu / label photos; ~300 team-captured Bangladeshi meal photos (test set)
-- Synthetic (always labelled): simulated IBD patient cohort with injected triggers; generated Bangla/Banglish, red-flag and guideline Q&A evaluation sets
+- Synthetic (always labelled): simulated IBD patient cohort with injected triggers; generated Bangla/English, red-flag and guideline Q&A evaluation sets
 - Not used: proprietary databases (e.g. Monash FODMAP), social-media health posts, real patient records
 
 ## AI models
 - Gemini Flash (free tier): meal / label vision, Bangla/English explanations, meal plans, weekly summaries
 - Llama (Groq free tier): fast routing, red-flag second check, fallback explainer; local Llama 3.1 8B for English test utterances (GPU job)
-- Gemma 3 12B (local, GPU job): Bangla/Banglish dish-name variants, test utterances and Bangla draft strings
+- Gemma 3 12B (local, GPU job): Bangla dish-name variants, English-letter spellings, test utterances and Bangla draft strings
 - Qwen3 14B (local, GPU job): Rule Card and dish enrichment drafts, contextual chunk headers
 - DeepSeek-R1-0528-Qwen3-8B (distill) (local, GPU job): LLM-as-judge for the evaluation run
 - BGE-M3 (fine-tuned for dish names) + bge-reranker-v2-m3 + Bengali NER: embeddings, reranking, PII detection (CPU)
@@ -26,7 +26,7 @@
 - Stricturing Crohn's safety rules applied before any AI output
 - Privacy: PII stripped inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
 - Free-tier cloud APIs only receive food photos and de-identified text
-- Bias checks: metrics broken down by language (Bangla / English / Banglish), sex and disease phenotype; native-speaker review of Bangla output
+- Bias checks: metrics broken down by language (Bangla / English), sex and disease phenotype; native-speaker review of Bangla output
 - Transparency: evidence bar, citations, SHAP factors on alerts, model/data cards, prompt and model versions logged per verdict
 - Honesty: simulated-data results always labelled; no fabricated traction or outcomes
 - Human oversight: humans approve AI-extracted knowledge and review every AI-generated code change

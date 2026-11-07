@@ -1,4 +1,4 @@
-# Portal text: AI detail usage (prototype, Oct 31)
+# Portal text: AI detail usage (prototype, Nov 20)
 
 > Paste-ready lists. Same rule as the data section: list only what's really used. Exact model versions are pinned after the Step 2 benchmark. Write the version names you actually run; don't copy placeholder names.
 
@@ -18,7 +18,7 @@
   - evaluation judge
 - Role prompting with hard boundaries: "clinical nutrition evidence explainer". Never says "safe", never diagnoses, never gives medication advice
 - Structured outputs: every prompt returns JSON matching a Pydantic schema; invalid output is retried with the validation error fed back (Instructor)
-- Few-shot: 3–5 curated examples per task (mixed Bangladeshi plate, Bangla label, Banglish text, blurry photo → ⚪ "Not sure")
+- Few-shot: 3–5 curated examples per task (mixed Bangladeshi plate, Bangla label, Bangla text, blurry photo → ⚪ "Not sure")
 - Grounded generation: the explainer only sees evidence objects with IDs, must cite an ID for every claim, and must say so when evidence is insufficient
 - Quote-then-answer: extraction prompts copy the exact source sentence before producing a Rule Card (reduces hallucination)
 - Minimal chain-of-thought: the verdict logic lives in the deterministic engine, so prompts don't need long reasoning. Faster and cheaper, with nothing hidden in model reasoning
@@ -81,7 +81,7 @@
 
 **GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
 - Qwen3 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
-- Gemma 3 12B: Bangla/Banglish spelling variants and aliases for dish names; Bangla/Banglish test utterances; Bangla draft strings for human review. The strongest Bangla of the local options that fit in 12 GB
+- Gemma 3 12B: Bangla spelling variants and English-letter spellings of dish names; Bangla test utterances; Bangla draft strings for human review. The strongest Bangla of the local options that fit in 12 GB
 - Llama 3.1 8B: English test utterances and red-flag paraphrases for the evaluation sets
 - DeepSeek-R1-0528-Qwen3-8B (distill): LLM-as-judge for the full evaluation run (does the evidence support each claim?)
 
@@ -106,7 +106,7 @@
 **Two retrieval paths, fused into one evidence packet**
 
 Graph path (food facts and personal history)
-- Dish resolution: Banglish → Bangla → canonical dish ID (pg_trgm + BGE-M3 name embeddings)
+- Dish resolution: Bangla or English name (including English-letter spellings such as "kacchi") → canonical dish ID (pg_trgm + BGE-M3 name embeddings)
 - Neo4j traversal: Dish → Ingredient → Component (level per 100 g)
 - Rule Cards matching (component, phenotype, disease state) → cited Papers
 - Patient REACTS_TO edges (personal evidence) + GENTLER_ALTERNATIVE dishes
@@ -118,7 +118,7 @@ Text path (guideline passages for the explanation)
 - Contextual RAG: Qwen3 14B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
 - Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
 - Index: pgvector HNSW (cosine, m=16, ef_construction=64)
-- Keyword search: Postgres tsvector (English) + pg_trgm (Bangla/Banglish)
+- Keyword search: Postgres tsvector (English) + pg_trgm (Bangla and dish-name spellings)
 - Metadata filters: licence, phenotype, disease state, document type
 - Query: built from structured facts (component + phenotype + state), not raw user text
 - Hybrid fusion: Reciprocal Rank Fusion, top 50 → bge-reranker-v2-m3 → top 5
@@ -133,7 +133,7 @@ Evaluation
 - Ablation table: naive vector → + contextual headers → + hybrid → + reranker
 
 ## MCP usage
-> **Status: PLANNED.** Fill in the portal only for servers that run by Oct 31. Repo/deploy URLs and "# endpoints actually called" come from the real build.
+> **Status: PLANNED.** Fill in the portal only for servers that run by the Nov 20 deadline. Repo/deploy URLs and "# endpoints actually called" come from the real build.
 
 ### Built
 **happygut-foodgraph** · tick "Reused across multiple projects / clients"
@@ -143,7 +143,7 @@ Evaluation
 - Repo / deploy URL: GitHub repo path `services/mcp` + Hugging Face Spaces URL *(after build)*
 - Purpose: exposes the HappyGut Food Knowledge Graph (Bangladeshi dishes → ingredients → gut-relevant components → cited IBD Rule Cards) as read-only tools, so the app's agent, our dev tools and clinicians' AI clients share one trusted source of food evidence instead of duplicating graph queries. No patient data.
 - Tools:
-  - `search_dish(query, lang)`: Bangla/English/Banglish name → canonical dishes
+  - `search_dish(query, lang)`: Bangla/English name → canonical dishes
   - `get_components(dish_id)`: ingredients, component levels, sources
   - `explain_verdict_path(dish_id, phenotype, state)`: graph path dish → component → Rule Card → paper
 
@@ -286,7 +286,7 @@ Evaluation
 
 ## Fine-tuning / adaptation
 - Embedding fine-tuning (GPU job on Ubuntu, ROCm PyTorch): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
-  - Training pairs: Banglish / Bangla / English dish names ↔ canonical dish IDs, from Dakshina transliterations, graph aliases and reviewed synthetic spellings
+  - Training pairs: Bangla / English dish names (including English-letter spellings) ↔ canonical dish IDs, from graph aliases and reviewed synthetic spellings
   - Measured by dish-resolution Recall@1 against the base model
 - Adaptation without weight changes: few-shot examples of Bangladeshi dishes, a Bangla medical glossary in prompts, retrieval grounding
 - Finals: QLoRA (PEFT + bitsandbytes, fits 12 GB VRAM) on a small Gemma/Qwen model for Bangla explanation style, trained on team-reviewed explanations
@@ -296,8 +296,8 @@ Evaluation
 - ~200-food verdict set, labelled by the team from Rule Cards
 - ~300 team meal photos with dish labels
 - ~100 guideline Q&A pairs with sources
-- Red-flag suite (Bangla / English / Banglish)
-- Banglish dish-name set
+- Red-flag suite (Bangla / English)
+- Dish-name set (Bangla names and English-letter spellings)
 - Simulated patient cohort
 
 **Methods**
@@ -405,7 +405,7 @@ GitHub Actions
 
 **Local models we actually ran** (tick the exact versions you ran)
 - ✅ Qwen3 14B (*add* "Qwen3" if the list only shows Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
-- ✅ Gemma 3 12B (*add*): Bangla/Banglish dish-name variants and aliases, Bangla/Banglish test utterances, Bangla draft strings
+- ✅ Gemma 3 12B (*add*): Bangla dish-name variants and English-letter spellings, Bangla test utterances, Bangla draft strings
 - ✅ Llama 3.1 8B (Llama 3 / 3.1 / 3.2): English test utterances and red-flag paraphrases
 - ✅ DeepSeek-R1-0528-Qwen3-8B (distill) (*add*): LLM-as-judge for the evaluation run
 
@@ -422,7 +422,7 @@ GitHub Actions
 ## Agentic frameworks used
 - ✅ LangGraph: orchestrates the meal-check graph (sentinel → privacy → perception → resolver → retrieval → verdict engine → explainer → guard), the dietitian generator–critic loop, interrupts, Postgres checkpointing
 - ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
-- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and Banglish sets, run with free cloud models or in a GPU batch session. Tick only if done
+- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and dish-name sets, run with free cloud models or in a GPU batch session. Tick only if done
 - ✅ CrewAI: offline knowledge-curation crew for Rule Cards, run on free cloud models (Groq)
   - Researcher agent: finds passages via Europe PMC + guideline RAG
   - Extractor agent: drafts the Rule Card with an exact quote
@@ -457,7 +457,7 @@ GitHub Actions
 ## Anything else about your AI usage?
 - Core design principle: "AI perceives and explains, a deterministic engine decides". Every verdict is reproducible, unit-tested and explainable, so the LLM can't invent a medical judgement
 - Personal AI, not generic AI: the Personal Gut Graph learns each patient's own triggers from their logs (Bayesian N-of-1) instead of giving one-size-fits-all IBD diet rules
-- Bangla-first AI: Bangla / English / Banglish input, Bangladeshi dish knowledge graph, Bangla medical glossary, native-speaker review of all generated Bangla
+- Bangla-first AI: Bangla / English input, Bangladeshi dish knowledge graph, Bangla medical glossary, native-speaker review of all generated Bangla
 - Honest evaluation: results on simulated patients are always labelled as simulated; real-data claims are made only where we measured them
 - Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
 - Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording

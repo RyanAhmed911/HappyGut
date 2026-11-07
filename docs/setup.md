@@ -106,9 +106,9 @@ Ubuntu is used only for GPU jobs that you start and that finish on their own. It
 | Job | Model / runtime | Output | When |
 |---|---|---|---|
 | G1 Contextual headers | Qwen3 14B (Ollama) | headers for every guideline chunk | Step 1 |
-| G2 Bangla aliases | Gemma 3 12B (Ollama) | Bangla/Banglish name variants for dishes (reviewed before use) | Step 1 |
+| G2 Bangla aliases | Gemma 3 12B (Ollama) | Bangla name variants and English-letter spellings for dishes (reviewed before use) | Step 1 |
 | G3 Corpus embeddings | BGE-M3 (ROCm PyTorch) | vectors for chunks, Rule Cards, dish names | Step 1 |
-| G4 Test utterances | Gemma 3 12B (Bangla/Banglish) + Llama 3.1 8B (English) | synthetic test inputs (reviewed) | Step 4 |
+| G4 Test utterances | Gemma 3 12B (Bangla) + Llama 3.1 8B (English) | synthetic test inputs (reviewed) | Step 4 |
 | G5 Evaluation judge | DeepSeek-R1 8B (Qwen3-based distill) (Ollama) | judge scores for the evaluation run | Step 4 |
 | G6 Dish-name fine-tune | BGE-M3 + sentence-transformers (ROCm PyTorch) | fine-tuned encoder pushed to Hugging Face | Step 4 |
 
@@ -138,7 +138,7 @@ ss -ltnp | grep 11434             # must show 127.0.0.1:11434 (not 0.0.0.0)
 ```bash
 ollama list                    # remove any small models from earlier with: ollama rm <name>
 ollama pull qwen3:14b          # ~9.3 GB G1 contextual headers (thinking switched off in the job)
-ollama pull gemma3:12b         # ~8 GB  G2 Bangla aliases, G4 Bangla/Banglish test inputs
+ollama pull gemma3:12b         # ~8 GB  G2 Bangla aliases, G4 Bangla test inputs
 ollama pull llama3.1:8b        # ~5 GB  G4 English test inputs
 ollama pull deepseek-r1:8b     # ~5 GB  G5 evaluation judge (R1-0528 distill on Qwen3 8B)
 ollama ps                      # after any run: PROCESSOR should say 100% GPU (a CPU/GPU split means it doesn't fit)
@@ -146,7 +146,7 @@ ollama ps                      # after any run: PROCESSOR should say 100% GPU (a
 ```
 Bangla quality check (one model loads at a time):
 ```bash
-ollama run gemma3:12b "Write only the answer, in Bangla script. Give 5 common ways Bangladeshis spell 'kacchi biryani' in Banglish, then its Bangla name."
+ollama run gemma3:12b "Write only the answer, in Bangla script. Give 5 common ways Bangladeshis spell 'kacchi biryani' in English letters, then its Bangla name."
 ollama run gemma3:12b "Rewrite in standard Bangla script, nothing else: ajke dupure kacchi khaisi, pete ektu betha"
 ```
 

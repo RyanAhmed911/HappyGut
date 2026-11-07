@@ -111,9 +111,12 @@ docker-compose.yml   optional local n8n for development
   - `POST /meal-checks` (SSE)
   - `GET /meal-checks/{id}`
   - `POST /meal-checks/{id}/feedback`
-  - `POST /checkins`
+  - `POST /checkins` (the nightly diary: foods, reactions, stool, sleep, stress, doses)
   - `GET /insights/triggers`
   - `GET /insights/flare-risk`
+  - `GET /insights/patterns` (Flare Pattern Finder, spec 003)
+  - `GET /insights/periods` (remission / flare timeline and per-period summaries, spec 003)
+  - `POST /stress-periods`
   - `POST /reports/previsit`
   - `GET /foods/search`
   - `GET /health`

@@ -1,6 +1,6 @@
 # HappyGut Roadmap: from plan to finals
 
-> Living document. Tick steps off as they finish. Dates are targets; **Oct 31 is fixed.**
+> Living document. Tick steps off as they finish. Dates are targets. **Fixed dates (AIBC Participants Guide):** team preliminary submission closes **20 Nov 2026**, selection announced **25 Nov**, finals **26 Dec**. We submit a day early, on **19 Nov**.
 
 ## Planning and design steps
 
@@ -12,21 +12,21 @@
 | **4. UX & Bangla design** | Sep 29–Oct 3 | `04-ux.md` + Figma: hero-flow screens, verdict card, check-in, Bangla copy, low-bandwidth rules | ⏳ |
 | **5. Evaluation & safety plan** | Oct 1–4 | `05-evaluation.md`: test sets, metrics, red-flag suite, bias slices | ⏳ |
 
-## Build plan (Oct 21 → Oct 30)
-Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.md). Architecture: [`02-architecture.md`](02-architecture.md). Rules: [`../.specify/memory/constitution.md`](../.specify/memory/constitution.md).
+## Build plan (Nov 7 → Nov 19)
+Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.md). Architecture: [`02-architecture.md`](02-architecture.md). Rules: [`../.specify/memory/constitution.md`](../.specify/memory/constitution.md). Scope changes of 2026-11-07 (Bangla + English only, nightly diary, sleep, stress, Flare Pattern Finder, remission / flare periods): [`01-strategy.md`](01-strategy.md) §12.
 
 | Day | Step | Spec | Done means | Status |
 |---|---|---|---|---|
 | Oct 21 | **0. Foundation** | — | Accounts ready, dev setup on Windows ([`setup.md`](setup.md)); skeleton, constitution, AGENTS.md, skills, specs 001–002 pushed | 🟡 Repo part done; accounts pending |
-| Oct 22–23 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | ~50 dishes + ~25 Rule Cards in Neo4j; contextual hybrid RAG in pgvector; foodgraph MCP | 🟡 Drafts done (61 dishes, 25 Rule Cards); team review via [`seed-review.md`](seed-review.md) |
-| Oct 23–25 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text → Bangla verdict card with citations, end to end on a phone | 🟡 Verdict engine + red-flag sentinel done (62 tests) |
-| Oct 25–26 | **3. Personal layer** | 003 | Check-in, simulated cohort, Trigger Discovery, early-warning score, "My Gut" | ⏳ |
-| Oct 26–27 | **4. Proof** | 004 | Eval sets, red-flag suite, RAG ablation, Eval Lab; remaining MCP servers; n8n | ⏳ |
-| Oct 28 | **5. Ship** | — | Deployed URL, demo account, /docs, clinician PDF, Figma prototype | ⏳ |
-| Oct 29 | **6. Video** | — | 180s video on YouTube + Facebook, 1-page summary | ⏳ |
-| Oct 30 | **7. Reconcile & submit** | — | Checklist in `portal/submission-scope.md` §4 done; submitted a day early | ⏳ |
+| Nov 7–9 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | Demo dishes + stricture Rule Cards approved first, then the rest; loader (T013) puts them in Neo4j + pgvector; foodgraph MCP | 🟡 Drafts done (61 dishes, 25 Rule Cards, 0 approved); graph, schema, MCP and GPU jobs G2/G3 done |
+| Nov 9–11 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text (Bangla or English) → Bangla verdict card with citations, end to end on a phone | 🟡 Verdict engine + red-flag sentinel done (62 tests); API and PWA not started |
+| Nov 11–14 | **3. Personal layer** | [003](../specs/003-personal-layer/spec.md) | Nightly diary (foods, reactions, stool, HBI/SCCAI, sleep, stress, doses), stressful periods, simulated cohort + demo persona, Flare Pattern Finder, remission / flare timeline and tabs, flare-risk v0, "My Gut" | 🟡 Spec written; Bayesian trigger model exists for food components |
+| Nov 14–15 | **4. Proof** | 004 | Eval sets, red-flag suite, trigger / pattern recovery on the simulated cohort, LightGBM + SHAP outlook (B), RAG ablation, Eval Lab | ⏳ |
+| Nov 16–17 | **5. Ship** | — | Deployed URL, demo account, /docs, clinician PDF, Figma prototype | ⏳ |
+| Nov 18 | **6. Video** | — | 180s video on YouTube + Facebook, 1-page summary | ⏳ |
+| Nov 19 | **7. Reconcile & submit** | — | Checklist in `portal/submission-scope.md` §4 done; submitted a day early | ⏳ |
 
-**Cut order if behind:** smolagents → CrewAI → DSPy → embedding fine-tune → research MCP → LightGBM → dietitian agent. Never cut: hero flow, evals, video.
+**Cut order if behind:** smolagents → CrewAI → DSPy → embedding fine-tune → research MCP → dietitian agent → LightGBM outlook (keep the Bayesian Pattern Finder) → per-period patterns (keep the period timeline). Never cut: hero flow, nightly diary, evals, video.
 
 ## Proposed role mapping (fill in names)
 

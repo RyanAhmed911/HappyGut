@@ -2,27 +2,30 @@
 
 This file is the shared memory for every coding agent on this repo (Claude Code, Cursor, Lovable, Codex and others). `CLAUDE.md` imports it.
 
-HappyGut is an AI-native chronic-care companion for people with Inflammatory Bowel Disease (Crohn's disease, ulcerative colitis), built for the International AI Builders Congress 2026 (HealthSphere AI · ChronicCare AI). Preliminary deadline: **2026-10-31**. Finals: **2026-12-26**.
+HappyGut is an AI-native chronic-care companion for people with Inflammatory Bowel Disease (Crohn's disease, ulcerative colitis), built for the International AI Builders Congress 2026 (HealthSphere AI · ChronicCare AI). Team preliminary deadline: **2026-11-20** (selection announced 2026-11-25, per the AIBC Participants Guide). Finals: **2026-12-26**.
 
 ## Read first
 - `.specify/memory/constitution.md`: the rules (they override everything else)
 - `docs/02-architecture.md`: system, verdict engine, repo layout, decisions
-- `docs/portal/submission-scope.md`: what is tier A / B / C for the Oct 31 prototype
+- `docs/portal/submission-scope.md`: what is tier A / B / C for the preliminary prototype
 - `docs/00-roadmap.md`: current step
+- `specs/003-personal-layer/spec.md`: nightly diary, sleep and stress tracking, Flare Pattern Finder, remission / flare periods
 
 ## Hero flow (protect this above everything else)
-Snap a Bangladeshi dish or label, or type Bangla/English/Banglish → **personal verdict** (🟢 Likely OK for you / 🟡 Caution / 🔴 Likely trigger for you / ⚪ Not sure) with *why*, citations and an alternative → log meal → Personal Gut Graph updates.
+Snap a Bangladeshi dish or label, or type Bangla/English → **personal verdict** (🟢 Likely OK for you / 🟡 Caution / 🔴 Likely trigger for you / ⚪ Not sure) with *why*, citations and an alternative → log meal → Personal Gut Graph updates.
+
+Every night the **nightly diary** collects the day's foods, food reactions, stool details, sleep and stress. The **Flare Pattern Finder** learns which foods and habits are linked to this person's worse days, and **My Gut** shows remission and flare periods separately.
 
 ## Non-negotiable product rules
 1. Never label a food "safe". Use the graded verdicts above.
 2. The LLM does perception and explanation; the **verdict is computed by the deterministic, unit-tested engine** in `engine/`.
-3. Every health claim cites retrieved evidence. No evidence → ⚪ "Not sure".
+3. Every health claim cites retrieved evidence. No evidence → ⚪ "Not sure". Personal patterns (foods, sleep, stress) are "linked to" or "likely contributors", never "caused", and need ≥ 3 exposures.
 4. Stricturing Crohn's rules (avoid insoluble fibre, skins, seeds, nuts) apply before any LLM output.
 5. Red-flag symptoms (heavy bleeding, fever + abdominal pain, signs of obstruction, severe dehydration) → stop diet advice and escalate to a clinician or emergency care.
 6. Never suggest starting, stopping or changing medication.
 7. Scrub PII inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud LLM call. The local GPU is never a server: it runs finite GPU jobs on Ubuntu that exchange files with Windows through git. Secrets and day-to-day work stay on Windows; the live app runs on cloud services. Never commit real patient data or secrets. Synthetic data is flagged `is_synthetic` and labelled "simulated".
 8. Only legally licensed data sources; record each licence in `docs/03-data.md` before ingesting.
-9. Every user-facing string exists in Bangla and English (i18n files).
+9. Every user-facing string exists in Bangla and English (i18n files). Supported input languages are Bangla and English; Banglish sentences are not supported, but English-letter dish names ("kacchi") stay in dish search and romanised red-flag phrases stay in the sentinel.
 10. Free tiers with no card only. No Google Cloud / Vertex, AWS or paid domains.
 
 ## Conventions

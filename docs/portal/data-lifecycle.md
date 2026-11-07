@@ -1,4 +1,4 @@
-# Portal text: Data lifecycle (prototype, Oct 31)
+# Portal text: Data lifecycle (prototype, Nov 20)
 
 > Paste-ready lists for the preliminary form. Source of truth: `docs/03-data.md` §0. Anything not listed here is a Finals item.
 
@@ -31,7 +31,7 @@
 
 **Synthetic data**
 1. Simulated IBD patient cohort (with known injected food triggers)
-2. Generated Bangla/Banglish evaluation sets
+2. Generated Bangla/English evaluation sets
 3. Red-flag and guideline Q&A evaluation sets
 
 ## 2. Acquisition
@@ -98,7 +98,6 @@
 
 **Data cleaning & enrichment**
 - Bangla Unicode NFC normalisation, Bangla ↔ ASCII digits, zero-width character cleanup
-- Banglish → Bangla transliteration (Dakshina) before matching
 - Nutrient units normalised per 100 g edible portion (kJ↔kcal, mg/g)
 - Local portions → grams (plate, bati, cup, piece)
 - Entity resolution: dish names across Wikipedia EN/BN, Wikidata, food table, USDA and user text → one canonical dish ID
@@ -148,7 +147,7 @@
 **Indexes**
 - B-tree (patient_id, created_at DESC) on event tables
 - GIN on JSONB and tsvector
-- pg_trgm trigram for Bangla/Banglish name search (Postgres has no Bangla stemmer)
+- pg_trgm trigram for Bangla and English name search, including English-letter spellings of dish names (Postgres has no Bangla stemmer)
 - HNSW (cosine, m=16, ef_construction=64) on embeddings
 - Partial index on unresolved red-flag events
 - Neo4j: unique constraints on IDs; full-text index on EN/BN names and aliases
@@ -230,7 +229,7 @@
 - Metrics: trigger recovery precision / recall / F1 and days-to-detection
 - Metrics: flare model AUROC, AUPRC, Brier score, calibration curve, alert lead time
 - Metrics: red-flag recall (target 100%); p90 scan-to-verdict latency (< 5 s)
-- Bias slices: Bangla vs English vs Banglish input, sex, disease phenotype
+- Bias slices: Bangla vs English input, sex, disease phenotype
 - Honesty: flare-model and trigger results are reported as results on simulated data
 
 **Non-AI analytics**
@@ -238,7 +237,7 @@
 - Hard overrides before any LLM output: stricturing Crohn's (insoluble fibre, skins, seeds, nuts → 🔴); red-flag symptoms → escalation
 - Clinical indices: Harvey-Bradshaw Index and SCCAI computed from check-in items with standard published activity thresholds
 - Early warning v0: rule score (index rise, blood, missed doses, weight loss past a threshold)
-- Red-flag rule set: structured answers + Bangla/English/Banglish keyword patterns, run before the LLM
+- Red-flag rule set: structured answers + Bangla/English keyword patterns (romanised-Bangla phrases kept as a safety net), run before the LLM
 - SQL aggregations: medication adherence %, symptom-free days and streaks, weekly averages, exposures per component
 - Evaluation statistics: bootstrap 95% confidence intervals on every metric
 - Evaluation statistics: McNemar's test, verdict engine vs an LLM-only baseline
