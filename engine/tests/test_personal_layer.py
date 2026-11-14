@@ -54,6 +54,14 @@ def test_sleep_hours_across_midnight():
     assert sleep_hours("21:00", "05:00") == 8.0
 
 
+def test_usual_bedtime_is_the_median_across_midnight():
+    from happygut_engine import usual_bedtime
+
+    assert usual_bedtime([]) is None
+    assert usual_bedtime(["23:30", "23:50", "00:10", "02:30", "23:40"]) == "23:50"
+    assert usual_bedtime(["00:30", "01:00", "01:30"]) == "01:00"
+
+
 def test_late_night_uses_own_median_after_a_week():
     assert is_late_night("01:30") and not is_late_night("00:30")  # fixed 01:00 at first
     usual = ["23:30"] * 10
@@ -150,17 +158,17 @@ def test_scope_uses_only_days_of_that_period_kind():
 
 MENU = [
     MenuItem("rice", {}),
-    MenuItem("dal", {Component.GOS: Level.MEDIUM}),
+    MenuItem("dal", {Component.GOS: Level.MEDIUM}),  # medium levels are not tracked as exposures
     MenuItem("light curry", {Component.CAPSAICIN_SPICE: Level.LOW}),
     MenuItem("spicy bhorta", {Component.CAPSAICIN_SPICE: Level.HIGH}, weight=0.35),
-    MenuItem("yoghurt", {Component.LACTOSE: Level.MEDIUM}, weight=0.6),
+    MenuItem("lassi", {Component.LACTOSE: Level.HIGH}, weight=0.6),
     MenuItem("biryani", {Component.FAT: Level.HIGH, Component.RED_PROCESSED_MEAT: Level.HIGH}, rich=True),
     MenuItem("fried snack", {Component.FAT: Level.HIGH}, rich=True),
 ]
 TRUTH = SimConfig(
     days=120, seed=11, flare_windows=((44, 57),),
     food_effects={Component.FAT: Effect(2.4, 0.8)},
-    late_night_effect=Effect(1.9, 0.75),
+    late_night_effect=Effect(2.3, 0.9),
     period_effects={"exam": Effect(1.1, 0.7, next_day=0.0)},
     stress_periods=(StressPeriod("exam", "Exams", 38, 52),),
 )
@@ -239,5 +247,5 @@ def test_risk_is_low_on_calm_days_and_names_its_drivers():
     codes = {d.code for d in out.drivers}
     assert out.level in {"raised", "high"} and {"index_trend", "factor", "upcoming_period", "missed_doses"} <= codes
     assert out.score == min(100, sum(d.points for d in out.drivers))
-    late = next(d for d in out.drivers if d.factor == LATE_NIGHT)
-    assert late.count == 2
+    sleep = [d for d in out.drivers if d.factor and d.factor.startswith("sleep:")]
+    assert len(sleep) == 1 and sleep[0].count == 2  # one sleep driver, not three for the same nights

@@ -4,7 +4,7 @@ name_en: "Leafy greens stir-fry"
 name_bn: "শাক ভাজি"
 aliases: ["shak", "shak bhaji"]
 cuisine: Bangladeshi
-category: test
+category: vegetable
 components:
   fat: low
   insoluble_fibre: high

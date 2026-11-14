@@ -4,7 +4,7 @@ name_en: "Kacchi biryani"
 name_bn: "কাচ্চি বিরিয়ানি"
 aliases: ["kacchi", "kachchi biriyani", "কাচ্চি"]
 cuisine: Bangladeshi
-category: test
+category: rice_dish
 components:
   fat: high
   insoluble_fibre: none

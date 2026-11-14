@@ -141,3 +141,14 @@ class PydanticExplainer:
             timeout=self.timeout_s,
         )
         return AgentRun(result.output, result.response.model_name or "unknown", self.prompt.ref)
+
+
+class Unavailable:
+    """Stands in when no model key is configured. Typed text still works (dish names are matched
+    directly and the explanation comes from the cited template); photos report an error."""
+
+    async def perceive(self, *, text: str | None, image: CleanImage | None, lang: str) -> AgentRun[Perception]:
+        raise RuntimeError("no perception model configured")
+
+    async def explain(self, *, packet: dict, lang: str, diagnosis: str) -> AgentRun[Explanation]:
+        raise RuntimeError("no explanation model configured")

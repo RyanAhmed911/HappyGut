@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, TypedDict
+import re
+from typing import Any, AsyncIterator, Awaitable, Callable, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -53,6 +54,10 @@ class State(TypedDict, total=False):
     meal_check_id: str
 
 
+# Separators between dishes in typed text, in English and Bangla.
+_SPLIT = re.compile(r"[,;+&\n।]|\band\b|\bwith\b|(?<=\s)(?:ও|আর|এবং|সাথে|সঙ্গে)(?=\s)", re.I)
+
+
 @dataclass(frozen=True)
 class Event:
     name: str
@@ -60,9 +65,11 @@ class Event:
 
 
 class MealCheckFlow:
-    def __init__(self, knowledge: Knowledge, perceiver: Perceiver, explainer: Explainer, scrubber: Scrubber, store: Store):
+    def __init__(self, knowledge: Knowledge, perceiver: Perceiver, explainer: Explainer, scrubber: Scrubber, store: Store,
+                 personal: Callable[[Patient], Awaitable[dict]] | None = None):
         self.knowledge, self.perceiver, self.explainer, self.scrubber, self.store = (
             knowledge, perceiver, explainer, scrubber, store)
+        self.personal = personal  # the patient's learned food evidence (spec 003); default: the store's
         self.graph = self._build()
 
     # ------------------------------------------------------------ graph
@@ -119,10 +126,11 @@ class MealCheckFlow:
         except Exception as exc:  # every model in the fallback chain failed
             log.warning("perception failed: %s", exc)
             if s.get("image") is None and s.get("scrubbed"):
-                # Text still works without a model: resolve the whole sentence against the dish names.
-                item = PerceivedItem.model_construct(name_en=s["scrubbed"], name_bn=None, confidence=0.8,
-                                                     preparation=None, portion=None)
-                return {"perception": Perception(is_food=True, items=[item]), "perception_model": "none",
+                # Text still works without a model: split the sentence and resolve each part against the dish names.
+                parts = [p.strip() for p in _SPLIT.split(s["scrubbed"]) if p.strip()][:12] or [s["scrubbed"]]
+                items = [PerceivedItem.model_construct(name_en=p, name_bn=None, confidence=0.8, preparation=None,
+                                                       portion=None) for p in parts]
+                return {"perception": Perception(is_food=True, items=items), "perception_model": "none",
                         "perception_prompt": "none"}
             return {"perception": None, "perception_error": "perception_unavailable",
                     "perception_model": "none", "perception_prompt": "none"}
@@ -147,7 +155,7 @@ class MealCheckFlow:
     async def decide(self, s: State) -> State:
         lang, patient = s["lang"], s["patient"]
         pending: list[_Pending] = s["pending"]
-        personal = await self.store.personal_evidence(patient.id)
+        personal = await (self.personal(patient) if self.personal else self.store.personal_evidence(patient.id))
         meal = assess_meal(
             [p.evidence for p in pending], patient.profile, self.knowledge.rules(), personal,
             self.knowledge.alternatives_pool(), DEFAULT_CONFIG,

@@ -39,6 +39,7 @@ class Effect:
     load: float
     probability: float = 0.75
     next_day: float = 0.4  # share of the load carried into the next day
+    min_level: Level = Level.HIGH  # food effects: the level at which the component bothers this person
 
 
 @dataclass(frozen=True)
@@ -189,7 +190,7 @@ def simulate(config: SimConfig, menu: Sequence[MenuItem]) -> list[SimDay]:
         for item, _meal in meals:
             for comp, effect in config.food_effects.items():
                 level = item.components.get(comp)
-                if level is not None and level >= Level.MEDIUM and comp not in fired:
+                if level is not None and level >= effect.min_level and comp not in fired:
                     if apply(effect):
                         fired.add(comp)
                         bothered.add(item.name)
@@ -213,7 +214,8 @@ def simulate(config: SimConfig, menu: Sequence[MenuItem]) -> list[SimDay]:
         # Sleep the night before this day
         bed = (25 * 60 + 15 + rng.uniform(0, 110)) if late else (23 * 60 + 20 + rng.gauss(0, 22))
         hours = rng.uniform(5.0, 6.4) if late else rng.gauss(7.4, 0.5)
-        quality = "poor" if (late and rng.random() < 0.6) or load >= 6 else rng.choice(("good", "good", "ok"))
+        quality = "poor" if late and rng.random() < 0.6 else rng.choice(("good", "good", "ok", "ok", "poor") if in_flare
+                                                                        else ("good", "good", "ok"))
 
         logged = d >= config.days - config.keep_last_days_logged or rng.random() >= config.missing_day_rate
         out.append(SimDay(

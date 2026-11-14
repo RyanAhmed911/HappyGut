@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.fuchka
+name_en: "Fuchka"
+name_bn: "ফুচকা"
+aliases: ["fuchka", "phuchka"]
+cuisine: Bangladeshi
+category: street_food
+components:
+  fat: none
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: high
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

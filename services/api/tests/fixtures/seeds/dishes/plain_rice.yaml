@@ -4,7 +4,7 @@ name_en: "Plain rice"
 name_bn: "সাদা ভাত"
 aliases: ["bhat", "rice"]
 cuisine: Bangladeshi
-category: test
+category: staple
 components:
   fat: none
   insoluble_fibre: none

@@ -55,6 +55,7 @@ def build_evidence(ctx: DishContext, knowledge: Knowledge, lang: str) -> list[di
         "id": f"dish:{v.dish_id}",
         "type": "composition",
         "text": f"Typical recipe of {ctx.name}: {composition or 'no component at medium or high level'}.",
+        "components": [{"component": a.component.value, "level": _level_word(a.level)} for a in notable],
     }]
     seen: set[str] = set()
     for a in sorted(v.components, key=lambda a: -a.risk):
@@ -78,9 +79,14 @@ def build_evidence(ctx: DishContext, knowledge: Knowledge, lang: str) -> list[di
                 "id": f"personal:{a.component.value}",
                 "type": "personal",
                 "component": a.component.value,
+                "exposures": p.exposures,
+                "probability": round(p.p_trigger, 2),
+                "tolerated": a.tolerated,
                 "text": (
                     f"In this person's own diary, {i18n.t(lang, 'component.' + a.component.value)} "
-                    + ("has rarely been followed by symptoms" if a.tolerated else "has often been followed by symptoms")
+                    + ("has rarely been followed by symptoms" if a.tolerated
+                       else "has often been followed by symptoms" if p.p_trigger > 0.8
+                       else "may be linked to symptoms, but it isn't clear yet")
                     + f" ({p.exposures} exposures, linked with probability {p.p_trigger:.2f})."
                 ),
             })

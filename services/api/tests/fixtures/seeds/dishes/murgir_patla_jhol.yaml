@@ -4,7 +4,7 @@ name_en: "Light chicken curry"
 name_bn: "মুরগির পাতলা ঝোল"
 aliases: ["murgir jhol", "chicken jhol"]
 cuisine: Bangladeshi
-category: test
+category: curry
 components:
   fat: low
   insoluble_fibre: none

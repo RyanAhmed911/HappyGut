@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     max_image_bytes: int = 8 * 1024 * 1024
     max_image_side: int = 1536
 
+    # Demo mode: a one-tap demo account with a simulated patient, held in memory (no Supabase needed).
+    demo_mode: bool = False
+    timezone: str = "Asia/Dhaka"
+
     # CORS for the PWA
     cors_origins: list[str] = ["http://localhost:5173"]
 

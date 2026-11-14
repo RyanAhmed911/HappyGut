@@ -19,7 +19,7 @@ def test_health(make_client):
         r = c.get("/v1/health")
     assert r.status_code == 200
     body = r.json()
-    assert body["knowledge"] == {"dishes": 4, "rule_cards": 2, "reviewed_only": True}
+    assert body["knowledge"] == {"dishes": 10, "rule_cards": 2, "reviewed_only": True}
 
 
 def test_auth_required(make_client, issuer):

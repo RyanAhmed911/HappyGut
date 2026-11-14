@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Sequence
 
-from .patterns import (DEFAULT_PATTERN_CONFIG, LIKELY, POSSIBLE, DayRecord, PatternConfig, PatternResult, _exposure)
+from .patterns import (DEFAULT_PATTERN_CONFIG, LIKELY, POSSIBLE, DayRecord, PatternConfig, PatternResult, exposure)
 
 LOW, RAISED, HIGH = "low", "raised", "high"
 
@@ -22,14 +22,15 @@ class RiskConfig:
     version: str = "flare-risk-v0.1"
     lookback_days: int = 3
     horizon_days: int = 3
-    trend_points_per_index_point: int = 10
-    trend_max: int = 40
-    likely_factor_points: int = 12
-    possible_factor_points: int = 6
-    factor_max: int = 36
-    upcoming_period_points: int = 12
-    missed_dose_points: int = 8
-    missed_dose_max: int = 16
+    trend_points_per_index_point: int = 8
+    trend_max: int = 32
+    likely_factor_points: int = 8
+    possible_factor_points: int = 4
+    per_factor_max: int = 16
+    factor_max: int = 40
+    upcoming_period_points: int = 10
+    missed_dose_points: int = 6
+    missed_dose_max: int = 12
     in_flare_points: int = 30
     raised_at: int = 30
     high_at: int = 60
@@ -81,18 +82,24 @@ def flare_risk(
             drivers.append(RiskDriver("index_trend", points, value=round(rise, 1)))
 
     # 2. The person's own contributors that happened in the last few days.
+    # Factors that describe the same thing are counted once: one sleep factor, and not both of two
+    # factors that mostly happen on the same days (high fat and red meat in the same dish).
     factor_points = 0
+    counted: list[PatternResult] = []
     for p in patterns:
         if p.label not in (LIKELY, POSSIBLE) or p.group == "medication":
             continue
-        count = sum(1 for r in recent if _exposure(r, p.factor, pattern_config))
+        if any(c.group == p.group == "sleep" or c.factor in p.overlaps_with or p.factor in c.overlaps_with for c in counted):
+            continue
+        count = sum(1 for r in recent if exposure(r, p.factor, pattern_config))
         if not count:
             continue
         per = risk.likely_factor_points if p.label == LIKELY else risk.possible_factor_points
-        points = min(per * count, risk.factor_max - factor_points)
+        points = min(per * count, risk.per_factor_max, risk.factor_max - factor_points)
         if points <= 0:
             break
         factor_points += points
+        counted.append(p)
         drivers.append(RiskDriver("factor", points, factor=p.factor, count=count))
 
     # 3. A marked stressful period about to start, if that kind of period is one of their contributors.

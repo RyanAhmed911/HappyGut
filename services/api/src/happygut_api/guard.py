@@ -113,7 +113,8 @@ def template_for(ctx: DishContext, lang: str) -> DishExplanation:
         cites += list(v.hard_rule_ids)
     elif reason == "personal":
         text = i18n.t(lang, "template.personal", components=i18n.join(lang, _components(ctx, lang, "personal")))
-        cites += [e["id"] for e in ctx.evidence if e["type"] == "personal"]
+        cites += [e["id"] for e in ctx.evidence if e["type"] == "personal" and not e.get("tolerated")
+                  and e.get("probability", 0) > 0.8]
     elif reason == "guideline":
         text = i18n.t(lang, "template.guideline", name=ctx.name, components=i18n.join(lang, _components(ctx, lang, "guideline")))
         top = next((e for e in ctx.evidence if e["type"] == "guideline"), None)

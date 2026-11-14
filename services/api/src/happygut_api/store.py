@@ -13,7 +13,22 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Protocol
 
-from happygut_engine import Component, Diagnosis, DiseaseState, PersonalEvidence, Profile
+from datetime import date
+
+from happygut_engine import Component, Diagnosis, DiseaseState, ManualFlare, PersonalEvidence, Profile
+
+from .diary import DiaryEntry, StressPeriodOut
+
+
+class NotSupported(Exception):
+    """This storage backend doesn't hold this data yet (the API answers 501)."""
+
+
+@dataclass
+class PeriodDecisions:
+    confirmed: set[date] = field(default_factory=set)  # start dates of flares the user confirmed
+    rejected: set[date] = field(default_factory=set)
+    manual: list[ManualFlare] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -24,6 +39,8 @@ class Patient:
     phenotypes: frozenset[str]
     language: str
     is_synthetic: bool = False
+    display_name: str = ""
+    reminder_time: str = "22:30"
 
     @property
     def profile(self) -> Profile:
@@ -71,6 +88,18 @@ class Store(Protocol):
     async def get_meal_check(self, patient_id: str, meal_check_id: str) -> MealCheckRecord | None: ...
     async def save_feedback(self, patient_id: str, meal_check_id: str, answer: str) -> bool: ...
     async def save_red_flag(self, patient_id: str, categories: list[str]) -> None: ...
+    # Spec 003: diary, stressful periods, period decisions
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None: ...
+    async def list_meal_checks(self, patient_id: str, limit: int = 30) -> list[MealCheckRecord]: ...
+    async def save_diary(self, patient_id: str, entry: DiaryEntry) -> None: ...
+    async def get_diary(self, patient_id: str, day: date) -> DiaryEntry | None: ...
+    async def list_diary(self, patient_id: str) -> list[DiaryEntry]: ...
+    async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]: ...
+    async def add_stress_period(self, patient_id: str, period: StressPeriodOut) -> None: ...
+    async def delete_stress_period(self, patient_id: str, period_id: str) -> bool: ...
+    async def period_decisions(self, patient_id: str) -> PeriodDecisions: ...
+    async def save_period_decisions(self, patient_id: str, decisions: PeriodDecisions) -> None: ...
+    async def data_version(self, patient_id: str) -> int: ...
 
 
 class MemoryStore:
@@ -82,6 +111,13 @@ class MemoryStore:
         self.meal_checks: dict[str, MealCheckRecord] = {}
         self.feedback: list[tuple[str, str, str]] = []
         self.red_flags: list[tuple[str, list[str]]] = []
+        self.diary: dict[str, dict[date, DiaryEntry]] = {}
+        self.stress_periods: dict[str, list[StressPeriodOut]] = {}
+        self.decisions: dict[str, PeriodDecisions] = {}
+        self.versions: dict[str, int] = {}
+
+    def _bump(self, patient_id: str) -> None:
+        self.versions[patient_id] = self.versions.get(patient_id, 0) + 1
 
     async def patient_for_user(self, user_id: str) -> Patient | None:
         return self.patients.get(user_id)
@@ -104,6 +140,53 @@ class MemoryStore:
 
     async def save_red_flag(self, patient_id: str, categories: list[str]) -> None:
         self.red_flags.append((patient_id, categories))
+
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None:
+        from dataclasses import replace
+
+        for user_id, p in self.patients.items():
+            if p.id == patient_id:
+                self.patients[user_id] = replace(p, language=language or p.language, reminder_time=reminder_time or p.reminder_time)
+                return self.patients[user_id]
+        return None
+
+    async def list_meal_checks(self, patient_id: str, limit: int = 30) -> list[MealCheckRecord]:
+        mine = [r for r in self.meal_checks.values() if r.patient_id == patient_id]
+        return sorted(mine, key=lambda r: r.created_at, reverse=True)[:limit]
+
+    async def save_diary(self, patient_id: str, entry: DiaryEntry) -> None:
+        self.diary.setdefault(patient_id, {})[entry.day] = entry
+        self._bump(patient_id)
+
+    async def get_diary(self, patient_id: str, day: date) -> DiaryEntry | None:
+        return self.diary.get(patient_id, {}).get(day)
+
+    async def list_diary(self, patient_id: str) -> list[DiaryEntry]:
+        return [e for _, e in sorted(self.diary.get(patient_id, {}).items())]
+
+    async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]:
+        return sorted(self.stress_periods.get(patient_id, []), key=lambda p: p.start)
+
+    async def add_stress_period(self, patient_id: str, period: StressPeriodOut) -> None:
+        self.stress_periods.setdefault(patient_id, []).append(period)
+        self._bump(patient_id)
+
+    async def delete_stress_period(self, patient_id: str, period_id: str) -> bool:
+        periods = self.stress_periods.get(patient_id, [])
+        kept = [p for p in periods if p.id != period_id]
+        self.stress_periods[patient_id] = kept
+        self._bump(patient_id)
+        return len(kept) != len(periods)
+
+    async def period_decisions(self, patient_id: str) -> PeriodDecisions:
+        return self.decisions.setdefault(patient_id, PeriodDecisions())
+
+    async def save_period_decisions(self, patient_id: str, decisions: PeriodDecisions) -> None:
+        self.decisions[patient_id] = decisions
+        self._bump(patient_id)
+
+    async def data_version(self, patient_id: str) -> int:
+        return self.versions.get(patient_id, 0)
 
 
 class PostgresStore:
@@ -175,3 +258,51 @@ class PostgresStore:
             await conn.execute(
                 "insert into events.red_flag_events (patient_id, categories) values (%s, %s)", (patient_id, categories)
             )
+
+    # Spec 003 storage (diary, stressful periods, period decisions) needs a migration that isn't
+    # written yet. Until then these features run on the in-memory store (demo mode).
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None:
+        async with await self._conn() as conn:
+            if language:
+                await conn.execute("update core.patients set language = %s where id = %s", (language, patient_id))
+            cur = await conn.execute(
+                "select id, diagnosis, state, phenotypes, language, is_synthetic from core.patients where id = %s", (patient_id,))
+            row = await cur.fetchone()
+        if row is None:
+            return None
+        return Patient(str(row[0]), Diagnosis(row[1]), DiseaseState(row[2]), frozenset(row[3] or ()), row[4], bool(row[5]),
+                       reminder_time=reminder_time or "22:30")
+
+    async def list_meal_checks(self, patient_id: str, limit: int = 30) -> list[MealCheckRecord]:
+        async with await self._conn() as conn:
+            cur = await conn.execute(
+                "select id from events.meal_checks where patient_id = %s order by created_at desc limit %s", (patient_id, limit))
+            ids = [str(r[0]) for r in await cur.fetchall()]
+        return [r for r in [await self.get_meal_check(patient_id, i) for i in ids] if r is not None]
+
+    async def save_diary(self, patient_id: str, entry: DiaryEntry) -> None:
+        raise NotSupported("diary")
+
+    async def get_diary(self, patient_id: str, day: date) -> DiaryEntry | None:
+        raise NotSupported("diary")
+
+    async def list_diary(self, patient_id: str) -> list[DiaryEntry]:
+        raise NotSupported("diary")
+
+    async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]:
+        raise NotSupported("stress_periods")
+
+    async def add_stress_period(self, patient_id: str, period: StressPeriodOut) -> None:
+        raise NotSupported("stress_periods")
+
+    async def delete_stress_period(self, patient_id: str, period_id: str) -> bool:
+        raise NotSupported("stress_periods")
+
+    async def period_decisions(self, patient_id: str) -> PeriodDecisions:
+        raise NotSupported("periods")
+
+    async def save_period_decisions(self, patient_id: str, decisions: PeriodDecisions) -> None:
+        raise NotSupported("periods")
+
+    async def data_version(self, patient_id: str) -> int:
+        return 0

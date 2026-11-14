@@ -3,7 +3,8 @@
 A Bayesian N-of-1 comparison (spec 003 FR-013 to FR-016). For each factor we compare how
 often a "worse day" follows days with the factor against days without it, inside the
 factor's time window. Both rates get Beta posteriors; the link probability is
-P(rate after the factor > rate without it), by seeded Monte Carlo so results repeat.
+P(rate after the factor > rate without it + a minimum difference), by seeded Monte Carlo
+so results repeat.
 
 Results are patterns ("linked to", "likely contributor"), never proven causes
 (Constitution IV). Only food-component results feed the meal verdict.
@@ -35,11 +36,16 @@ class PatternConfig:
     median_window: int = 14
     min_exposures: int = 3
     min_baseline_days: int = 7
+    # "Linked" means worse days follow at least this much more often (in rate), not just "more often":
+    # with a dozen factors, tiny differences would otherwise produce false alarms (spec 003 SC-003).
+    min_rate_difference: float = 0.10
     overlap_max_prevalence: float = 0.5  # a factor present on most days overlaps everything; don't report it
     likely_above: float = 0.8
     not_linked_below: float = 0.5
     overlap_above: float = 0.7
-    food_min_level: Level = Level.MEDIUM
+    # Only high levels count as a food exposure: in Bangladeshi cooking, medium fat, onion / garlic
+    # and spice are in most dishes, so "medium or above" is true nearly every day and says nothing.
+    food_min_level: Level = Level.HIGH
     short_sleep_hours: float = 6.0
     high_stress_at: int = 3
     # Days after the exposure day in which a worse day counts (0 = the same day).
@@ -88,7 +94,7 @@ class PatternResult:
     baseline_hits: int
     exposed_rate: float
     baseline_rate: float
-    probability: float  # P(rate after the factor > rate without it)
+    probability: float  # P(rate after the factor > rate without it + min_rate_difference)
     ci_low: float
     ci_high: float
     label: str
@@ -122,7 +128,7 @@ def worse_days(days: Sequence[DayRecord], config: PatternConfig = DEFAULT_PATTER
 
 # ---------------------------------------------------------------- factors
 
-def _exposure(rec: DayRecord, factor: str, config: PatternConfig) -> bool | None:
+def exposure(rec: DayRecord, factor: str, config: PatternConfig) -> bool | None:
     """True / False, or None when the day can't be used for this factor."""
     group, _, name = factor.partition(":")
     if group == "food":
@@ -159,7 +165,7 @@ def _posterior(hits: int, n: int, b_hits: int, b_n: int, config: PatternConfig) 
     for _ in range(config.samples):
         e, b = rng.betavariate(a_e, b_e), rng.betavariate(a_b, b_b)
         draws.append(e)
-        above += e > b
+        above += e > b + config.min_rate_difference
     draws.sort()
     return (a_e / (a_e + b_e), a_b / (a_b + b_b), above / config.samples,
             draws[int(0.05 * config.samples)], draws[int(0.95 * config.samples) - 1])
@@ -203,7 +209,7 @@ def find_patterns(
         for rec in records:
             if scope is not None and rec.period_kind != scope:
                 continue
-            state = _exposure(rec, factor, config)
+            state = exposure(rec, factor, config)
             if state is None:
                 continue
             followers = [rec.day + timedelta(days=o) for o in window]

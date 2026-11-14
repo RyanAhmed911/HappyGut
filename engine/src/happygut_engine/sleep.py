@@ -42,3 +42,12 @@ def is_late_night(bedtime: str, previous_bedtimes: Sequence[str] = ()) -> bool:
     if len(history) < MIN_NIGHTS:
         return bed >= DEFAULT_LATE_AT
     return bed > statistics.median(history) + LATE_AFTER_MINUTES
+
+
+def usual_bedtime(previous_bedtimes: Sequence[str]) -> str | None:
+    """The person's median bedtime over the last 14 nights, as "HH:MM"."""
+    history = [_evening_minutes(b) for b in previous_bedtimes][-HISTORY_NIGHTS:]
+    if not history:
+        return None
+    minutes = int(statistics.median(history)) % (24 * 60)
+    return f"{minutes // 60:02d}:{minutes % 60:02d}"
