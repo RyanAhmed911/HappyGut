@@ -10,7 +10,12 @@ from .models import (
     Profile,
     RuleCard,
 )
+from .flare_risk import RiskDriver, RiskOutlook, flare_risk
+from .indices import THRESHOLDS, DiaryItems, IndexScore, hbi, index_for, index_name, sccai
+from .patterns import DayRecord, PatternResult, find_patterns, personal_evidence, worse_days
+from .periods import ManualFlare, Period, current_kind, detect_periods, kind_by_day
 from .redflag import RedFlagResult, check_red_flags
+from .sleep import is_late_night, sleep_hours
 from .triggers import (
     MealExposure,
     SymptomEvent,
@@ -28,4 +33,7 @@ __all__ = [
     "MealExposure", "SymptomEvent", "TriggerPosterior", "discover_triggers", "exposure_outcomes",
     "trigger_posterior", "assess_dish", "assess_meal", "Component", "DiseaseState", "Diagnosis",
     "Level", "Verdict",
+    "RiskDriver", "RiskOutlook", "flare_risk", "THRESHOLDS", "DiaryItems", "IndexScore", "hbi", "index_for",
+    "index_name", "sccai", "DayRecord", "PatternResult", "find_patterns", "personal_evidence", "worse_days",
+    "ManualFlare", "Period", "current_kind", "detect_periods", "kind_by_day", "is_late_night", "sleep_hours",
 ]

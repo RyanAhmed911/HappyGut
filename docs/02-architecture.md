@@ -82,7 +82,7 @@ The whole path runs on always-on services. If a Gemini free-tier quota runs out,
 **Algorithm (v0)**
 1. Hard rules first. A `hard` Rule Card match (e.g. stricturing + insoluble fibre ≥ medium) → 🔴, and the reason is fixed.
 2. Guideline score per component = severity × level weight (low 0.4, medium 0.7, high 1.0) × state multiplier (flare 1.3, remission 1.0).
-3. Personal score per component = P(trigger) when exposures ≥ 3; otherwise the prior is used, at reduced weight.
+3. Personal score per component = evidence strength × level weight, where strength = (P(trigger) − 0.5) / 0.5, floored at 0 (P = 0.5 means the diary shows no difference). With fewer than 3 exposures the strength is halved. *(engine-v0.2, 2026-11-14: before this, P itself was used, so "no evidence either way" counted as half-strength evidence.)*
 4. Component risk = max(guideline score / 3, personal score). Dish risk = max over its components. Meal = max over dishes.
 5. Thresholds: < 0.35 🟢 · 0.35–0.65 🟡 · > 0.65 🔴.
 6. Confidence = min(perception confidence, resolution confidence, evidence coverage). Below 0.5 → ⚪ "Not sure" plus a clarifying question.
