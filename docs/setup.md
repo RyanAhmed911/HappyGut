@@ -100,6 +100,26 @@ Expected: 62 passed and 9 passed, and the validator prints `OK`.
 
 Docker Desktop is optional: install it only if you want to run n8n locally (`docker compose up -d`). Production n8n runs on Hugging Face Spaces.
 
+## 2b. Run the app in demo mode (no accounts needed)
+The whole app runs on one PC with a simulated patient ("Nusrat") held in memory. Add these two lines to the repo-root `.env`:
+```
+DEMO_MODE=true
+INCLUDE_DRAFT_SEEDS=true
+```
+Terminal 1 (backend):
+```bash
+cd services/api
+uv sync
+uv run uvicorn --factory happygut_api.main:app --port 8000
+```
+Terminal 2 (app):
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+Open http://localhost:5173 and tap **Try the demo**. With `GEMINI_API_KEY` in `.env`, photos and model-written explanations work too. Restarting the backend resets the demo data. `INCLUDE_DRAFT_SEEDS` shows an "unreviewed knowledge" note on every verdict until the seeds are approved.
+
 ## 3. Ubuntu: GPU jobs (finite, started by hand)
 Ubuntu is used only for GPU jobs that you start and that finish on their own. It is never a server, and it needs **no `.env`**: each job reads its inputs from the repo and commits its outputs back as versioned files, which Windows then loads into Supabase / Neo4j.
 

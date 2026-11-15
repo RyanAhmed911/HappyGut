@@ -27,6 +27,21 @@ jobs:
           uv run python -m happygut_pipelines.seeds
           uv run --group dev pytest -q
 
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: PWA (types, locale parity, unit tests, production build)
+        working-directory: apps/web
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
   database:
     runs-on: ubuntu-latest
     steps:

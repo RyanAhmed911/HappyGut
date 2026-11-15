@@ -217,3 +217,12 @@ def test_no_evidence_either_way_adds_no_personal_risk():
         assert "personal:fat" not in v.evidence_ids
     weak = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.65, exposures=20)}
     assert assess_dish(dish(fat=L.HIGH), REMISSION_CD, (), weak).verdict == V.LIKELY_OK
+
+
+def test_evidence_learned_from_high_levels_does_not_spill_onto_low_levels():
+    # The Pattern Finder learns from high-fat meals; a low-fat dish must not inherit that.
+    personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.95, exposures=14, min_level=L.HIGH)}
+    assert assess_dish(dish(fat=L.HIGH), REMISSION_CD, (), personal).verdict == V.LIKELY_TRIGGER
+    assert assess_dish(dish(fat=L.MEDIUM), REMISSION_CD, (), personal).verdict == V.CAUTION  # one step below, lower weight
+    low = assess_dish(dish(fat=L.LOW), REMISSION_CD, (), personal)
+    assert low.verdict == V.LIKELY_OK and low.personal_contribution == 0

@@ -49,6 +49,9 @@ class PersonalEvidence:
     exposures: int
     ci_low: float = 0.0
     ci_high: float = 1.0
+    # The level the evidence was learned at. The Pattern Finder learns from high-level exposures, so
+    # the evidence counts at that level and one step below (at that step's lower weight), not further.
+    min_level: Level = Level.LOW
 
 
 @dataclass(frozen=True)

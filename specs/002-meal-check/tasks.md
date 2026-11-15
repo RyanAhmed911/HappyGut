@@ -21,9 +21,9 @@
 - [~] T014 Dockerfile for Hugging Face Spaces. The image's file layout was installed and started in the sandbox (health OK, auth enforced); **open:** a real `docker build` and the Space itself (step 5)
 
 ## Phase 3: Frontend [US1, US2, US4]
-- [ ] T015 PWA skeleton (React + Vite + Tailwind + shadcn/ui + react-i18next bn/en), Supabase Auth, onboarding profile
-- [ ] T016 Scan / type screen, streamed verdict card (dishes → verdict → explanation, evidence bar, alternative), escalation screen
-- [ ] T017 Meal history and "Was this right for you?" feedback
+- [~] T015 PWA skeleton (React + Vite + Tailwind + Radix + react-i18next bn/en), demo sign-in. **Open:** Supabase Auth and the onboarding profile
+- [x] T016 Scan / type screen, streamed verdict card (dishes → verdict → explanation, evidence bar, alternative), escalation screen
+- [x] T017 Meal history and "Was this right for you?" feedback
 
 ## Phase 4: Proof and wiring
 - [ ] T018 Live smoke test against Gemini/Groq on Windows with real keys; record latency (p90 < 5 s)

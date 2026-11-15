@@ -32,3 +32,6 @@ dist/
 # GPU jobs: set-aside and in-progress outputs stay local
 data/gpu_jobs/**/output.superseded.jsonl
 data/gpu_jobs/**/output.jsonl.partial
+
+# TypeScript build cache
+*.tsbuildinfo

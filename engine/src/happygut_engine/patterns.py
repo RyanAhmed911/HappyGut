@@ -100,12 +100,13 @@ class PatternResult:
     label: str
     overlaps_with: tuple[str, ...] = ()
 
-    def to_personal_evidence(self) -> PersonalEvidence | None:
+    def to_personal_evidence(self, min_level: Level = Level.HIGH) -> PersonalEvidence | None:
         if self.group != "food":
             return None
         return PersonalEvidence(
             component=Component(self.factor.split(":", 1)[1]),
             p_trigger=self.probability, exposures=self.exposures, ci_low=self.ci_low, ci_high=self.ci_high,
+            min_level=min_level,
         )
 
 
@@ -250,11 +251,13 @@ def find_patterns(
     return with_overlap
 
 
-def personal_evidence(results: Sequence[PatternResult]) -> dict[Component, PersonalEvidence]:
+def personal_evidence(
+    results: Sequence[PatternResult], config: PatternConfig = DEFAULT_PATTERN_CONFIG,
+) -> dict[Component, PersonalEvidence]:
     """Food-component results in the form the verdict engine takes (spec 003 FR-020)."""
     out = {}
     for r in results:
-        ev = r.to_personal_evidence()
+        ev = r.to_personal_evidence(config.food_min_level)
         if ev is not None:
             out[ev.component] = ev
     return out
