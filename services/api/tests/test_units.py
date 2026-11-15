@@ -245,5 +245,5 @@ def test_diagnose_without_keys(monkeypatch, capsys):
         get_settings.cache_clear()
     out = capsys.readouterr().out
     assert code == 1 and "GEMINI_API_KEY: NOT SET" in out and "skipped" in out
-    assert diagnose._hint("ModelHTTPError [m] HTTP 404: not found").startswith("Google doesn't know")
+    assert diagnose._hint("ModelHTTPError [m] HTTP 404: not found").startswith("This model name isn't available")
     assert diagnose._redact("key=abc123 failed", ["abc123"]) == "key=<key> failed"

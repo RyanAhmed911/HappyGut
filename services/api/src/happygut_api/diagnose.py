@@ -3,6 +3,7 @@
     uv run python -m happygut_api.diagnose                 # text + a generated test image
     uv run python -m happygut_api.diagnose my_plate.jpg    # text + your photo
     uv run python -m happygut_api.diagnose --model gemini-2.5-flash
+    uv run python -m happygut_api.diagnose --list          # the models each key can use
 
 Every model in the fallback chain is called on its own, so the output shows which one
 fails and why (the provider's own error message). Key values are never printed.
@@ -17,6 +18,7 @@ import sys
 import time
 from pathlib import Path
 
+from . import model_catalog
 from .agents import PydanticExplainer, PydanticPerceiver, build_model, describe_error
 from .images import ImageRejected, sanitise
 from .prompts import load_prompt
@@ -50,7 +52,7 @@ HINTS = [
     ("API key not valid", "The key is wrong or was copied with extra characters. Copy it again from aistudio.google.com/apikey."),
     ("API_KEY_INVALID", "The key is wrong or was copied with extra characters. Copy it again from aistudio.google.com/apikey."),
     ("HTTP 403", "The key isn't allowed to use this API or model (or the Generative Language API is off for its project)."),
-    ("HTTP 404", "Google doesn't know this model name for your key. Try: --model gemini-2.5-flash"),
+    ("HTTP 404", "This model name isn't available for your key. Run with --list to see the ones that are."),
     ("HTTP 429", "Free-tier quota or rate limit reached. Wait a minute (or until tomorrow for the daily limit) and try again."),
     ("Timeout", "The model took too long. Check your internet connection, or try a lighter model: --model gemini-flash-lite-latest"),
     ("ConnectError", "Can't reach Google from this PC. Check the internet connection, VPN, proxy or firewall."),
@@ -94,6 +96,7 @@ async def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="python -m happygut_api.diagnose")
     parser.add_argument("photo", nargs="?", help="a food photo to test with (JPG, PNG or WebP)")
     parser.add_argument("--model", help="test only this model name instead of the configured ones")
+    parser.add_argument("--list", action="store_true", help="list the models each key can use, then stop")
     args = parser.parse_args(argv)
     s = get_settings()
     secrets = [s.gemini_api_key, s.groq_api_key]
@@ -103,6 +106,16 @@ async def main(argv: list[str]) -> int:
         print(f"  {name}: {'set (' + str(len(value)) + ' characters)' if value else 'NOT SET'}")
     if s.gemini_api_key and (s.gemini_api_key != s.gemini_api_key.strip() or s.gemini_api_key[0] in "'\""):
         print("  ! GEMINI_API_KEY has spaces or quotes around it: remove them in .env")
+
+    catalog = model_catalog.fetch(s.gemini_api_key, s.groq_api_key, s.gemini_base_url or model_catalog.GEMINI_API)
+    for error in catalog.errors:
+        print(f"  ! {_redact(error, secrets)}")
+    if args.list:
+        for provider, names in (("Gemini", catalog.gemini), ("Groq", catalog.groq)):
+            print(f"\n{provider} models this key can use:" if names is not None else f"\n{provider}: not listed")
+            for name in sorted(names or []):
+                print(f"  {name}")
+        return 0
 
     if args.photo:
         try:
@@ -117,14 +130,23 @@ async def main(argv: list[str]) -> int:
 
     perception_prompt = load_prompt(s.prompts_dir, "meal-perception")
     explanation_prompt = load_prompt(s.prompts_dir, "meal-explanation")
-    perception_models = [args.model] if args.model else [s.perception_model, s.perception_fallback_model]
-    explanation_models = [args.model] if args.model else [s.explanation_model, s.explanation_fallback_model]
+    if args.model:
+        perception_models = explanation_models = [args.model]
+    else:
+        choice = model_catalog.choose(s, catalog)
+        print("\nModels the backend will use (configured names checked against what the keys can use):")
+        print(f"  perception:  {' → '.join(choice.perception)}")
+        print(f"  explanation: {' → '.join(choice.explanation)}")
+        for note in choice.notes:
+            if not note.startswith(("Gemini model list", "Groq model list")):
+                print(f"  note: {note}")
+        perception_models, explanation_models = choice.perception, choice.explanation
 
     ok = True
     for name in dict.fromkeys(perception_models):
         print(f"\nPerception model: {name}")
         try:
-            model = build_model([name], s.gemini_api_key, s.groq_api_key)
+            model = build_model([name], s.gemini_api_key, s.groq_api_key, s.gemini_base_url)
         except RuntimeError as exc:
             print(f"  ✗ skipped: {exc}")
             ok = False
@@ -136,7 +158,7 @@ async def main(argv: list[str]) -> int:
     for name in dict.fromkeys(explanation_models):
         print(f"\nExplanation model: {name}")
         try:
-            model = build_model([name], s.gemini_api_key, s.groq_api_key)
+            model = build_model([name], s.gemini_api_key, s.groq_api_key, s.gemini_base_url)
         except RuntimeError as exc:
             print(f"  ✗ skipped: {exc}")
             ok = False
