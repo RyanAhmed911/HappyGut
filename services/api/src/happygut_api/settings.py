@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     perception_fallback_model: str = "gemini-flash-lite-latest"
     explanation_model: str = "gemini-flash-latest"
     explanation_fallback_model: str = "llama-3.3-70b-versatile"  # Groq
-    model_timeout_s: float = 20.0
+    model_timeout_s: float = 25.0  # per model attempt; a whole call allows 2.5x this
 
     # Knowledge
     seeds_dir: Path = REPO_ROOT / "data" / "seeds"

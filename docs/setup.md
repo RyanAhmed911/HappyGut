@@ -118,7 +118,7 @@ cd apps/web
 npm install
 npm run dev
 ```
-Open http://localhost:5173 and tap **Try the demo**. With `GEMINI_API_KEY` in `.env`, photos and model-written explanations work too. Restarting the backend resets the demo data. `INCLUDE_DRAFT_SEEDS` shows an "unreviewed knowledge" note on every verdict until the seeds are approved.
+Open http://localhost:5173 and tap **Try the demo**. With `GEMINI_API_KEY` in `.env`, photos and model-written explanations work too. If photos fail, run `uv run python -m happygut_api.diagnose` in `services/api`: it calls each model on its own and prints the exact reason, with no keys in the output. Restarting the backend resets the demo data. `INCLUDE_DRAFT_SEEDS` shows an "unreviewed knowledge" note on every verdict until the seeds are approved.
 
 ## 3. Ubuntu: GPU jobs (finite, started by hand)
 Ubuntu is used only for GPU jobs that you start and that finish on their own. It is never a server, and it needs **no `.env`**: each job reads its inputs from the repo and commits its outputs back as versioned files, which Windows then loads into Supabase / Neo4j.

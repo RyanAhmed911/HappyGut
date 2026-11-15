@@ -70,6 +70,29 @@ class Explainer(Protocol):
     async def explain(self, *, packet: dict, lang: str, diagnosis: str) -> AgentRun[Explanation]: ...
 
 
+# ---------------------------------------------------------------- errors
+
+def describe_error(exc: BaseException) -> str:
+    """One readable line per failed model, with the provider's own message (no keys in it)."""
+    subs = getattr(exc, "exceptions", None)
+    if subs:
+        return " | ".join(describe_error(e) for e in subs)
+    parts = [type(exc).__name__]
+    if model := getattr(exc, "model_name", None):
+        parts.append(f"[{model}]")
+    if status := getattr(exc, "status_code", None):
+        parts.append(f"HTTP {status}")
+    body = getattr(exc, "body", None)
+    message = ""
+    if isinstance(body, dict):
+        err = body.get("error", body)
+        message = str(err.get("message", err)) if isinstance(err, dict) else str(err)
+    elif isinstance(body, str) and body:
+        message = body
+    message = " ".join((message or str(exc)).split())
+    return f"{' '.join(parts)}: {message[:400]}"
+
+
 # ---------------------------------------------------------------- models
 
 def build_model(names: list[str], gemini_api_key: str, groq_api_key: str) -> Model:
@@ -94,7 +117,8 @@ def build_model(names: list[str], gemini_api_key: str, groq_api_key: str) -> Mod
             models.append(GroqModel(name, provider=GroqProvider(api_key=groq_api_key)))
     if not models:
         raise RuntimeError(f"no usable model among {names}: set GEMINI_API_KEY and/or GROQ_API_KEY")
-    return models[0] if len(models) == 1 else FallbackModel(*models)
+    # Fall back on any failure of a model (HTTP error, quota, timeout, unusable output), not only HTTP errors.
+    return models[0] if len(models) == 1 else FallbackModel(*models, fallback_on=(Exception,))
 
 
 # ---------------------------------------------------------------- agents
@@ -116,8 +140,9 @@ class PydanticPerceiver:
             content,
             model=self.model,
             instructions=self.prompt.render(language=LANGUAGE_NAMES[lang]),
-            model_settings={"temperature": self.prompt.temperature},
-            timeout=self.timeout_s,
+            # Each model attempt gets its own time limit, so a slow first model still leaves time for the fallback.
+            model_settings={"temperature": self.prompt.temperature, "timeout": self.timeout_s},
+            timeout=self.timeout_s * 2.5,
         )
         return AgentRun(result.output, result.response.model_name or "unknown", self.prompt.ref)
 
@@ -137,8 +162,8 @@ class PydanticExplainer:
             "Write the explanation.",
             model=self.model,
             instructions=instructions,
-            model_settings={"temperature": self.prompt.temperature},
-            timeout=self.timeout_s,
+            model_settings={"temperature": self.prompt.temperature, "timeout": self.timeout_s},
+            timeout=self.timeout_s * 2.5,
         )
         return AgentRun(result.output, result.response.model_name or "unknown", self.prompt.ref)
 

@@ -11,6 +11,12 @@ uv run uvicorn --factory happygut_api.main:app --reload --port 8000
 ```
 Settings come from the repo-root `.env` (see `.env.example`). Without `SUPABASE_DB_URL` the API keeps data in memory. Until seeds are approved, set `INCLUDE_DRAFT_SEEDS=true` to try it; every verdict then carries an "unreviewed knowledge" note.
 
+## Check the AI models
+```bash
+uv run python -m happygut_api.diagnose
+```
+It shows whether each key is read, then calls every configured model on its own (text, photo, explanation) and prints the provider's exact error with a hint when one fails. Pass a photo path to test with your own picture, or `--model <name>` to try another model. Key values are never printed. When a model fails during normal use, the backend window logs the same one-line reason (`perception failed: …`).
+
 ## Endpoints
 | Method | Path | What it does |
 |---|---|---|

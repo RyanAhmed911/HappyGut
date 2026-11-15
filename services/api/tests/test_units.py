@@ -201,3 +201,49 @@ def test_presidio_layer_when_installed():
     assert "Rahim" not in out.text and "kacchi biryani" in out.text
     assert s.scrub("plain rice, masoor dal and murgir jhol").found == {}
     assert s.scrub("Shorshe ilish, begun bhaja and Mishti doi").found == {}
+
+
+# ---------------------------------------------------------------- model errors and the diagnostic
+
+def test_describe_error_reads_provider_messages():
+    from pydantic_ai.exceptions import FallbackExceptionGroup, ModelHTTPError
+
+    from happygut_api.agents import describe_error
+
+    a = ModelHTTPError(status_code=404, model_name="gemini-x", body={"error": {"code": 404, "message": "models/gemini-x is not found"}})
+    b = ModelHTTPError(status_code=429, model_name="gemini-y", body={"error": {"message": "Quota exceeded"}})
+    text = describe_error(FallbackExceptionGroup("All models failed", [a, b]))
+    assert "[gemini-x] HTTP 404: models/gemini-x is not found" in text and "HTTP 429: Quota exceeded" in text
+    assert describe_error(TimeoutError("slow")) == "TimeoutError: slow"
+
+
+def test_fallback_is_tried_on_any_failure():
+    """build_model's chain moves to the next model on any error, not only HTTP errors."""
+    from pydantic_ai.models.function import FunctionModel
+    from pydantic_ai.models.test import TestModel
+
+    def broken(messages, info):
+        raise ValueError("unusable output")
+
+    chain = build_model(["gemini-flash-latest", "llama-3.3-70b-versatile"], "k1", "k2")
+    good = TestModel(custom_output_args={"is_food": True, "items": [{"name_en": "dal", "confidence": 0.9}]})
+    chain.models = [FunctionModel(broken), good]  # same chain object and rule, local models
+    run = asyncio.run(PydanticPerceiver(chain, load_prompt(PROMPTS, "meal-perception")).perceive(text="dal", image=None, lang="en"))
+    assert run.output.items[0].name_en == "dal"
+
+
+def test_diagnose_without_keys(monkeypatch, capsys):
+    from happygut_api import diagnose
+    from happygut_api.settings import get_settings
+
+    monkeypatch.setenv("GEMINI_API_KEY", "")
+    monkeypatch.setenv("GROQ_API_KEY", "")
+    get_settings.cache_clear()
+    try:
+        code = asyncio.run(diagnose.main([]))
+    finally:
+        get_settings.cache_clear()
+    out = capsys.readouterr().out
+    assert code == 1 and "GEMINI_API_KEY: NOT SET" in out and "skipped" in out
+    assert diagnose._hint("ModelHTTPError [m] HTTP 404: not found").startswith("Google doesn't know")
+    assert diagnose._redact("key=abc123 failed", ["abc123"]) == "key=<key> failed"
