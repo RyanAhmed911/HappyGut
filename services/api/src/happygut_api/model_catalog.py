@@ -140,8 +140,8 @@ def choose(settings, catalog: Catalog | None = None) -> ModelChoice:
     notes = list(cat.errors)
 
     def chain(primary: str, fallback: str) -> list[str]:
-        # The primary is a full Flash model; a Gemini fallback is the light model of the same family.
-        first, n1 = resolve(primary, cat, lite=False)
+        # A missing name is replaced by the same kind of model (Flash-Lite for a Flash-Lite name, Flash otherwise).
+        first, n1 = resolve(primary, cat, lite="lite" in primary)
         second, n2 = resolve(fallback, cat, lite="lite" in fallback)
         notes.extend(n for n in (n1, n2) if n)
         return list(dict.fromkeys(m for m in (first, second) if m))

@@ -54,6 +54,7 @@ prompts/runtime/meal-explanation/v1.md
 |---|---|---|
 | MC1 | Pydantic-AI `FallbackModel` instead of LiteLLM for provider fallback | Pydantic-AI is already the agent layer (AR5) and has typed outputs plus cross-provider fallback; adding LiteLLM would be a second client for the same job (Constitution VIII) |
 | MC2 | Photo fallback goes to a second Gemini model (Flash-Lite, separate quota); text fallback goes to Groq Llama | Groq's production models are text-only |
+| MC7 | (2026-11-15) Flash-Lite first, full Flash as the fallback; explanation Flash-Lite then Groq `openai/gpt-oss-120b`; 12 s per attempt; model names resolved at start-up against what each key can use; Gemini on `v1beta` | Live test: Flash returned 503 (high demand) and 504 (deadline) while Flash-Lite answered text and photos in 1-2 s and Groq in about 1 s. `google-genai` 3 defaults to `v1`, where the "-latest" aliases don't exist; Groq retired `llama-3.3-70b-versatile` |
 | MC3 | Knowledge in memory from approved seeds | Always-on with no extra service; same queries as the MCP's offline mode; Neo4j adapter later |
 | MC4 | Explanations may not state a verdict label; the UI shows the engine's label | Makes "explanation contradicts the verdict" checkable with simple phrase lists in both languages |
 | MC5 | Guard failure → one regeneration → deterministic template built from Rule Card recommendations | The flow always completes with cited text |

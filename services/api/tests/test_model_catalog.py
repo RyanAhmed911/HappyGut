@@ -96,8 +96,8 @@ def test_choose_lists_both_providers(fake_api):
     cat = mc.fetch("g-key", "q-key", gemini_base_url=base, groq_base_url=f"{base}/openai/v1")
     assert "gemini-3-flash" in cat.gemini and "text-embedding-004" not in cat.gemini and cat.groq
     choice = mc.choose(Settings(gemini_api_key="g", groq_api_key="q"), cat)
-    assert choice.perception == ["gemini-3-flash", "gemini-3-flash-lite"]
-    assert choice.explanation == ["gemini-3-flash", "openai/gpt-oss-120b"]
+    assert choice.perception == ["gemini-3-flash-lite", "gemini-3-flash"]  # the light model first, for speed
+    assert choice.explanation == ["gemini-3-flash-lite", "openai/gpt-oss-120b"]
     assert any(p.startswith("GET /v1beta/models") for p in seen)
 
 
@@ -105,7 +105,7 @@ def test_listing_failure_keeps_configured_names():
     cat = mc.fetch("g-key", "", gemini_base_url="http://127.0.0.1:9")  # nothing listens there
     assert cat.gemini is None and cat.errors
     choice = mc.choose(Settings(gemini_api_key="g", groq_api_key=""), cat)
-    assert choice.perception[0] == "gemini-flash-latest"
+    assert choice.perception[0] == "gemini-flash-lite-latest"
 
 
 def test_gemini_calls_use_v1beta(fake_api):

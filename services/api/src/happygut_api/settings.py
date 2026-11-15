@@ -22,14 +22,16 @@ class Settings(BaseSettings):
     # Models (Google AI Studio and Groq free tiers). Exact model versions are stored with every meal check.
     gemini_api_key: str = ""
     groq_api_key: str = ""
-    perception_model: str = "gemini-flash-latest"
-    perception_fallback_model: str = "gemini-flash-lite-latest"
-    explanation_model: str = "gemini-flash-latest"
+    # Light models first: Flash-Lite and Groq answer in 1-2 s, while full Flash was overloaded (503) or timing
+    # out (504) on the free tier in testing (2026-11-15). The meal-check target is a verdict in under 5 s.
+    perception_model: str = "gemini-flash-lite-latest"
+    perception_fallback_model: str = "gemini-flash-latest"
+    explanation_model: str = "gemini-flash-lite-latest"
     explanation_fallback_model: str = "openai/gpt-oss-120b"  # Groq
     # Configured names are checked against what the keys can use at start-up; unavailable ones are replaced.
     resolve_models: bool = True
     gemini_base_url: str = ""  # tests / proxies only
-    model_timeout_s: float = 25.0  # per model attempt; a whole call allows 2.5x this
+    model_timeout_s: float = 12.0  # per model attempt, so a stuck model hands over quickly; a call allows 2.5x this
 
     # Knowledge
     seeds_dir: Path = REPO_ROOT / "data" / "seeds"
