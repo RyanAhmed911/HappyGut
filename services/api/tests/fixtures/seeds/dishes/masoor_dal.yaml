@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.masoor_dal
+name_en: "Masoor dal"
+name_bn: "মসুর ডাল"
+aliases: ["dal"]
+cuisine: Bangladeshi
+category: dal
+components:
+  fat: none
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: medium
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

@@ -70,7 +70,7 @@ The concept is built around ingredient labels, but most meals in Bangladesh are 
 **Fix: support three input modes, in this priority order:**
 1. **Dish photo → dish recognition → ingredient and preparation inference** from a **Bangladeshi Food Knowledge Graph** (this is the differentiator)
 2. **Package label photo → OCR** of Bangla and English ingredient lists
-3. **Bangla / English / Banglish voice or text**, e.g. *"ajke dupure kacchi khaisi"* ("I ate kacchi for lunch today"). This lowers the literacy barrier.
+3. **Bangla or English voice or text**, e.g. *"আজ দুপুরে কাচ্চি খেয়েছি"* ("I ate kacchi for lunch today"). This lowers the literacy barrier. *(Banglish dropped 2026-11-07, see D10.)*
 
 ### 2.6 The ChronicCare loop needs a clinician side
 The challenge's winning signal is *"wearable/data ingestion + alerts + coaching → sustained outcomes."* A patient-only app misses the "remote monitoring" half.
@@ -110,10 +110,12 @@ flowchart LR
     G[Current state<br/>flare / remission / stricture] --> D
     D --> H[🟢🟡🔴⚪ Verdict + why + citations<br/>+ 'instead, try…']
     H --> I[Meal logged]
-    J[Daily check-in<br/>HBI / SCCAI · meds · stress · sleep · wearable] --> K[Trigger Discovery<br/>N-of-1 Bayesian]
+    J[Nightly diary<br/>foods · reactions · stool · HBI / SCCAI<br/>sleep · stress · exams · doses] --> K[Flare Pattern Finder<br/>N-of-1 Bayesian + GBM/SHAP]
     I --> K
     K --> E
-    J --> L[Flare Early-Warning]
+    J --> P[Remission / flare periods]
+    P --> G
+    K --> L[Flare-risk outlook]
     L --> M[Nudge patient · alert clinician · pre-visit report]
 ```
 
@@ -152,7 +154,7 @@ flowchart LR
 | Medication harm | The system never suggests stopping or changing medication. Adherence reminders only |
 | Hallucination | LLM generates explanations **only from retrieved evidence** · faithfulness evaluation · structured outputs with Pydantic validation |
 | Privacy | PII removed by a **local** model (Ollama) before any cloud LLM call · row-level security · in-region storage · consent scopes per data use · research data is aggregated with DP only |
-| Bias | Evaluation broken down by language (Bangla vs English vs Banglish), dish origin, sex, and literacy level (voice vs text) |
+| Bias | Evaluation broken down by language (Bangla vs English), dish origin, sex, and literacy level (voice vs text) |
 | Regulatory | Positioned as **self-management and wellness support, not a medical device**. SaMD classification is flagged as a production consideration. Aligned with GDPR/HIPAA principles and Bangladesh's data-protection framework *(check the current legal status of Bangladesh's personal data protection law before citing it)* |
 
 ---
@@ -178,7 +180,7 @@ We design the product backwards from this video.
 |---|---|
 | 0:00–0:30 **Problem** | *Nusrat, 27, has Crohn's.* She's at a wedding (biye bari): kacchi biryani, borhani, firni. Every plate is a gamble. Put the local and global numbers on screen |
 | 0:30–1:00 **Solution** | HappyGut in one sentence. The Personal Gut Graph idea, shown visually |
-| 1:00–2:00 **Demo** | Photo of the plate → Bangla verdict in ~3s: 🔴 kacchi (high fat; *your* history says so) · 🟡 borhani (yoghurt: you tolerate it, but mind the portion) · 🟢 plain rice + chicken rezala instead. Cut to a week later: Early-Warning notices rising symptoms + 2 missed doses → a gentle nudge → a pre-visit report shared with her doctor by QR |
+| 1:00–2:00 **Demo** | Photo of the plate → Bangla verdict in ~3s: 🔴 kacchi (high fat; *your* history says so) · 🟡 borhani (yoghurt: you tolerate it, but mind the portion) · 🟢 plain rice + chicken rezala instead. That night: the 2-minute **nightly diary** (today's meals pre-filled, "did any food bother you?", stool, sleep, stress). Cut to exam week: **My patterns** shows late nights and exam weeks linked to her worse days, and the **Remission / Flare** timeline shows a flare starting; a gentle nudge and a pre-visit report shared with her doctor by QR |
 | 2:00–2:30 **AI approach** | Architecture diagram: vision + Bangla NLP → GraphRAG + contextual RAG → N-of-1 Bayesian trigger model → transparent verdict engine → local PII scrubbing → federated roadmap |
 | 2:30–3:00 **Impact** | KPIs (§8), synthetic-cohort trigger-recovery result, pilot plan, business model, "from Bangladesh to the world" |
 
@@ -251,3 +253,16 @@ The portal rewards *documented, real* components. **Rule: we only list what we a
 | D7 | FL = model updates only; research layer = consented DP aggregates | Fixes the contradiction in the current text | Proposed |
 | D8 | Bangladeshi dish recognition first, labels second | Local reality; differentiation | Proposed |
 | D9 | Add clinician pre-visit report | Completes the ChronicCare loop; B2B revenue | Proposed |
+
+## 12. Team review changes (2026-11-07)
+
+After reading the AIBC Participants Guide, the team changed the scope. The guide's calendar puts the **team preliminary deadline on 20 Nov 2026** (selection 25 Nov, finals 26 Dec), not 31 Oct as planned earlier. The guide's winning signals for ChronicCare AI (*data ingestion + alerts + coaching*) and PersonalMD (*patient profiling, longitudinal memory*) both support the changes below. Full requirements: [`specs/003-personal-layer/spec.md`](../specs/003-personal-layer/spec.md).
+
+| # | Decision | Why | Status |
+|---|---|---|---|
+| D10 | **Bangla and English only; Banglish dropped** as an input and output language. English-letter dish names ("kacchi", "aloo bhorta") stay in dish search because that is how the dishes are written in English. Romanised red-flag phrases stay in the sentinel as a safety net | Less to build and evaluate before the deadline; the guide asks for Bangla localisation, which Bangla + English covers | Agreed |
+| D11 | **Nightly diary replaces the daily check-in.** Before bed the app asks what was eaten all day (meal checks pre-filled), per-food reactions (stomach ache, bloating, urgency, nausea), stool (count, Bristol type, blood, mucus, urgency, night stools), pain, well-being, doses and notes, and computes HBI / SCCAI | One short questionnaire a day; catches meals that weren't checked; food-level reactions are direct personal evidence | Agreed |
+| D12 | **Sleep tracking** (bedtime, wake, quality; late night = > 90 min after the user's median bedtime; short sleep < 6 h), analysed as a factor | Test whether late or short sleep worsens this user's symptoms; also removes a confounder from the food analysis | Agreed |
+| D13 | **Stress tracking**: daily 0–4 stress plus named stressful periods (exams, work, family, fasting, travel, menstruation), analysed as factors | Test whether stress and exam periods worsen symptoms; students are a large share of the 20–40 persona | Agreed |
+| D14 | **Flare Pattern Finder** extends Trigger Discovery from food components to lifestyle factors. Personal Bayesian N-of-1 (tier A) + LightGBM flare-risk outlook with SHAP drivers trained on the simulated cohort (tier B). Results are "linked to / likely contributor", never "caused" (Constitution IV) | The team wants the app to figure out what the person is doing that leads to flares. Bayesian works from a few weeks of one person's data; GBM + SHAP gives the "ML that learns" story with explanations | Agreed |
+| D15 | **Remission and flare periods** detected from the daily index (flare: active on 3 of 4 days; remission: 7 days below threshold), confirmed by the user, shown separately with per-period summaries and per-period patterns. The confirmed period sets the verdict engine's disease state | What a gut tolerates differs by period; the engine already uses flare vs remission | Agreed |

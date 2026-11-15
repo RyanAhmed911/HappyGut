@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.murgir_patla_jhol
+name_en: "Light chicken curry"
+name_bn: "মুরগির পাতলা ঝোল"
+aliases: ["murgir jhol", "chicken jhol"]
+cuisine: Bangladeshi
+category: curry
+components:
+  fat: low
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

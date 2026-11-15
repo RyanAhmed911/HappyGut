@@ -1,0 +1,24 @@
+# Test fixture only (not real knowledge).
+id: RC-TEST-FAT-FLARE
+title_en: "Limit high-fat food in a flare"
+title_bn: "ফ্লেয়ারে বেশি চর্বির খাবার কমান"
+component: fat
+min_level: high
+applies_to:
+  diagnosis: [CD, UC]
+  phenotype: [any]
+  state: [flare]
+severity: 2
+hard: false
+evidence_level: guideline
+recommendation_en: "During a flare, choose lower-fat dishes."
+recommendation_bn: "ফ্লেয়ারের সময় কম চর্বির খাবার বেছে নিন।"
+sources:
+  - key: TEST2026
+    citation: "Test citation, not a real paper."
+    doi: ""
+    pmid: ""
+    licence: "test"
+    quote: "test quote"
+reviewed_by: test
+status: approved

@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.dim_sheddho
+name_en: "Boiled egg"
+name_bn: "ডিম সেদ্ধ"
+aliases: ["dim"]
+cuisine: Bangladeshi
+category: egg
+components:
+  fat: low
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

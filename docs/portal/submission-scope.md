@@ -1,4 +1,4 @@
-# Preliminary submission scope (Oct 30)
+# Preliminary submission scope (submit Nov 19; deadline Nov 20)
 
 > **Rule:** the live demo and video only show things that really work. The Figma prototype shows the full vision. Before submitting, every portal tick or claim must be **A** (real), **B** (real but minimal), or removed / reworded as planned (**C**).
 >
@@ -37,14 +37,16 @@
 ### Product
 | Feature | Tier |
 |---|---|
-| Meal check: photo / Bangla / Banglish text → graded verdict + why + citations + alternative | **A** |
+| Meal check: photo / Bangla / English text → graded verdict + why + citations + alternative | **A** |
 | Red-flag sentinel + escalation screen | **A** |
 | Stricturing Crohn's hard rules | **A** |
-| Daily check-in (HBI / SCCAI) | **A** |
-| Personal Trigger Discovery on the simulated demo persona | **A** |
-| "My Gut" screen (trend + trigger insights) | **A** |
-| Flare early-warning score (rule-based v0) | **A** |
-| LightGBM flare model on synthetic cohort + SHAP | B |
+| Nightly diary: day's foods (pre-filled from meal checks), per-food reactions, stool (Bristol, blood, urgency), HBI / SCCAI, doses, notes | **A** |
+| Sleep (bedtime, wake, quality, late-night flag) and stress (0–4, exam / stressful periods) | **A** |
+| Flare Pattern Finder (Bayesian N-of-1 over food components, late / short sleep, stress, exam periods, missed doses) on the simulated demo persona | **A** |
+| Remission / flare periods: timeline + separate Remission and Flare summaries | **A** |
+| "My Gut" screen (trend, periods, "My patterns") | **A** |
+| Flare-risk outlook (rule-based v0) | **A** |
+| Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers | B |
 | Personal Gut Graph view (D3) | B |
 | Clinician pre-visit PDF | B |
 | /docs page | B |
@@ -100,7 +102,7 @@
 | AI-DLC: AGENTS.md, Spec-Kit, Claude Skills | A (set up on day 0) |
 | Model / data cards | B |
 
-## 4. Reconciliation checklist (Oct 30, before submitting)
+## 4. Reconciliation checklist (Nov 19, before submitting)
 - [ ] Untick every C item that wasn't built (CrewAI, smolagents, DSPy, fine-tune, research MCP if missing)
 - [ ] Replace estimates with real numbers: % AI-built UI, MCP endpoints called, eval metrics
 - [ ] Fill in versions and URLs: exact model versions, repo / deploy URLs

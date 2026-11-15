@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.lassi
+name_en: "Lassi"
+name_bn: "লাচ্ছি"
+aliases: ["lassi"]
+cuisine: Bangladeshi
+category: dairy
+components:
+  fat: none
+  insoluble_fibre: none
+  lactose: high
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

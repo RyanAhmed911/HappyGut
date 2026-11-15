@@ -16,12 +16,12 @@ When the meal check names a dish ("kacchi biryani", "কাচ্চি", "kachc
 
 **Why this priority**: Without dish knowledge there is no verdict. This is the foundation of the hero flow.
 
-**Independent Test**: Query the knowledge layer with English, Bangla and Banglish names for 20 seeded dishes and check that the right dish, components and sources come back.
+**Independent Test**: Query the knowledge layer with English names, English-letter spellings and Bangla names for 20 seeded dishes and check that the right dish, components and sources come back.
 
 **Acceptance Scenarios**:
 
-1. **Given** an approved seeded dish, **When** it is looked up by its English name, Bangla name or a listed Banglish alias, **Then** the same canonical dish is returned with its components and sources.
-2. **Given** a misspelt Banglish name within a small edit distance of an alias, **When** it is looked up, **Then** the right dish is the top candidate, together with a match confidence.
+1. **Given** an approved seeded dish, **When** it is looked up by its English name, Bangla name or a listed English-letter spelling, **Then** the same canonical dish is returned with its components and sources.
+2. **Given** a misspelt English-letter name within a small edit distance of an alias, **When** it is looked up, **Then** the right dish is the top candidate, together with a match confidence.
 3. **Given** a dish name that isn't in the knowledge base, **When** it is looked up, **Then** no dish is returned with high confidence, and the name is recorded in a knowledge-gap list.
 
 ---
@@ -76,10 +76,10 @@ For a dish judged risky, the system can suggest one or two familiar dishes with 
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST hold at least 50 approved Bangladeshi dishes, each with English and Bangla names, Banglish aliases, ingredients, component levels and sources.
+- **FR-001**: The system MUST hold at least 50 approved Bangladeshi dishes, each with English and Bangla names, English-letter spellings, ingredients, component levels and sources.
 - **FR-002**: Component levels MUST use the controlled vocabulary and levels defined in `.claude/skills/add-dish`.
 - **FR-003**: The system MUST hold at least 25 approved Rule Cards drawn from ESPEN, IOIBD, AGA and FODMAP literature, each with a severity, hard flag, Bangla and English recommendation, citation, licence and exact quote.
-- **FR-004**: Dish lookup MUST accept English, Bangla and Banglish input and return candidates with match confidence.
+- **FR-004**: Dish lookup MUST accept English (including English-letter spellings of dish names) and Bangla input and return candidates with match confidence.
 - **FR-005**: Rule lookup MUST filter by component, level, diagnosis, phenotype and disease state.
 - **FR-006**: Guideline passage retrieval MUST combine keyword and semantic search, rerank the results, and return at most 5 passages with source IDs.
 - **FR-007**: Each guideline chunk MUST carry a generated context header, which is used for both keyword and semantic indexing.
@@ -100,7 +100,7 @@ For a dish judged risky, the system can suggest one or two familiar dishes with 
 
 ### Measurable Outcomes
 - **SC-001**: ≥ 50 approved dishes and ≥ 25 approved Rule Cards loaded, each with sources and licences.
-- **SC-002**: Dish resolution top-1 accuracy ≥ 90% on a 100-name English/Bangla/Banglish test set.
+- **SC-002**: Dish resolution top-1 accuracy ≥ 90% on a 100-name English/Bangla test set (including English-letter spellings).
 - **SC-003**: Rule lookup matches the expected table for 100% of the hand-made cases, including all stricturing hard rules.
 - **SC-004**: Guideline retrieval Recall@5 ≥ 0.8 on the 30-question Q&A set, and contextual hybrid retrieval beats naive vector retrieval (ablation recorded).
 - **SC-005**: Loading the seeds and GPU-job outputs into Neo4j and pgvector finishes in under 30 minutes from Windows; the GPU jobs (contextual headers, corpus embeddings) finish in under 1 hour on Ubuntu.

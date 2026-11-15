@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.plain_rice
+name_en: "Plain rice"
+name_bn: "সাদা ভাত"
+aliases: ["bhat", "rice"]
+cuisine: Bangladeshi
+category: staple
+components:
+  fat: none
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: []
+sources: []
+reviewed_by: test
+status: approved

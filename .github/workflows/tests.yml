@@ -18,11 +18,29 @@ jobs:
       - name: MCP servers (in-process MCP client)
         working-directory: services/mcp
         run: uv run --group dev pytest -q
+      - name: Backend API (meal-check flow, guard, PII incl. Presidio, auth)
+        working-directory: services/api
+        run: uv run --group dev --extra pii pytest -q
       - name: Knowledge seeds (validator + engine sanity on real seeds)
         working-directory: pipelines
         run: |
           uv run python -m happygut_pipelines.seeds
           uv run --group dev pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: PWA (types, locale parity, unit tests, production build)
+        working-directory: apps/web
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
 
   database:
     runs-on: ubuntu-latest

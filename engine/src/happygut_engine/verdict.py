@@ -44,13 +44,14 @@ def _assess_component(
 
     personal_score = 0.0
     tolerated = False
-    if personal is not None and level is not None and level >= Level.LOW:
+    if personal is not None and level is not None and level >= max(Level.LOW, personal.min_level - 1):
         weight = config.level_weights[level]
+        strength = _clip((personal.p_trigger - config.personal_neutral) / (1.0 - config.personal_neutral))
         if personal.exposures >= config.min_personal_exposures:
-            personal_score = _clip(personal.p_trigger * weight)
+            personal_score = _clip(strength * weight)
             tolerated = personal.p_trigger <= config.tolerance_p_max
         else:
-            personal_score = _clip(personal.p_trigger * weight * config.prior_weight)
+            personal_score = _clip(strength * weight * config.prior_weight)
 
     if tolerated and not hard:
         guideline *= config.tolerance_discount

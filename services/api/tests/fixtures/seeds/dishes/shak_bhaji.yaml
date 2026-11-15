@@ -1,0 +1,26 @@
+# Test fixture only (not real knowledge).
+id: dish.shak_bhaji
+name_en: "Leafy greens stir-fry"
+name_bn: "শাক ভাজি"
+aliases: ["shak", "shak bhaji"]
+cuisine: Bangladeshi
+category: vegetable
+components:
+  fat: low
+  insoluble_fibre: high
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.plain_rice]
+sources: []
+reviewed_by: test
+status: approved

@@ -21,7 +21,9 @@ def _terms(*terms: str) -> tuple[str, ...]:
     return tuple(normalise(t) for t in terms)
 
 
-# English and Banglish use regex with word boundaries; Bangla uses substrings
+# English and romanised Bangla use regex with word boundaries; Bangla uses substrings.
+# Banglish is not a supported input language, but people type it anyway, so the
+# romanised patterns stay as a safety net (red-flag recall must be 100%).
 # (word boundaries don't work across Bangla combining marks).
 _EN = {
     "blood": r"\bblood(y)?\b|\bbleed(ing|s)?\b|\bclots?\b",

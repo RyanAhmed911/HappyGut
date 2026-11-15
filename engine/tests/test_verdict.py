@@ -109,12 +109,12 @@ def test_learned_personal_trigger_raises_verdict():
 def test_personal_evidence_with_few_exposures_is_down_weighted():
     personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.9, exposures=2)}
     v = assess_dish(dish(fat=L.HIGH), REMISSION_CD, RULES, personal)
-    assert v.personal_contribution == pytest.approx(0.45)
+    assert v.personal_contribution == pytest.approx(0.4)  # strength 0.8 x level 1.0 x prior weight 0.5
     assert v.verdict == V.CAUTION
 
 
 def test_personal_trigger_scales_with_level():
-    personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.8, exposures=5)}
+    personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.9, exposures=5)}
     low = assess_dish(dish(fat=L.LOW), REMISSION_CD, RULES, personal)
     high = assess_dish(dish(fat=L.HIGH), REMISSION_CD, RULES, personal)
     assert low.verdict == V.LIKELY_OK
@@ -198,7 +198,7 @@ def test_no_alternative_for_ok_dish():
 
 
 def test_result_carries_config_version():
-    assert assess_meal([dish(fat=L.LOW)], REMISSION_CD, RULES).config_version == "engine-v0.1"
+    assert assess_meal([dish(fat=L.LOW)], REMISSION_CD, RULES).config_version == "engine-v0.2"
 
 
 def test_rule_card_validation():
@@ -206,3 +206,23 @@ def test_rule_card_validation():
         RuleCard("bad", C.FAT, L.HIGH, severity=4)
     with pytest.raises(ValueError):
         RuleCard("bad", C.FAT, L.NONE, severity=1)
+
+
+def test_no_evidence_either_way_adds_no_personal_risk():
+    # p_trigger 0.5 means the diary shows no difference; it must not raise the verdict on its own.
+    for p in (0.3, 0.5):
+        personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=p, exposures=20)}
+        v = assess_dish(dish(fat=L.HIGH), REMISSION_CD, (), personal)
+        assert v.personal_contribution == 0 and v.verdict == V.LIKELY_OK
+        assert "personal:fat" not in v.evidence_ids
+    weak = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.65, exposures=20)}
+    assert assess_dish(dish(fat=L.HIGH), REMISSION_CD, (), weak).verdict == V.LIKELY_OK
+
+
+def test_evidence_learned_from_high_levels_does_not_spill_onto_low_levels():
+    # The Pattern Finder learns from high-fat meals; a low-fat dish must not inherit that.
+    personal = {C.FAT: PersonalEvidence(C.FAT, p_trigger=0.95, exposures=14, min_level=L.HIGH)}
+    assert assess_dish(dish(fat=L.HIGH), REMISSION_CD, (), personal).verdict == V.LIKELY_TRIGGER
+    assert assess_dish(dish(fat=L.MEDIUM), REMISSION_CD, (), personal).verdict == V.CAUTION  # one step below, lower weight
+    low = assess_dish(dish(fat=L.LOW), REMISSION_CD, (), personal)
+    assert low.verdict == V.LIKELY_OK and low.personal_contribution == 0

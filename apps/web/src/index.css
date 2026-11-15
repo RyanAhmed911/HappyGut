@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Anek Latin Variable", "Anek Bangla Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #17211c;
+  --color-ink-soft: #46554d;
+  --color-ink-faint: #76847c;
+  --color-paper: #f6f3ec;
+  --color-paper-deep: #ece7db;
+  --color-card: #ffffff;
+  --color-line: #e2dccf;
+
+  --color-brand: #0f5c4d;
+  --color-brand-deep: #0a4237;
+  --color-brand-soft: #d9eae3;
+  --color-brand-tint: #eef6f2;
+  --color-saffron: #e0a526;
+  --color-saffron-soft: #fbf0d4;
+
+  /* Verdicts and periods */
+  --color-ok: #24744a;
+  --color-ok-soft: #e0f1e7;
+  --color-caution: #9a6508;
+  --color-caution-soft: #fbeecb;
+  --color-trigger: #b93a26;
+  --color-trigger-soft: #fbe2db;
+  --color-unsure: #586470;
+  --color-unsure-soft: #e9ecef;
+
+  --shadow-card: 0 1px 2px rgb(23 33 28 / 0.05), 0 10px 28px -16px rgb(23 33 28 / 0.18);
+  --shadow-float: 0 12px 32px -10px rgb(15 92 77 / 0.45);
+
+  --animate-rise: rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.86); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-paper text-ink antialiased;
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01";
+    line-height: 1.5;
+  }
+  /* Bangla conjuncts and vowel signs need more room than Latin. */
+  html[lang="bn"] body { line-height: 1.7; }
+  html[lang="bn"] :is(h1, h2, h3) { line-height: 1.4; }
+  :is(h1, h2, h3) { line-height: 1.2; text-wrap: balance; }
+  :focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; border-radius: 6px; }
+  button, a { touch-action: manipulation; }
+  input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, var(--color-paper-deep) 25%, #f4f0e6 37%, var(--color-paper-deep) 63%);
+  background-size: 400% 100%;
+  animation: var(--animate-shimmer);
+  border-radius: 0.75rem;
+}
+
+@utility safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+@utility tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+}

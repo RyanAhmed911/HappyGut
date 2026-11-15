@@ -3,7 +3,7 @@
 ## Core Principles
 
 ### I. Hero Flow First
-The meal check is the product: photo or Bangla/English/Banglish text → graded personal verdict with reasons, citations and a gentler alternative → meal logged → Personal Gut Graph updated. Every plan and task is ranked by how directly it serves this flow.
+The meal check is the product: photo or Bangla/English text → graded personal verdict with reasons, citations and a gentler alternative → meal logged → Personal Gut Graph updated. Every plan and task is ranked by how directly it serves this flow.
 - Tier A work (real and working in the demo) is finished before tier B work starts (see `docs/portal/submission-scope.md`).
 - Tier C items (designed / roadmap) never appear in the live demo or video as if they work.
 
@@ -19,6 +19,7 @@ LLMs handle perception (photos, labels, Bangla text) and explanation. The verdic
 ### IV. Evidence or "Not sure"
 - Every health claim cites retrieved evidence: a Rule Card and its paper, composition data, or the user's own history.
 - Weak or missing evidence produces ⚪ "Not sure" or a clarifying question, never a guess.
+- Personal patterns (food components, sleep, stress, stressful periods, missed doses) are reported as "linked to" or "likely contributor" with their counts and uncertainty, never as proven causes, and only after at least 3 exposures.
 - Only legally licensed data is ingested, and each source's licence is recorded in `docs/03-data.md` before ingestion.
 
 ### V. Privacy by Architecture
@@ -27,7 +28,7 @@ LLMs handle perception (photos, labels, Bangla text) and explanation. The verdic
 - Secrets live only in `.env` files that are never committed.
 
 ### VI. Bangla-First
-Every user-facing string exists in both Bangla and English (i18n files, no hard-coded text). Native Bangla speakers review generated Bangla before release.
+Every user-facing string exists in both Bangla and English (i18n files, no hard-coded text). Native Bangla speakers review generated Bangla before release. Supported input languages are Bangla and English. Banglish (romanised Bangla sentences) is not supported; English-letter dish names stay in dish search, and romanised red-flag phrases stay in the sentinel as a safety net.
 
 ### VII. Measured, Not Claimed
 - Quality is shown with evaluation sets and numbers: verdict accuracy, red-flag recall, retrieval metrics, trigger recovery.
@@ -55,4 +56,6 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 ## Governance
 This constitution takes precedence over other practices in this repository. `CLAUDE.md` and `AGENTS.md` carry the same rules for coding agents and must stay consistent with it. Amendments are made by pull request with a one-line reason, reviewed by the Team Leader, and versioned semantically (MAJOR: a principle removed or redefined; MINOR: a principle or section added; PATCH: wording). Every spec and plan includes a constitution check before implementation starts.
 
-**Version**: 1.3.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-22
+**Version**: 1.4.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-11-07
+
+_1.4.0: Banglish dropped as an input language (I, VI); personal patterns are never reported as causes (IV)._
