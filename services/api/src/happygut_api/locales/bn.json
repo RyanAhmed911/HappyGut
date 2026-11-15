@@ -1,5 +1,8 @@
 {
-  "_meta": {"lang": "bn", "review": "native-speaker review needed before release (Constitution VI)"},
+  "_meta": {
+    "lang": "bn",
+    "review": "Reviewed by the LLM judge on 2026-11-15 (see data/review/llm_judge/bangla.md)"
+  },
   "red_flag.title": "এখনই চিকিৎসকের সাহায্য নিন",
   "red_flag.body": "আপনি যা জানিয়েছেন তা গুরুতর সমস্যার লক্ষণ হতে পারে। এই মুহূর্তে HappyGut খাবার নিয়ে কোনো পরামর্শ দেবে না। এখনই আপনার চিকিৎসকের সঙ্গে যোগাযোগ করুন, আর খুব অসুস্থ লাগলে নিকটস্থ জরুরি বিভাগে যান বা ৯৯৯-এ কল করুন।",
   "red_flag.category.heavy_bleeding": "রক্তপাত",

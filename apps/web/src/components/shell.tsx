@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Activity, FileText, FlaskConical, History, House, NotebookPen, ScanLine, Settings, Sparkles } from "lucide-react";
+import { Activity, FileText, History, House, NotebookPen, Salad, ScanLine, Settings, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { DataNotice } from "./notice";
+import { useDiaryReminder } from "@/lib/reminder";
 import { setLang, type Lang } from "@/lib/i18n";
 
 export function useLang(): Lang {
@@ -58,25 +60,13 @@ export function LangToggle({ className }: { className?: string }) {
   );
 }
 
-export function SimulatedBadge({ className }: { className?: string }) {
-  const { t } = useTranslation();
-  return (
-    <span
-      title={t("app.simulated_long")}
-      className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-saffron-soft px-2.5 py-1 text-xs font-semibold text-caution", className)}
-    >
-      <FlaskConical className="h-3.5 w-3.5" />
-      {t("app.simulated_short")}
-    </span>
-  );
-}
-
 const NAV = [
   { to: "/", icon: House, key: "today", end: true },
   { to: "/check", icon: ScanLine, key: "check" },
   { to: "/diary", icon: NotebookPen, key: "diary" },
   { to: "/patterns", icon: Sparkles, key: "patterns" },
   { to: "/gut", icon: Activity, key: "gut" },
+  { to: "/foods", icon: Salad, key: "foods" },
   { to: "/history", icon: History, key: "history" },
   { to: "/report", icon: FileText, key: "report" },
   { to: "/settings", icon: Settings, key: "settings" },
@@ -100,7 +90,7 @@ function BottomLink({ to, icon: Icon, label, end }: { to: string; icon: typeof H
 export function AppShell() {
   const { t } = useTranslation();
   const profile = useProfile();
-  const simulated = profile.data?.is_synthetic;
+  useDiaryReminder(profile.data?.reminder_time);
 
   return (
     <div className="min-h-dvh">
@@ -127,8 +117,7 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
-        <div className="space-y-3 px-1">
-          {simulated && <p className="rounded-2xl bg-saffron-soft p-3 text-xs leading-relaxed text-caution">{t("app.simulated_long")}</p>}
+        <div className="px-1">
           <LangToggle />
         </div>
       </aside>
@@ -138,11 +127,10 @@ export function AppShell() {
         <Link to="/">
           <Logo className="[&>span]:text-lg" />
         </Link>
-        <div className="flex items-center gap-1.5">
-          {simulated && <SimulatedBadge />}
-          <LangToggle />
-        </div>
+        <LangToggle />
       </header>
+
+      {profile.data?.is_synthetic && <DataNotice />}
 
       <main className="lg:pl-64">
         <div className="mx-auto w-full max-w-3xl px-4 pb-28 pt-5 lg:px-8 lg:pb-12 lg:pt-10">

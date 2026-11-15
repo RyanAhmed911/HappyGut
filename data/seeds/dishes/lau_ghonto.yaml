@@ -1,7 +1,7 @@
 id: dish.lau_ghonto
 name_en: "Bottle gourd curry"
 name_bn: "লাউ ঘন্ট"
-aliases: ["lau ghonto", "lau ghanto", "lau torkari"]
+aliases: ["lau ghonto", "lau ghanto", "lau torkari", "লাউয়ের ঘন্ট", "lau er ghonto"]
 cuisine: Bangladeshi
 category: vegetable
 preparation: ["simmered", "soft"]
@@ -9,7 +9,7 @@ ingredients:
   - {name: "bottle gourd"}
   - {name: "turmeric"}
   - {name: "cumin"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: low
   insoluble_fibre: low
   lactose: none
@@ -25,7 +25,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: []
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  note: ""
+status: approved

@@ -3,7 +3,7 @@ import { Printer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TrendChart, useFactorName } from "@/components/insights";
 import { LoadError, Logo, PageLoading, useLang } from "@/components/shell";
-import { Badge, Button, PageTitle } from "@/components/ui";
+import { Button, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
 import { dateRange, longDate, num, pct } from "@/lib/format";
 import { keys } from "@/lib/hooks";
@@ -60,11 +60,6 @@ export function Report() {
             <p className="text-ink-soft">
               {t(`today.dx_${r.patient.diagnosis}`)} · {t(`gut.kind_${r.patient.current_state}`)}
             </p>
-            {r.is_synthetic && (
-              <Badge tone="saffron" className="mt-1.5">
-                {t("app.simulated")}
-              </Badge>
-            )}
           </div>
         </header>
 
@@ -140,6 +135,7 @@ export function Report() {
 
         <footer className="mt-6 border-t border-line pt-3 text-xs text-ink-faint">
           <p>{t("report.footer", { index: r.index_name })}</p>
+          {r.is_synthetic && <p className="mt-1">{t("report.sample_data")}</p>}
           <p className="mt-1">
             {t("report.generated", { date: longDate(r.to, lang) })} · {t("app.disclaimer")}
           </p>

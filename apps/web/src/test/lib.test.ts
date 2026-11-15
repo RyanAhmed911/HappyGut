@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addDays, clock, daysBetween, isoDay, num, parseDay, shortDate } from "../lib/format";
 import { DiarySaved, Patterns, VerdictEvent } from "../lib/schemas";
+import { isDue, minutesOf } from "../lib/reminder";
 import { parseSseBlock } from "../lib/sse";
 
 describe("sse", () => {
@@ -46,5 +47,16 @@ describe("schemas", () => {
   it("accept empty pattern results and a red-flag diary response", () => {
     expect(Patterns.parse({ scope: "all", days_logged: 3, min_days: 14, enough_data: false, index_name: "HBI", results: [], is_synthetic: true }).results).toEqual([]);
     expect(() => DiarySaved.parse({ entry: {}, red_flag: null, comparison: null })).toThrow();
+  });
+});
+
+describe("diary reminder", () => {
+  it("is due once per day, at or after the chosen time", () => {
+    const at = (h: number, m: number): Date => new Date(2026, 10, 15, h, m);
+    expect(minutesOf("22:30")).toBe(1350);
+    expect(isDue(at(22, 29), "22:30", null, "2026-11-15")).toBe(false);
+    expect(isDue(at(22, 30), "22:30", null, "2026-11-15")).toBe(true);
+    expect(isDue(at(23, 50), "22:30", "2026-11-14", "2026-11-15")).toBe(true);
+    expect(isDue(at(23, 50), "22:30", "2026-11-15", "2026-11-15")).toBe(false); // already shown today
   });
 });

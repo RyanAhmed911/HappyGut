@@ -1,0 +1,168 @@
+{
+ "sources": {
+  "BARBERIO2025": {
+   "citation": "Barberio B, et al. Dietary Interventions and Oral Nutritional Supplementation in Inflammatory Bowel Disease: Current Evidence and Future Directions. Nutrients. 2025.",
+   "doi": "10.3390/nu17111879",
+   "pmid": "40507145",
+   "pmcid": "PMC12157630",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "LIMDI2018": {
+   "citation": "Limdi JK. Dietary practices and inflammatory bowel disease. Indian J Gastroenterol. 2018.",
+   "doi": "10.1007/s12664-018-0890-5",
+   "pmid": "30209778",
+   "pmcid": "PMC6153885",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "GODALA2023": {
+   "citation": "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023.",
+   "doi": "10.3390/jcm12103455",
+   "pmid": "37240560",
+   "pmcid": "PMC10219397",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "GODALA2022": {
+   "citation": "Godala M, et al. Dietary Interventions in Inflammatory Bowel Disease. Nutrients. 2022.",
+   "doi": "10.3390/nu14204261",
+   "pmid": "36296945",
+   "pmcid": "PMC9607252",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "MORTON2020": {
+   "citation": "Morton H, et al. Inflammatory Bowel Disease: Are Symptoms and Diet Linked? Nutrients. 2020.",
+   "doi": "10.3390/nu12102975",
+   "pmid": "33003341",
+   "pmcid": "PMC7650696",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "SOOD2019": {
+   "citation": "Sood A, et al. Diet and inflammatory bowel disease: The Asian Working Group guidelines. Indian J Gastroenterol. 2019.",
+   "doi": "10.1007/s12664-019-00976-1",
+   "pmid": "31352652",
+   "pmcid": "PMC6675761",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "HASKEY2017": {
+   "citation": "Haskey N, Gibson DL. An Examination of Diet for the Maintenance of Remission in Inflammatory Bowel Disease. Nutrients. 2017.",
+   "doi": "10.3390/nu9030259",
+   "pmid": "28287412",
+   "pmcid": "PMC5372922",
+   "licence": "CC BY 4.0 (open access, Europe PMC)"
+  },
+  "AGA2024": {
+   "citation": "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024.",
+   "doi": "10.1053/j.gastro.2023.11.303",
+   "pmid": "38276922",
+   "pmcid": "",
+   "licence": "Not open access: short quotation from the published abstract; full text not retrieved"
+  },
+  "COX2020": {
+   "citation": "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020.",
+   "doi": "10.1053/j.gastro.2019.09.024",
+   "pmid": "31586453",
+   "pmcid": "",
+   "licence": "Not open access: short quotation from the published abstract; full text not retrieved"
+  },
+  "ESPEN2023": {
+   "citation": "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023.",
+   "doi": "10.1016/j.clnu.2022.12.004",
+   "pmid": "36739756",
+   "pmcid": "",
+   "licence": "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
+  },
+  "IOIBD2020": {
+   "citation": "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020.",
+   "doi": "10.1016/j.cgh.2020.01.046",
+   "pmid": "32068150",
+   "pmcid": "",
+   "licence": "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
+  },
+  "LIMDI2016": {
+   "citation": "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016.",
+   "doi": "10.1097/mib.0000000000000585",
+   "pmid": "26383912",
+   "pmcid": "",
+   "licence": "Not open access: short quotation from the published abstract; full text not retrieved"
+  }
+ },
+ "quotes": {
+  "stricture_avoid": {
+   "source": "BARBERIO2025",
+   "quote": "Traditionally, patients with stricturing disease have been advised to avoid foods with high fiber content, particularly those that maintain their form during intestinal transit, such as raw fruits and vegetables with peels, nuts, seeds, and fibrous vegetables."
+  },
+  "stricture_modified": {
+   "source": "BARBERIO2025",
+   "quote": "This approach allows patients with stricturing disease to consume soluble fibers and even some insoluble fibers that have been properly modified through cooking, blending, or pureeing."
+  },
+  "aga_stricture": {
+   "source": "AGA2024",
+   "quote": "Patients with IBD who have symptomatic intestinal strictures may not tolerate fibrous, plant-based foods (ie, raw fruits and vegetables) due to their texture."
+  },
+  "aga_stricture_cook": {
+   "source": "AGA2024",
+   "quote": "An emphasis on careful chewing and cooking and processing of fruits and vegetables to a soft, less fibrinous consistency may help patients with IBD who have concomitant intestinal strictures incorporate a wider variety of plant-based foods and fiber in their diets."
+  },
+  "aga_redmeat": {
+   "source": "AGA2024",
+   "quote": "A diet low in red and processed meat may reduce ulcerative colitis flares, but has not been found to reduce relapse in Crohn's disease."
+  },
+  "ioibd_redmeat": {
+   "source": "GODALA2023",
+   "quote": "The IOIBD recommends a moderate to high intake of vegetables and fruits and decreasing consumption of red meat for ulcerative colitis."
+  },
+  "ioibd_satfat": {
+   "source": "GODALA2023",
+   "quote": "On the other hand, the IOIBD suggests reducing saturated-fatty-acid intake."
+  },
+  "ioibd_additives": {
+   "source": "GODALA2022",
+   "quote": "The IOIBD guidelines unequivocally recommend eliminating foods rich in additives such as maltodextrin, emulsifiers, thickeners, nanoparticles and sulfur compounds in all IBD patients."
+  },
+  "marsh_avoid": {
+   "source": "GODALA2023",
+   "quote": "In a study by Marsh et al., participants most frequently reported avoiding spicy foods (46%), lactose-containing foods (41%), deep-fried/fatty foods (39%) and alcohol (38%) during active disease and spicy foods (39%) and lactose-containing foods (39%) during remission."
+  },
+  "crooks_eliminated": {
+   "source": "GODALA2023",
+   "quote": "In the study by Crooks et al., the most commonly eliminated foods were spicy and fatty products, carbonated drinks, milk products, alcohol, coffee and red meat."
+  },
+  "limdi_modify": {
+   "source": "LIMDI2018",
+   "quote": "Patients often modify their diet, typically avoiding fatty and spicy foods, fruit, vegetables, alcohol, and milk often during remission as also “to prevent” relapse."
+  },
+  "morton_foods": {
+   "source": "MORTON2020",
+   "quote": "Commonly identified foods include fruit and vegetables, dairy products, spicy foods, processed foods, nuts and seeds, alcohol, and foods with a high fat content."
+  },
+  "limdi2016_worse": {
+   "source": "LIMDI2016",
+   "quote": "Worsening symptoms with certain foods was reported by 60%."
+  },
+  "lowfibre_active": {
+   "source": "GODALA2022",
+   "quote": "Low-fiber diets are often recommended for patients with active disease, including, for example, as part of the implementation of a low FODMAP diet, while patients in remission are advised to follow a standard fiber intake pattern which does not differ from the recommendations for healthy individuals."
+  },
+  "lowresidue_flare": {
+   "source": "HASKEY2017",
+   "quote": "A low-residue diet is often recommended for the management of an acute flare of IBD, especially in patients that have intestinal strictures or narrowing."
+  },
+  "cox_relief": {
+   "source": "COX2020",
+   "quote": "A higher proportion of patients reported adequate relief of gut symptoms following the low FODMAP diet (14/27, 52%) than the control diet (4/25, 16%, P=.007)."
+  },
+  "lactose_unnecessary": {
+   "source": "SOOD2019",
+   "quote": "A subsequent review also concluded that even though hypolactasia is common in IBD, strict lactose exclusion is usually unnecessary."
+  },
+  "lactose_yogurt": {
+   "source": "GODALA2022",
+   "quote": "The lactose content of milk and milk products is similar, however, studies have confirmed that lacto-fermented products (such as yogurt) are better tolerated."
+  },
+  "lactose_confirm": {
+   "source": "GODALA2022",
+   "quote": "Thus, when diagnosing and treating patients with IBD, it is crucial to confirm lactose intolerance, which prevents the unnecessary implementation of elimination diets."
+  }
+ },
+ "retrieved_on": "2026-11-15",
+ "retrieved_from": "Europe PMC REST API (search + fullTextXML); abstracts from Europe PMC core records"
+}

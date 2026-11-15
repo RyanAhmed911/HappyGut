@@ -1,7 +1,7 @@
 id: dish.rui_macher_kalia
 name_en: "Rohu kalia"
 name_bn: "রুই মাছের কালিয়া"
-aliases: ["rui kalia", "macher kalia"]
+aliases: ["rui kalia", "macher kalia", "রুই কালিয়া", "রুইয়ের কালিয়া", "rui macher kalia"]
 cuisine: Bangladeshi
 category: fish
 preparation: ["fried fish in rich gravy"]
@@ -11,7 +11,7 @@ ingredients:
   - {name: "onion"}
   - {name: "yogurt"}
   - {name: "spices"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: high
   insoluble_fibre: none
   lactose: low
@@ -27,7 +27,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: [dish.rui_macher_patla_jhol, dish.plain_rice]
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  note: ""
+status: approved

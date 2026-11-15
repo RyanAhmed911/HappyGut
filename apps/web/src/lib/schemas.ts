@@ -345,3 +345,31 @@ export type FoodMatch = z.infer<typeof FoodMatch>;
 export const MealCheckList = z.object({ items: z.array(MealCheck) });
 export const StressPeriodList = z.object({ items: z.array(StressPeriod) });
 export const FoodSearch = z.object({ results: z.array(FoodMatch) });
+
+// ---------------------------------------------------------------- food guide and meal ideas
+
+export const PHENOTYPES = ["stricturing", "lactose_intolerant", "ibs_like_symptoms"] as const;
+export type Phenotype = (typeof PHENOTYPES)[number];
+
+export const GuideItem = z.object({
+  dish_id: z.string(),
+  name_en: z.string(),
+  name_bn: z.string(),
+  category: z.string(),
+  verdict: VerdictCode,
+  risk: z.number(),
+  reason: z.string(),
+  components: z.array(z.object({ component: z.string(), level: z.string(), source: z.enum(["personal", "guideline"]) })),
+  alternative: z.object({ dish_id: z.string(), name_en: z.string(), name_bn: z.string() }).nullable(),
+});
+export type GuideItem = z.infer<typeof GuideItem>;
+export const Guide = z.object({ items: z.array(GuideItem) });
+
+const PlanDish = z.object({ dish_id: z.string(), name_en: z.string(), name_bn: z.string() });
+export const MealPlan = z.object({
+  days: z.array(z.object({ date: z.string(), meals: z.object({ breakfast: z.array(PlanDish), lunch: z.array(PlanDish), dinner: z.array(PlanDish) }) })),
+  pool_size: z.number(),
+  enough: z.boolean(),
+  start: z.string(),
+});
+export type MealPlan = z.infer<typeof MealPlan>;

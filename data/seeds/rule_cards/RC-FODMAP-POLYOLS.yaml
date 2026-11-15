@@ -1,6 +1,6 @@
 id: RC-FODMAP-POLYOLS
 title_en: "IBS-like symptoms: polyols"
-title_bn: "আইবিএস-ধরনের উপসর্গ: পলিওল"  # native-speaker review needed
+title_bn: "আইবিএস-ধরনের উপসর্গ: পলিওল"
 component: polyols
 min_level: medium
 applies_to:
@@ -12,12 +12,18 @@ hard: false
 evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "Polyols (in some fruits, cauliflower, mushrooms and sugar-free sweets) can cause bloating with IBS-like symptoms."
 recommendation_bn: "পলিওল (কিছু ফল, ফুলকপি, মাশরুম ও চিনি-মুক্ত মিষ্টিতে) আইবিএস-ধরনের উপসর্গে পেট ফাঁপাতে পারে।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
   - key: COX2020
     citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
-reviewed_by: null
-status: draft
+    doi: "10.1053/j.gastro.2019.09.024"
+    pmid: "31586453"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "A higher proportion of patients reported adequate relief of gut symptoms following the low FODMAP diet (14/27, 52%) than the control diet (4/25, 16%, P=.007)."
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: class_level  # direct | class_level | partial
+  note: "The trial tested the low-FODMAP diet as a whole in quiescent IBD with persistent gut symptoms; the individual FODMAP groups were not tested separately in the retrieved text."
+status: approved

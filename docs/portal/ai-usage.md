@@ -81,7 +81,7 @@
 
 **GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
 - Qwen3 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
-- Gemma 3 12B: Bangla spelling variants and English-letter spellings of dish names; Bangla test utterances; Bangla draft strings for human review. The strongest Bangla of the local options that fit in 12 GB
+- Gemma 3 12B: Bangla spelling variants and English-letter spellings of dish names; Bangla test utterances; Bangla draft strings for LLM-judge review. The strongest Bangla of the local options that fit in 12 GB
 - Llama 3.1 8B: English test utterances and red-flag paraphrases for the evaluation sets
 - DeepSeek-R1-0528-Qwen3-8B (distill): LLM-as-judge for the full evaluation run (does the evidence support each claim?)
 
@@ -274,7 +274,7 @@ Evaluation
 
 **Other agents**
 - Dietitian agent: generator–critic loop. The LLM drafts a weekly plan, the verdict engine checks every dish, failing dishes are regenerated (max 2 rounds)
-- Knowledge Enrichment agent: takes the "Not sure" / unmatched-dish queue, drafts graph facts, sends them to human review
+- Knowledge Enrichment agent: takes the "Not sure" / unmatched-dish queue, drafts graph facts, sends them to LLM-judge review
 - Weekly Summary agent: writes the digest from SQL-computed statistics only
 - Trigger Discovery + Flare Early Warning: nightly jobs scheduled by n8n
 
@@ -382,7 +382,7 @@ n8n
 - Weekly digest (Sunday): Weekly Summary agent writes a Bangla/English digest from SQL-computed statistics → push + in-app card
 - Weekly clinician report: pre-visit PDF (WeasyPrint) → signed expiring link
 - Knowledge ingestion: Supabase Storage upload webhook → parse → chunk → contextual headers (Gemini free tier) → embed (BGE-M3, CPU) → Rule Card candidates → review-queue notice
-- Knowledge-gap loop (daily): collects ⚪ "Not sure" / unmatched dishes → Knowledge Enrichment agent drafts graph facts → human review
+- Knowledge-gap loop (daily): collects ⚪ "Not sure" / unmatched dishes → Knowledge Enrichment agent drafts graph facts → LLM-judge review
 - Error workflow: any failed run → team chat webhook alert
 
 LangGraph
@@ -427,7 +427,7 @@ GitHub Actions
   - Researcher agent: finds passages via Europe PMC + guideline RAG
   - Extractor agent: drafts the Rule Card with an exact quote
   - Critic agent: checks the quote supports the rule
-  - Output → human review queue
+  - Output → LLM-judge review queue
 - ✅ smolagents: data-ops code agent (Groq-hosted open model, sandboxed). Writes and runs read-only pandas / Cypher analysis on unmatched ingredients, orphan graph nodes and evaluation failures, then proposes fixes as reviewable diffs
 - ❌ AutoGen, Swarm, OpenAI Agents SDK, Letta, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
 
@@ -448,7 +448,7 @@ GitHub Actions
    - Claude Skills encode repeatable steps: add-rule-card, add-dish, new-prompt-version, run-evals
    - Gate: unit tests on every verdict-engine rule
    - Gate: CI eval regression (red-flag recall 100%, verdict accuracy must not drop)
-   - Gate: human review of every AI-generated PR; native-speaker review of Bangla copy
+   - Gate: CI on every AI-generated PR; knowledge and Bangla copy reviewed by an LLM judge against a written rubric (not by clinicians)
 4. Operations and learning: Langfuse traces, Evaluation Lab, user feedback, knowledge-gap queue
    - Lessons feed back into the constitution, skills and prompt library
 - Memory bank: CLAUDE.md + AGENTS.md (project memory), `docs/` decision logs, versioned `prompts/` library (build provenance)
@@ -457,7 +457,7 @@ GitHub Actions
 ## Anything else about your AI usage?
 - Core design principle: "AI perceives and explains, a deterministic engine decides". Every verdict is reproducible, unit-tested and explainable, so the LLM can't invent a medical judgement
 - Personal AI, not generic AI: the Personal Gut Graph learns each patient's own triggers from their logs (Bayesian N-of-1) instead of giving one-size-fits-all IBD diet rules
-- Bangla-first AI: Bangla / English input, Bangladeshi dish knowledge graph, Bangla medical glossary, native-speaker review of all generated Bangla
+- Bangla-first AI: Bangla / English input, Bangladeshi dish knowledge graph, Bangla medical glossary, LLM-judge review of all generated Bangla
 - Honest evaluation: results on simulated patients are always labelled as simulated; real-data claims are made only where we measured them
 - Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
 - Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording

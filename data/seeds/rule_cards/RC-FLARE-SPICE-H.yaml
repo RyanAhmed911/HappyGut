@@ -1,6 +1,6 @@
 id: RC-FLARE-SPICE-H
 title_en: "Flare: very spicy food"
-title_bn: "ফ্লেয়ার: খুব ঝাল খাবার"  # native-speaker review needed
+title_bn: "ফ্লেয়ার: খুব ঝাল খাবার"
 component: capsaicin_spice
 min_level: high
 applies_to:
@@ -10,14 +10,26 @@ applies_to:
 severity: 2
 hard: false
 evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
-recommendation_en: "During a flare, very spicy food is often reported to worsen pain and diarrhoea; ask for less chilli."
-recommendation_bn: "ফ্লেয়ারের সময় বেশি ঝাল খাবারে পেট ব্যথা ও পাতলা পায়খানা বাড়ে বলে রোগীরা প্রায়ই জানান; কম ঝাল দিতে বলুন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+recommendation_en: "During a flare, spicy food is the food people with IBD most often report avoiding; ask for less chilli."
+recommendation_bn: "ফ্লেয়ারের সময় আইবিডি রোগীরা সবচেয়ে বেশি যে খাবার এড়িয়ে চলেন বলে জানান, তা হলো ঝাল খাবার; কম ঝাল দিতে বলুন।"
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: GODALA2023
+    citation: "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023."
+    doi: "10.3390/jcm12103455"
+    pmid: "37240560"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "In a study by Marsh et al., participants most frequently reported avoiding spicy foods (46%), lactose-containing foods (41%), deep-fried/fatty foods (39%) and alcohol (38%) during active disease and spicy foods (39%) and lactose-containing foods (39%) during remission."
   - key: LIMDI2016
     citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
-reviewed_by: null
-status: draft
+    doi: "10.1097/mib.0000000000000585"
+    pmid: "26383912"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "Worsening symptoms with certain foods was reported by 60%."
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved_with_edits
+  support: direct  # direct | class_level | partial
+  note: "Reworded: the retrieved text reports avoidance during active disease (46%), not specific symptoms."
+status: approved

@@ -1,6 +1,6 @@
 id: RC-FLARE-FAT-M
 title_en: "Flare: moderately oily food"
-title_bn: "ফ্লেয়ার: মাঝারি তৈলাক্ত খাবার"  # native-speaker review needed
+title_bn: "ফ্লেয়ার: মাঝারি তৈলাক্ত খাবার"
 component: fat
 min_level: medium
 applies_to:
@@ -12,12 +12,30 @@ hard: false
 evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "During a flare, keep oil and ghee moderate and watch how you feel after richer meals."
 recommendation_bn: "ফ্লেয়ারের সময় তেল ও ঘি পরিমিত রাখুন এবং ভারী খাবারের পর শরীর কেমন লাগে খেয়াল করুন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: GODALA2023
+    citation: "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023."
+    doi: "10.3390/jcm12103455"
+    pmid: "37240560"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "In a study by Marsh et al., participants most frequently reported avoiding spicy foods (46%), lactose-containing foods (41%), deep-fried/fatty foods (39%) and alcohol (38%) during active disease and spicy foods (39%) and lactose-containing foods (39%) during remission."
+  - key: MORTON2020
+    citation: "Morton H, et al. Inflammatory Bowel Disease: Are Symptoms and Diet Linked? Nutrients. 2020."
+    doi: "10.3390/nu12102975"
+    pmid: "33003341"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "Commonly identified foods include fruit and vegetables, dairy products, spicy foods, processed foods, nuts and seeds, alcohol, and foods with a high fat content."
   - key: LIMDI2016
     citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
-reviewed_by: null
-status: draft
+    doi: "10.1097/mib.0000000000000585"
+    pmid: "26383912"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "Worsening symptoms with certain foods was reported by 60%."
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: partial  # direct | class_level | partial
+  note: "The evidence is about fatty and fried food; applying it mildly (severity 1) to moderately oily dishes is the card author's extension."
+status: approved

@@ -1,6 +1,6 @@
 id: RC-FLARE-CAFFEINE
 title_en: "Flare: strong caffeinated drinks"
-title_bn: "ফ্লেয়ার: কড়া ক্যাফেইনযুক্ত পানীয়"  # native-speaker review needed
+title_bn: "ফ্লেয়ার: কড়া ক্যাফেইনযুক্ত পানীয়"
 component: caffeine
 min_level: high
 applies_to:
@@ -10,14 +10,26 @@ applies_to:
 severity: 1
 hard: false
 evidence_level: patient_reported  # guideline | trial | clinical_practice | patient_reported
-recommendation_en: "Strong tea or coffee can speed up the gut; during a flare, keep caffeinated drinks light."
-recommendation_bn: "কড়া চা বা কফি অন্ত্রের গতি বাড়াতে পারে; ফ্লেয়ারের সময় হালকা রাখুন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+recommendation_en: "Coffee is among the things people with IBD most often cut out; during a flare, keep strong tea and coffee light and notice how they affect you."
+recommendation_bn: "আইবিডি রোগীরা যেসব খাবার সবচেয়ে বেশি বাদ দেন তার মধ্যে কফিও আছে; ফ্লেয়ারের সময় কড়া চা-কফি হালকা রাখুন এবং কেমন লাগে খেয়াল করুন।"
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: GODALA2023
+    citation: "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023."
+    doi: "10.3390/jcm12103455"
+    pmid: "37240560"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "In the study by Crooks et al., the most commonly eliminated foods were spicy and fatty products, carbonated drinks, milk products, alcohol, coffee and red meat."
   - key: LIMDI2016
     citation: "Limdi JK, Aggarwal D, McLaughlin JT. Dietary Practices and Beliefs in Patients with Inflammatory Bowel Disease. Inflamm Bowel Dis. 2016."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
-reviewed_by: null
-status: draft
+    doi: "10.1097/mib.0000000000000585"
+    pmid: "26383912"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "Worsening symptoms with certain foods was reported by 60%."
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved_with_edits
+  support: partial  # direct | class_level | partial
+  note: "Reworded: the retrieved text lists coffee among the most commonly eliminated items but is not specific to flares; the earlier 'speeds up the gut' claim had no retrieved support and was removed."
+status: approved

@@ -89,7 +89,8 @@ class Store(Protocol):
     async def save_feedback(self, patient_id: str, meal_check_id: str, answer: str) -> bool: ...
     async def save_red_flag(self, patient_id: str, categories: list[str]) -> None: ...
     # Spec 003: diary, stressful periods, period decisions
-    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None: ...
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None,
+                             diagnosis: Diagnosis | None = None, phenotypes: frozenset[str] | None = None) -> Patient | None: ...
     async def list_meal_checks(self, patient_id: str, limit: int = 30) -> list[MealCheckRecord]: ...
     async def save_diary(self, patient_id: str, entry: DiaryEntry) -> None: ...
     async def get_diary(self, patient_id: str, day: date) -> DiaryEntry | None: ...
@@ -141,12 +142,16 @@ class MemoryStore:
     async def save_red_flag(self, patient_id: str, categories: list[str]) -> None:
         self.red_flags.append((patient_id, categories))
 
-    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None:
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None,
+                             diagnosis: Diagnosis | None = None, phenotypes: frozenset[str] | None = None) -> Patient | None:
         from dataclasses import replace
 
         for user_id, p in self.patients.items():
             if p.id == patient_id:
-                self.patients[user_id] = replace(p, language=language or p.language, reminder_time=reminder_time or p.reminder_time)
+                self.patients[user_id] = replace(
+                    p, language=language or p.language, reminder_time=reminder_time or p.reminder_time,
+                    diagnosis=diagnosis or p.diagnosis, phenotypes=p.phenotypes if phenotypes is None else phenotypes)
+                self._bump(patient_id)
                 return self.patients[user_id]
         return None
 
@@ -261,10 +266,15 @@ class PostgresStore:
 
     # Spec 003 storage (diary, stressful periods, period decisions) needs a migration that isn't
     # written yet. Until then these features run on the in-memory store (demo mode).
-    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None) -> Patient | None:
+    async def update_patient(self, patient_id: str, language: str | None, reminder_time: str | None,
+                             diagnosis: Diagnosis | None = None, phenotypes: frozenset[str] | None = None) -> Patient | None:
         async with await self._conn() as conn:
             if language:
                 await conn.execute("update core.patients set language = %s where id = %s", (language, patient_id))
+            if diagnosis:
+                await conn.execute("update core.patients set diagnosis = %s where id = %s", (diagnosis.value, patient_id))
+            if phenotypes is not None:
+                await conn.execute("update core.patients set phenotypes = %s where id = %s", (sorted(phenotypes), patient_id))
             cur = await conn.execute(
                 "select id, diagnosis, state, phenotypes, language, is_synthetic from core.patients where id = %s", (patient_id,))
             row = await cur.fetchone()

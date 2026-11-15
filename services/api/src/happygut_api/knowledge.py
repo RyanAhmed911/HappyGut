@@ -47,7 +47,10 @@ class MemoryKnowledge:
 
     @classmethod
     def from_seeds(cls, seeds_dir: Path, include_drafts: bool = False) -> "MemoryKnowledge":
-        return cls(MemoryGraph.from_seeds(seeds_dir, include_drafts=include_drafts), reviewed_only=not include_drafts)
+        graph = MemoryGraph.from_seeds(seeds_dir, include_drafts=include_drafts)
+        # "Reviewed only" describes what was actually loaded, not the flag: no draft dish and no draft Rule Card.
+        drafts = any(d.status != "approved" for d in graph.dishes.values()) or any(r.ref.status != "approved" for r in graph.rules)
+        return cls(graph, reviewed_only=not drafts)
 
     def resolve(self, *names: str) -> Resolution | None:
         best = None

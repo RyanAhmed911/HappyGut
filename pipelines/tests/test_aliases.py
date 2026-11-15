@@ -14,6 +14,14 @@ def workspace(tmp_path):
     (seeds / "dishes").mkdir(parents=True)
     for name in ("beef_bhuna", "beef_tehari"):
         shutil.copy(DEFAULT_SEEDS / "dishes" / f"{name}.yaml", seeds / "dishes")
+    # Start from a dish that doesn't have the candidate spellings yet, whatever the real seed holds today.
+    bhuna = seeds / "dishes" / "beef_bhuna.yaml"
+    raw = _read(bhuna)
+    kept = [a for a in raw["aliases"] if a not in {"গরুর ভুনা", "gorur bhuna", "gur mangsho bhuna"}]
+    text = bhuna.read_text(encoding="utf-8")
+    text, n = al._ALIASES_LINE.subn(lambda _: "aliases: " + json.dumps(kept, ensure_ascii=False), text, count=1)
+    assert n == 1
+    bhuna.write_text(text, encoding="utf-8")
     shutil.copytree(DEFAULT_SEEDS / "rule_cards", seeds / "rule_cards")
     g2 = tmp_path / "jobs" / "g2"
     g2.mkdir(parents=True)

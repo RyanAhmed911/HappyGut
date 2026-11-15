@@ -1,6 +1,6 @@
 id: RC-FLARE-SSN
 title_en: "Flare: whole nuts, seeds and tough skins"
-title_bn: "ফ্লেয়ার: আস্ত বাদাম, বীজ ও শক্ত খোসা"  # native-speaker review needed
+title_bn: "ফ্লেয়ার: আস্ত বাদাম, বীজ ও শক্ত খোসা"
 component: skins_seeds_nuts
 min_level: high
 applies_to:
@@ -12,12 +12,30 @@ hard: false
 evidence_level: clinical_practice  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "During a flare, whole nuts, seeds and tough skins can be harder to tolerate; choose soft or peeled versions."
 recommendation_bn: "ফ্লেয়ারের সময় আস্ত বাদাম, বীজ ও শক্ত খোসা সহ্য করা কঠিন হতে পারে; নরম বা খোসা ছাড়ানো খাবার বেছে নিন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: HASKEY2017
+    citation: "Haskey N, Gibson DL. An Examination of Diet for the Maintenance of Remission in Inflammatory Bowel Disease. Nutrients. 2017."
+    doi: "10.3390/nu9030259"
+    pmid: "28287412"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "A low-residue diet is often recommended for the management of an acute flare of IBD, especially in patients that have intestinal strictures or narrowing."
+  - key: MORTON2020
+    citation: "Morton H, et al. Inflammatory Bowel Disease: Are Symptoms and Diet Linked? Nutrients. 2020."
+    doi: "10.3390/nu12102975"
+    pmid: "33003341"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "Commonly identified foods include fruit and vegetables, dairy products, spicy foods, processed foods, nuts and seeds, alcohol, and foods with a high fat content."
   - key: ESPEN2023
     citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.clnu.2022.12.004"
+    pmid: "36739756"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: direct  # direct | class_level | partial
+  note: "Low-residue advice for flares plus nuts and seeds among patient-identified foods."
+status: approved

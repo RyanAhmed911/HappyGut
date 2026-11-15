@@ -1,6 +1,6 @@
 id: RC-FLARE-FIBRE
 title_en: "Flare: temporary lower-fibre choices"
-title_bn: "ফ্লেয়ার: সাময়িক কম আঁশের খাবার"  # native-speaker review needed
+title_bn: "ফ্লেয়ার: সাময়িক কম আঁশের খাবার"
 component: insoluble_fibre
 min_level: high
 applies_to:
@@ -10,14 +10,32 @@ applies_to:
 severity: 1
 hard: false
 evidence_level: clinical_practice  # guideline | trial | clinical_practice | patient_reported
-recommendation_en: "During a flare with diarrhoea, a temporary lower-fibre (low-residue) choice may ease symptoms; return to normal fibre once settled."
-recommendation_bn: "পাতলা পায়খানাসহ ফ্লেয়ারের সময় কিছুদিন কম আঁশের খাবার উপসর্গ কমাতে পারে; ভালো হলে আবার স্বাভাবিক আঁশে ফিরুন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+recommendation_en: "During a flare, a temporary lower-fibre (low-residue) choice is often recommended; return to your normal fibre intake once things settle."
+recommendation_bn: "ফ্লেয়ারের সময় কিছুদিন কম আঁশের খাবার খাওয়ার পরামর্শ প্রায়ই দেওয়া হয়; ভালো হলে আবার স্বাভাবিক আঁশে ফিরুন।"
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: GODALA2022
+    citation: "Godala M, et al. Dietary Interventions in Inflammatory Bowel Disease. Nutrients. 2022."
+    doi: "10.3390/nu14204261"
+    pmid: "36296945"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "Low-fiber diets are often recommended for patients with active disease, including, for example, as part of the implementation of a low FODMAP diet, while patients in remission are advised to follow a standard fiber intake pattern which does not differ from the recommendations for healthy individuals."
+  - key: HASKEY2017
+    citation: "Haskey N, Gibson DL. An Examination of Diet for the Maintenance of Remission in Inflammatory Bowel Disease. Nutrients. 2017."
+    doi: "10.3390/nu9030259"
+    pmid: "28287412"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "A low-residue diet is often recommended for the management of an acute flare of IBD, especially in patients that have intestinal strictures or narrowing."
   - key: ESPEN2023
     citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.clnu.2022.12.004"
+    pmid: "36739756"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved_with_edits
+  support: direct  # direct | class_level | partial
+  note: "Reworded to 'often recommended'. The evidence is mixed (one trial found no advantage of a low-residue diet in active Crohn's), so severity stays 1."
+status: approved

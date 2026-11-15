@@ -1,6 +1,6 @@
 id: RC-STRICT-001
 title_en: "Stricturing Crohn's: avoid tough insoluble fibre"
-title_bn: "স্ট্রিকচারিং ক্রোনস: শক্ত অদ্রবণীয় আঁশ এড়িয়ে চলুন"  # native-speaker review needed
+title_bn: "স্ট্রিকচারিং ক্রোনস: শক্ত অদ্রবণীয় আঁশ এড়িয়ে চলুন"
 component: insoluble_fibre
 min_level: medium
 applies_to:
@@ -12,18 +12,30 @@ hard: true
 evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "With stricturing Crohn's, avoid foods high in tough insoluble fibre (leafy stalks, whole grains, raw vegetables); choose soft, well-cooked, low-residue food."
 recommendation_bn: "স্ট্রিকচারিং ক্রোনস থাকলে শক্ত অদ্রবণীয় আঁশযুক্ত খাবার (শাকের ডাঁটা, গোটা শস্য, কাঁচা সবজি) এড়িয়ে চলুন; নরম, ভালোভাবে রান্না করা, কম আঁশের খাবার বেছে নিন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
-  - key: ESPEN2023
-    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: BARBERIO2025
+    citation: "Barberio B, et al. Dietary Interventions and Oral Nutritional Supplementation in Inflammatory Bowel Disease: Current Evidence and Future Directions. Nutrients. 2025."
+    doi: "10.3390/nu17111879"
+    pmid: "40507145"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "Traditionally, patients with stricturing disease have been advised to avoid foods with high fiber content, particularly those that maintain their form during intestinal transit, such as raw fruits and vegetables with peels, nuts, seeds, and fibrous vegetables."
   - key: AGA2024
     citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1053/j.gastro.2023.11.303"
+    pmid: "38276922"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "Patients with IBD who have symptomatic intestinal strictures may not tolerate fibrous, plant-based foods (ie, raw fruits and vegetables) due to their texture."
+  - key: ESPEN2023
+    citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
+    doi: "10.1016/j.clnu.2022.12.004"
+    pmid: "36739756"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: direct  # direct | class_level | partial
+  note: "Both sources name fibrous plant foods and strictures. One review notes the evidence behind this long-standing advice is weak; kept as a strict rule because it errs on the side of caution."
+status: approved

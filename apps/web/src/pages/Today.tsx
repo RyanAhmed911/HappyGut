@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarClock, Camera, ChevronRight, CircleCheck, Moon, Type } from "lucide-react";
+import { ArrowRight, CalendarClock, Camera, ChevronRight, CircleCheck, FileText, History, Moon, Salad, Settings, Type } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { RiskCard, TrendChart } from "@/components/insights";
-import { LoadError, SimulatedBadge, useLang, useProfile } from "@/components/shell";
+import { LoadError, useLang, useProfile } from "@/components/shell";
 import { Card, SectionTitle, Skeleton } from "@/components/ui";
 import { VerdictDot } from "@/components/verdict";
 import { api } from "@/lib/api";
@@ -40,7 +40,6 @@ export function Today() {
             {profile.data ? t(`today.state_${profile.data.state}`, { diagnosis: t(`today.dx_${profile.data.diagnosis}`) }) : " "}
           </p>
         </div>
-        {profile.data?.is_synthetic && <SimulatedBadge className="hidden lg:inline-flex" />}
       </header>
 
       {upcoming && risk.data?.level !== "low" && (
@@ -154,6 +153,25 @@ export function Today() {
       ) : (
         <Card className="text-sm text-ink-soft">{t("today.no_checks")}</Card>
       )}
+
+      <SectionTitle>{t("today.more")}</SectionTitle>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {(
+          [
+            { to: "/foods", icon: Salad, key: "foods" },
+            { to: "/history", icon: History, key: "history" },
+            { to: "/report", icon: FileText, key: "report" },
+            { to: "/settings", icon: Settings, key: "settings" },
+          ] as const
+        ).map(({ to, icon: Icon, key }) => (
+          <Link key={to} to={to} className="flex flex-col items-start gap-2 rounded-2xl border border-line/70 bg-card p-3.5 text-sm font-semibold shadow-card transition active:scale-[0.98]">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-soft text-brand-deep">
+              <Icon className="h-[18px] w-[18px]" />
+            </span>
+            {t(`nav.${key}`)}
+          </Link>
+        ))}
+      </div>
 
       <p className="mt-8 text-center text-xs text-ink-faint">{t("app.disclaimer")}</p>
     </div>

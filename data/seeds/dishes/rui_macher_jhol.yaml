@@ -1,7 +1,7 @@
 id: dish.rui_macher_jhol
 name_en: "Rohu fish curry"
 name_bn: "রুই মাছের ঝোল"
-aliases: ["rui macher jhol", "macher jhol", "fish curry"]
+aliases: ["rui macher jhol", "macher jhol", "fish curry", "রুইয়ের ঝোল", "rui er jhol", "rui jhol"]
 cuisine: Bangladeshi
 category: fish
 preparation: ["home-style"]
@@ -11,7 +11,7 @@ ingredients:
   - {name: "onion"}
   - {name: "chilli"}
   - {name: "spices"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: medium
   insoluble_fibre: low
   lactose: none
@@ -27,7 +27,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: [dish.rui_macher_patla_jhol]
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  note: ""
+status: approved

@@ -17,4 +17,4 @@ export const keys = {
 };
 
 /** Query keys to refresh after the diary, a period or a stressful period changes. */
-export const PERSONAL_KEYS = [["risk"], ["periods"], ["days"], ["patterns"], ["diary"], ["me"], ["report"]] as const;
+export const PERSONAL_KEYS = [["risk"], ["periods"], ["days"], ["patterns"], ["diary"], ["me"], ["report"], ["foodGuide"], ["mealPlan"]] as const;

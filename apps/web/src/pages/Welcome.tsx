@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowRight, BookOpen, FlaskConical, LoaderCircle, Moon, ScanLine, ShieldCheck, Sparkles, User } from "lucide-react";
+import { ArrowRight, BookOpen, LoaderCircle, Moon, ScanLine, ShieldCheck, Sparkles, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { LangToggle, Logo } from "@/components/shell";
@@ -60,13 +60,13 @@ export function Welcome() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button size="lg" className="w-full sm:w-auto" disabled={login.isPending || health.data?.demo_mode === false} onClick={() => login.mutate()}>
-                {login.isPending ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <FlaskConical className="h-5 w-5" />}
-                {t("welcome.try_demo")}
+                {login.isPending && <LoaderCircle className="h-5 w-5 animate-spin" />}
+                {t("welcome.start")}
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <p className="text-sm text-ink-faint">{t("welcome.demo_note")}</p>
+              <p className="text-sm text-ink-faint">{t("welcome.start_note")}</p>
             </div>
-            {health.data?.demo_mode === false && <p className="mt-3 text-sm text-caution">{t("welcome.demo_off")}</p>}
+            {health.data?.demo_mode === false && <p className="mt-3 text-sm text-caution">{t("welcome.sign_in_soon")}</p>}
             {(login.isError || health.isError) && <p className="mt-3 text-sm text-trigger">{t("welcome.server_down")}</p>}
 
             <ul className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -88,10 +88,7 @@ export function Welcome() {
           <section aria-label={t("welcome.example")} className="mx-auto w-full max-w-sm">
             <div className="rounded-[36px] border border-line bg-paper-deep/60 p-4 shadow-2xl shadow-brand/10">
               <div className="rounded-[26px] bg-paper p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-[0.1em] text-ink-faint">{t("welcome.example")}</span>
-                  <span className="rounded-full bg-saffron-soft px-2 py-0.5 text-[11px] font-semibold text-caution">{t("app.simulated")}</span>
-                </div>
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.1em] text-ink-faint">{t("welcome.example")}</p>
                 <div className="space-y-2.5">
                   <PreviewRow verdict="likely_trigger" name={t("welcome.ex_1_name")} why={t("welcome.ex_1_why")} delay={100} />
                   <PreviewRow verdict="caution" name={t("welcome.ex_2_name")} why={t("welcome.ex_2_why")} delay={250} />

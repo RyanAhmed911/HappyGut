@@ -15,13 +15,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from happygut_engine import DEFAULT_CONFIG, ManualFlare, usual_bedtime
+from happygut_engine import DEFAULT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
 
-from . import __version__, i18n
+from . import __version__, foods, i18n
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
 from .demo import DemoVerifier, seed_demo
-from .diary import CLOCK, DiaryIn, StressPeriodIn, StressPeriodOut, build_entry
+from .diary import CLOCK, DiaryIn, IndexOut, StressPeriodIn, StressPeriodOut, build_entry, items_of
 from .flow import Event, MealCheckFlow
 from .images import ImageRejected, sanitise
 from .insights import SCOPES, Insights
@@ -45,6 +45,8 @@ class Feedback(BaseModel):
 class ProfileUpdate(BaseModel):
     language: Lang | None = None
     reminder_time: str | None = Field(default=None, pattern=CLOCK)
+    diagnosis: Literal["CD", "UC"] | None = None
+    phenotypes: list[Literal["stricturing", "lactose_intolerant", "ibs_like_symptoms"]] | None = Field(default=None, max_length=3)
 
 
 class PeriodDecision(BaseModel):
@@ -184,8 +186,18 @@ def create_app(services: Services | None = None) -> FastAPI:
 
     @app.patch("/v1/me")
     async def update_me(body: ProfileUpdate, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
-        updated = await s.store.update_patient(patient.id, body.language, body.reminder_time)
-        return await profile(updated or patient, s)
+        updated = await s.store.update_patient(
+            patient.id, body.language, body.reminder_time,
+            Diagnosis(body.diagnosis) if body.diagnosis else None,
+            frozenset(body.phenotypes) if body.phenotypes is not None else None)
+        updated = updated or patient
+        if updated.diagnosis != patient.diagnosis:
+            # The clinical index follows the diagnosis (HBI for Crohn's, SCCAI for UC): rescore the stored days.
+            for entry in await s.store.list_diary(updated.id):
+                score = index_for(updated.diagnosis, items_of(entry))
+                entry.index = IndexOut(name=score.name, score=score.score, parts=score.parts)
+                await s.store.save_diary(updated.id, entry)
+        return await profile(updated, s)
 
     @app.get("/v1/foods/search")
     async def food_search(q: str = Query(min_length=1, max_length=80), _: Patient = Depends(current_patient),
@@ -193,6 +205,27 @@ def create_app(services: Services | None = None) -> FastAPI:
         graph = getattr(s.knowledge, "graph", None)
         matches = graph.search_dish(q, limit=6, threshold=0.35) if graph is not None else []
         return {"results": [{"dish_id": m.dish_id, "name_en": m.name_en, "name_bn": m.name_bn, "score": m.score} for m in matches]}
+
+    async def food_guide(patient: Patient, s: Services) -> list[dict]:
+        if not isinstance(s.knowledge, MemoryKnowledge):
+            raise NotSupported("food_guide")
+        try:
+            state = await s.insights.effective_state(patient)
+            personal = await s.insights.personal_evidence(patient)
+        except NotSupported:
+            state, personal = patient.state, {}
+        return foods.guide(s.knowledge, replace(patient, state=state).profile, personal)
+
+    @app.get("/v1/foods/guide")
+    async def get_food_guide(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        return {"items": await food_guide(patient, s)}
+
+    @app.get("/v1/foods/plan")
+    async def get_meal_plan(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        today = s.insights.today()
+        year, week, _ = today.isocalendar()
+        seed = f"{patient.id}:{year}-{week}:{patient.diagnosis.value}:{sorted(patient.phenotypes)}"
+        return {**foods.plan(await food_guide(patient, s), today, seed), "start": today.isoformat()}
 
     # ------------------------------------------------------------ meal checks
 

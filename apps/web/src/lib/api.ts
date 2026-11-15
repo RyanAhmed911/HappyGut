@@ -62,7 +62,10 @@ export const api = {
     auth.set(((await response.json()) as { token: string }).token);
   },
   me: () => json(S.Profile, "/v1/me"),
-  updateMe: (body: { language?: "bn" | "en"; reminder_time?: string }) => json(S.Profile, "/v1/me", send("PATCH", body)),
+  updateMe: (body: { language?: "bn" | "en"; reminder_time?: string; diagnosis?: "CD" | "UC"; phenotypes?: S.Phenotype[] }) =>
+    json(S.Profile, "/v1/me", send("PATCH", body)),
+  foodGuide: async () => (await json(S.Guide, "/v1/foods/guide")).items,
+  mealPlan: () => json(S.MealPlan, "/v1/foods/plan"),
 
   async mealCheck(form: FormData, onEvent: (e: SseEvent) => void, signal?: AbortSignal): Promise<void> {
     const response = await raw("/v1/meal-checks", { method: "POST", body: form, signal });
