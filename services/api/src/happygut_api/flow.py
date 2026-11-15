@@ -20,7 +20,7 @@ from langgraph.graph import END, START, StateGraph
 from happygut_engine import DEFAULT_CONFIG, DishEvidence, MealVerdict, Verdict, assess_meal, check_red_flags
 
 from . import guard, i18n
-from .agents import Explainer, Explanation, PerceivedItem, Perceiver, Perception
+from .agents import Explainer, Explanation, PerceivedItem, Perceiver, Perception, describe_error
 from .evidence import DishContext, build_evidence, packet
 from .images import CleanImage
 from .knowledge import Knowledge
@@ -124,7 +124,7 @@ class MealCheckFlow:
         try:
             run = await self.perceiver.perceive(text=s.get("scrubbed"), image=s.get("image"), lang=s["lang"])
         except Exception as exc:  # every model in the fallback chain failed
-            log.warning("perception failed: %s", exc)
+            log.warning("perception failed: %s", describe_error(exc))
             if s.get("image") is None and s.get("scrubbed"):
                 # Text still works without a model: split the sentence and resolve each part against the dish names.
                 parts = [p.strip() for p in _SPLIT.split(s["scrubbed"]) if p.strip()][:12] or [s["scrubbed"]]
@@ -190,7 +190,7 @@ class MealCheckFlow:
             try:
                 run = await self.explainer.explain(packet=data, lang=lang, diagnosis=s["patient"].diagnosis.value)
             except Exception as exc:
-                log.warning("explanation failed: %s", exc)
+                log.warning("explanation failed: %s", describe_error(exc))
                 problems.append(f"model_error:{type(exc).__name__}")
                 break
             result = guard.check(run.output, contexts, lang)
