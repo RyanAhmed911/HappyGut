@@ -26,6 +26,7 @@ from .flow import Event, MealCheckFlow
 from .images import ImageRejected, sanitise
 from .insights import SCOPES, Insights
 from .knowledge import Knowledge, MemoryKnowledge
+from .model_catalog import choose
 from .pii import Scrubber, build_scrubber
 from .prompts import load_prompt
 from .settings import Settings, get_settings
@@ -67,6 +68,7 @@ class Services:
     scrubber: Scrubber | None = None
     demo: DemoVerifier | None = None
     models: dict[str, bool] | None = None
+    model_names: dict[str, list[str]] | None = None
 
     def __post_init__(self) -> None:
         self.insights = self.insights or Insights(self.store, self.knowledge, self.settings.timezone)
@@ -80,16 +82,23 @@ def build_services(settings: Settings) -> Services:
     demo = DemoVerifier() if settings.demo_mode else None
     store: Store = MemoryStore() if settings.demo_mode or not settings.supabase_db_url else PostgresStore(settings.supabase_db_url)
     models = {"perception": True, "explanation": True}
+    if settings.resolve_models and (settings.gemini_api_key or settings.groq_api_key):
+        choice = choose(settings)
+        perception_names, explanation_names = choice.perception, choice.explanation
+    else:
+        perception_names = [settings.perception_model, settings.perception_fallback_model]
+        explanation_names = [settings.explanation_model, settings.explanation_fallback_model]
+    log.info("models: perception %s, explanation %s", perception_names, explanation_names)
     try:
         perceiver = PydanticPerceiver(
-            build_model([settings.perception_model, settings.perception_fallback_model], settings.gemini_api_key, settings.groq_api_key),
+            build_model(perception_names, settings.gemini_api_key, settings.groq_api_key, settings.gemini_base_url),
             load_prompt(settings.prompts_dir, "meal-perception"), settings.model_timeout_s)
     except RuntimeError:
         log.warning("no perception model key: photos are unavailable, typed text still works")
         perceiver, models["perception"] = Unavailable(), False
     try:
         explainer = PydanticExplainer(
-            build_model([settings.explanation_model, settings.explanation_fallback_model], settings.gemini_api_key, settings.groq_api_key),
+            build_model(explanation_names, settings.gemini_api_key, settings.groq_api_key, settings.gemini_base_url),
             load_prompt(settings.prompts_dir, "meal-explanation"), settings.model_timeout_s)
     except RuntimeError:
         log.warning("no explanation model key: explanations use the cited template")
@@ -97,7 +106,9 @@ def build_services(settings: Settings) -> Services:
     scrubber = build_scrubber(settings.pii_presidio, settings.pii_bengali_ner_model, knowledge.all_names())
     flow = MealCheckFlow(knowledge, perceiver, explainer, scrubber, store)
     verifier: Verifier = demo if demo else SupabaseVerifier(settings.supabase_url, settings.jwt_audience)
-    return Services(settings, knowledge, store, verifier, flow, demo=demo, models=models)
+    names = {"perception": perception_names if models["perception"] else [],
+             "explanation": explanation_names if models["explanation"] else []}
+    return Services(settings, knowledge, store, verifier, flow, demo=demo, models=models, model_names=names)
 
 
 def create_app(services: Services | None = None) -> FastAPI:
@@ -158,6 +169,7 @@ def create_app(services: Services | None = None) -> FastAPI:
             "knowledge": {**s.knowledge.counts(), "reviewed_only": s.knowledge.reviewed_only},
             "storage": type(s.store).__name__, "demo_mode": s.demo is not None,
             "models": s.models or {"perception": True, "explanation": True},
+            "model_names": s.model_names or {},
         }
 
     @app.post("/v1/demo/login")

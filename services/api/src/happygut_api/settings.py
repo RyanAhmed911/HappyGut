@@ -25,7 +25,10 @@ class Settings(BaseSettings):
     perception_model: str = "gemini-flash-latest"
     perception_fallback_model: str = "gemini-flash-lite-latest"
     explanation_model: str = "gemini-flash-latest"
-    explanation_fallback_model: str = "llama-3.3-70b-versatile"  # Groq
+    explanation_fallback_model: str = "openai/gpt-oss-120b"  # Groq
+    # Configured names are checked against what the keys can use at start-up; unavailable ones are replaced.
+    resolve_models: bool = True
+    gemini_base_url: str = ""  # tests / proxies only
     model_timeout_s: float = 25.0  # per model attempt; a whole call allows 2.5x this
 
     # Knowledge

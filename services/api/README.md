@@ -15,7 +15,9 @@ Settings come from the repo-root `.env` (see `.env.example`). Without `SUPABASE_
 ```bash
 uv run python -m happygut_api.diagnose
 ```
-It shows whether each key is read, then calls every configured model on its own (text, photo, explanation) and prints the provider's exact error with a hint when one fails. Pass a photo path to test with your own picture, or `--model <name>` to try another model. Key values are never printed. When a model fails during normal use, the backend window logs the same one-line reason (`perception failed: …`).
+Models are picked automatically: at start-up the backend lists the models each key can use (Gemini on the `v1beta` API) and replaces any configured name that isn't available, logging what it chose; `/v1/health` shows the chosen names. `--list` prints what each key can use.
+
+It shows whether each key is read and which models will be used, then calls each of them on its own (text, photo, explanation) and prints the provider's exact error with a hint when one fails. Pass a photo path to test with your own picture, or `--model <name>` to try another model. Key values are never printed. When a model fails during normal use, the backend window logs the same one-line reason (`perception failed: …`).
 
 ## Endpoints
 | Method | Path | What it does |

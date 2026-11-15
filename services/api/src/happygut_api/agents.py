@@ -95,7 +95,19 @@ def describe_error(exc: BaseException) -> str:
 
 # ---------------------------------------------------------------- models
 
-def build_model(names: list[str], gemini_api_key: str, groq_api_key: str) -> Model:
+def gemini_provider(api_key: str, base_url: str = ""):
+    """Google AI Studio on the v1beta API: google-genai 3 defaults to v1, where the "-latest" aliases don't exist."""
+    from google.genai import Client
+    from google.genai.types import HttpOptions
+    from pydantic_ai.providers.google import GoogleProvider
+
+    from .model_catalog import GEMINI_API_VERSION
+
+    options = HttpOptions(api_version=GEMINI_API_VERSION, **({"base_url": base_url} if base_url else {}))
+    return GoogleProvider(client=Client(vertexai=False, api_key=api_key, http_options=options))
+
+
+def build_model(names: list[str], gemini_api_key: str, groq_api_key: str, gemini_base_url: str = "") -> Model:
     """Gemini names go to Google AI Studio, everything else to Groq. Names without a key are skipped."""
     models: list[Model] = []
     for name in names:
@@ -105,9 +117,8 @@ def build_model(names: list[str], gemini_api_key: str, groq_api_key: str) -> Mod
             if not gemini_api_key:
                 continue
             from pydantic_ai.models.google import GoogleModel
-            from pydantic_ai.providers.google import GoogleProvider
 
-            models.append(GoogleModel(name, provider=GoogleProvider(api_key=gemini_api_key)))
+            models.append(GoogleModel(name, provider=gemini_provider(gemini_api_key, gemini_base_url)))
         else:
             if not groq_api_key:
                 continue
