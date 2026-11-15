@@ -47,11 +47,14 @@
 | "My Gut" screen (trend, periods, "My patterns") | **A** |
 | Flare-risk outlook (rule-based v0) | **A** |
 | Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers | B |
-| Personal Gut Graph view (D3) | B |
 | Clinician pre-visit PDF | B |
 | /docs page | B |
 | Reminders (web push) | B |
-| Generative dietitian / meal plans | **C** |
+| Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine | **A** |
+| Health profile editing; verdicts change at once (stricture, lactose intolerance, IBS-like symptoms) | **A** |
+| Personal Gut Graph view (SVG) | **A** |
+| Diary reminder notification (while the app is open or installed) | B |
+| LLM-written (generative) dietitian plans | **C** |
 | Wearables, lab reports, voice | **C** |
 | Federated learning, research portal | **C** |
 
@@ -61,7 +64,7 @@
 | Sources: Internal, APIs, Public web, Open datasets, Uploads, Synthetic | A |
 | Scrapy (Wikipedia, ~50 dishes), Crawl4AI (guideline pages), Wikidata SPARQL | A |
 | AI extraction: meal photo / label → JSON | A |
-| AI extraction: LLM-drafted Rule Cards (~25, human-reviewed) | A |
+| AI extraction: LLM-drafted Rule Cards (25), reviewed by an LLM judge against retrieved quotes (not by clinicians) | A |
 | Food-table PDF parsing (subset of foods) | B |
 | Admin bulk upload | B |
 | Postgres, pgvector, Supabase Storage, Neo4j | A |
@@ -107,6 +110,7 @@
 - [ ] Replace estimates with real numbers: % AI-built UI, MCP endpoints called, eval metrics
 - [ ] Fill in versions and URLs: exact model versions, repo / deploy URLs
 - [ ] Re-paste any portal text changed since it was first entered (see git history of `docs/portal/`)
-- [ ] Label all simulated results as simulated in the app, video, /docs and README
+- [ ] Say that evaluation results come from a simulated cohort in the video, /docs, README and portal; the app shows its sample-data notice once at entry
+- [ ] Describe knowledge review as "LLM judge against published sources", never as clinical review
 - [ ] Make the repo public; check no keys are in git history
 - [ ] Add the real build prompts to the prompt library

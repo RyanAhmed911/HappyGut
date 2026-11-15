@@ -25,7 +25,12 @@
 - [x] T016 My patterns (scopes, counts, rate bars, overlap, explanation sheet) and flare-risk card [US3]
 - [x] T017 My Gut (trend with flare shading, timeline, Remission / Flare tabs, week before each flare, proposals, manual flare, stressful periods) [US4]
 - [x] T018 Doctor's report (printable) [US5]
-- [ ] T019 Native-speaker review of the Bangla strings
+- [x] T019 Bangla strings reviewed by the LLM judge (`data/review/llm_judge/bangla.md`)
+- [x] T023 Personal Gut Graph view on My patterns
+- [x] T024 Diary reminder notification while the app is open or installed (local notification; server push is T014)
+- [x] T025 Health profile editing (diagnosis, stricture, lactose intolerance, IBS-like symptoms); a diagnosis change rescores the diary
+- [x] T026 Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine
+- [x] T027 Sample-data notice shown once at entry; per-screen labels removed (Constitution V, v2.0.0)
 
 ## Proof (step 4)
 - [ ] T020 Simulated cohort (≥ 200 patients × 180 days) and the recovery metrics SC-002 to SC-004 in the Eval Lab

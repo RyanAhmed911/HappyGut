@@ -139,7 +139,7 @@ Evaluation only: dataset photos never train a model and never enter the app. Map
 ### 1.4 Portal text: "Data source details"
 > Plain text, ready to paste.
 
-HappyGut's prototype combines six types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, and open-access ESPEN, IOIBD and AGA guideline documents. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, and Google's Dakshina dataset for Banglish-to-Bangla transliteration. User uploads: meal, menu and label photos, plus a team-captured set of about 300 real Bangladeshi meal photos used as our test set. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and human-reviewed Bangla/English, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records. Wearables, voice notes, lab reports and a Bangladeshi medicine registry are planned for the finals phase.
+HappyGut's prototype combines six types of data source, each with a documented licence. Internal: our Supabase app database (patient profiles, meal checks, verdicts, daily check-ins using Harvey-Bradshaw Index and SCCAI items, medication adherence and "was this right for you?" verdict feedback), the Neo4j Personal Gut Graph of learned tolerances, and team-authored Rule Cards that turn published IBD guidance into structured, cited rules. External free APIs: USDA FoodData Central (CC0 nutrient data), Open Food Facts (ODbL barcode lookup of packaged foods sold in Bangladesh), Europe PMC (open-access IBD nutrition literature, filtered automatically by licence) and PubMed E-utilities (citation metadata so every claim links to a real paper). Public web: Wikipedia Bangladeshi cuisine pages in English and Bangla (CC BY-SA) for dish descriptions and ingredients, and open-access ESPEN, IOIBD and AGA guideline documents. Open datasets: the Food Composition Table for Bangladesh (INFS, University of Dhaka), Wikidata (CC0) for dish-ingredient relations and Bangla labels, published FODMAP composition tables, and Google's Dakshina dataset for Banglish-to-Bangla transliteration. User uploads: meal, menu and label photos, plus a team-captured set of about 300 real Bangladeshi meal photos used as our test set. Synthetic data: a clearly labelled simulated cohort of IBD patients with known injected food triggers, used to measure how accurately our Trigger Discovery engine recovers them, plus generated and reviewed by an LLM judge Bangla/English, red-flag and guideline Q&A evaluation sets. We deliberately exclude proprietary databases (such as Monash FODMAP), social-media health posts and any real patient records. Wearables, voice notes, lab reports and a Bangladeshi medicine registry are planned for the finals phase.
 
 ---
 
@@ -194,7 +194,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - n8n: nightly Personal Gut Graph + flare-risk recompute
 - n8n: weekly clinician pre-visit report
 - n8n: wearable sync (Finals)
-- n8n: RSS watch for new IBD diet papers → LLM triage → human review queue (Finals)
+- n8n: RSS watch for new IBD diet papers → LLM triage → LLM-judge review queue (Finals)
 - Supabase database / storage webhooks → FastAPI ingestion endpoints
 - Scheduled GitHub Actions: weekly scraper runs, USDA / Open Food Facts delta refresh
 
@@ -205,11 +205,11 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Vision-language model: meal photo → dishes, ingredients, cooking method, portion, confidence (JSON)
 - Labels and menus: VLM OCR first, Tesseract (Bangla + English) as fallback → normalised ingredient list
 - Food-table PDF: Docling / pdfplumber tables → LLM repair of broken rows
-- Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → human review
-- Wikipedia text → LLM → dish–ingredient graph candidates with provenance → human review
+- Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → LLM-judge review
+- Wikipedia text → LLM → dish–ingredient graph candidates with provenance → LLM-judge review
 - Lab reports: OCR + LLM → LOINC-coded values (Finals)
 - Voice: faster-whisper (local GPU) → intent and entity extraction
-- Every output is validated against a Pydantic schema; low confidence → ⚪ "Not sure" or human review
+- Every output is validated against a Pydantic schema; low confidence → ⚪ "Not sure" or LLM-judge review
 
 ## 3. Parsing, formats and cleaning
 
@@ -264,7 +264,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Local portions → grams (plate, bati, cup, piece)
 - Entity resolution: dish names across Wikipedia EN/BN, Wikidata, food table, USDA and user text → one canonical dish ID
   - rapidfuzz fuzzy matching + BGE-M3 multilingual embeddings + transliteration
-  - LLM adjudication for ambiguous matches → human review
+  - LLM adjudication for ambiguous matches → LLM-judge review
 - Ingredient → food-code mapping: Bangladesh food table first, USDA as fallback
 - Dedup: products by barcode, papers by DOI/PMID, chunks by content hash, near-duplicate pages by MinHash
 - AI enrichment: LLM tags each dish (fat level, insoluble fibre, FODMAP groups, lactose, spice level, cooking method) with provenance
@@ -624,7 +624,7 @@ HappyGut's prototype combines six types of data source, each with a documented l
 - Synthetic cohort as test oracle: injected ground-truth triggers make trigger discovery measurable
 
 **Agent-driven data ops**
-- Knowledge-gap loop: every ⚪ "Not sure" or unmatched dish is queued; an enrichment agent drafts graph facts → human review → graph update
+- Knowledge-gap loop: every ⚪ "Not sure" or unmatched dish is queued; an enrichment agent drafts graph facts → LLM-judge review → graph update
 - Data flywheel: "was this right for you?" feedback feeds Trigger Discovery and grows the evaluation sets
 - Curation via MCP: a coding agent uses the Neo4j and Supabase MCP servers to find orphan nodes and unmatched ingredients and propose fixes as reviewable diffs
 

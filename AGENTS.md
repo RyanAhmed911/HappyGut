@@ -23,7 +23,7 @@ Every night the **nightly diary** collects the day's foods, food reactions, stoo
 4. Stricturing Crohn's rules (avoid insoluble fibre, skins, seeds, nuts) apply before any LLM output.
 5. Red-flag symptoms (heavy bleeding, fever + abdominal pain, signs of obstruction, severe dehydration) → stop diet advice and escalate to a clinician or emergency care.
 6. Never suggest starting, stopping or changing medication.
-7. Scrub PII inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud LLM call. The local GPU is never a server: it runs finite GPU jobs on Ubuntu that exchange files with Windows through git. Secrets and day-to-day work stay on Windows; the live app runs on cloud services. Never commit real patient data or secrets. Synthetic data is flagged `is_synthetic` and labelled "simulated".
+7. Scrub PII inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud LLM call. The local GPU is never a server: it runs finite GPU jobs on Ubuntu that exchange files with Windows through git. Secrets and day-to-day work stay on Windows; the live app runs on cloud services. Never commit real patient data or secrets. Sample (simulated) data is flagged `is_synthetic`; the app announces it once at entry (not on every screen), and exported documents and evaluation results still say so.
 8. Only legally licensed data sources; record each licence in `docs/03-data.md` before ingesting.
 9. Every user-facing string exists in Bangla and English (i18n files). Supported input languages are Bangla and English; Banglish sentences are not supported, but English-letter dish names ("kacchi") stay in dish search and romanised red-flag phrases stay in the sentinel.
 10. Free tiers with no card only. No Google Cloud / Vertex, AWS or paid domains.
@@ -33,4 +33,5 @@ Every night the **nightly diary** collects the day's foods, food reactions, stoo
 - Long prompts live in `prompts/runtime/` as versioned files; don't inline them in code.
 - Knowledge seeds: dishes in `data/seeds/dishes/*.yaml`, Rule Cards in `data/seeds/rule_cards/*.yaml` (formats in `.claude/skills/add-dish` and `.claude/skills/add-rule-card`).
 - Spec-Kit per feature: specs in `specs/NNN-name/`.
-- One PR per task, reviewed by a human. Record decisions in the relevant `docs/` decision log.
+- Review is done by an **LLM judge**, not by clinical experts (rubric: `docs/seed-review.md`; verdicts: `data/review/llm_judge/`). A Rule Card needs a paper confirmed by DOI / PMID and an exact retrieved sentence that supports it. Never invent a quote or an identifier, and never describe the review as clinical.
+- One PR per step; it merges when CI passes. Record decisions in the relevant `docs/` decision log.

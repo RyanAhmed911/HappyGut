@@ -1,6 +1,8 @@
-# Seed review guide (Step 1)
+# Knowledge review by the LLM judge
 
-The knowledge seeds were drafted by Claude Code **without internet access to the papers or Wikipedia**. Nothing is used by the app until a team member reviews it and sets `status: approved`. Split the files across the team; each file takes 2–5 minutes.
+HappyGut is a competition prototype and the team has no clinical experts, so review is done by an **LLM judge** (Constitution IV, v2.0.0). This file is the judge's rubric. Verdicts are recorded per item in the seed files (`review:` block) and summarised in [`data/review/llm_judge/`](../data/review/llm_judge/). The app only loads items with `status: approved`.
+
+**What this review is not:** it is not a clinical or dietetic review. Say "reviewed by an LLM judge against published sources" wherever review is described.
 
 Check progress at any time:
 ```bash
@@ -8,36 +10,42 @@ cd pipelines && uv run python -m happygut_pipelines.seeds    # counts + problems
 uv run --group dev pytest -q                                  # seed + engine sanity tests
 ```
 
-## Rule Cards (`data/seeds/rule_cards/`, 25 files): highest priority
-For each card:
-1. Open each cited paper (titles in `sources[].citation`; all are findable on PubMed / Europe PMC).
-2. Find the sentence that supports the card. Copy it **exactly** into `quote`, and fill in `doi`, `pmid` and `licence`.
-3. If the paper doesn't support the card as written, fix the card (component, level, state, severity) or delete it. Never keep a card without a real quote.
-4. `patient_reported` cards (Limdi 2016) must stay mild (severity ≤ 2) and use "often reported" wording.
-5. A native Bangla speaker checks `title_bn` and `recommendation_bn` and removes the "review needed" comment.
-6. Set `reviewed_by: <your name>` and `status: approved`.
+## Rule Cards (`data/seeds/rule_cards/`)
+For each card the judge must:
+1. **Confirm the paper exists.** Look each citation up (Europe PMC or NCBI) and record its DOI and PMID. A citation that can't be found is removed.
+2. **Retrieve supporting text.** Use the paper's full text when it is open access, otherwise its published abstract, or an open-access (CC BY) paper that reports the same guidance. Record where it came from and its licence.
+3. **Quote exactly.** Copy the supporting sentence word for word (reference markers such as "[12]" may be dropped). Never write a quote from memory.
+4. **Compare the claim with the quote** and record one of:
+   - *direct*: the quote states the card's claim
+   - *class level*: the quote supports the group the card belongs to (for example the low-FODMAP diet as a whole)
+   - *partial*: the quote supports a stronger or more general form and the card applies it mildly
+5. **Reword or reject.** If the card says more than the retrieved text, reword it down to what is supported. If nothing supports it, leave it `draft`.
+6. **Check the wording:** no "safe", no medication advice, no "caused"; `patient_reported` cards stay mild (severity ≤ 2) and say "report" or "often".
+7. **Check the Bangla** (`title_bn`, `recommendation_bn`): same meaning as the English, natural phrasing, same banned-wording rules.
+8. Set `reviewed_by: llm-judge`, fill the `review:` block (date, verdict, support, note) and set `status: approved`.
 
-**Hard rules first:** RC-STRICT-001 and RC-STRICT-002 are the safety rules. Approve them only with a clear guideline quote.
+Hard rules (`RC-STRICT-*`) are the safety rules: they need a quote that names strictures.
 
-## Dishes (`data/seeds/dishes/`, 61 files)
-For each dish:
-1. Check the Bangla name and add common English-letter spellings you actually see people type (e.g. "kacchi", "kachchi").
-2. Check each component level against the typical home or restaurant recipe. If you're unsure, use `unknown` rather than guessing.
-3. Add at least one source: the Wikipedia page (`{ref: "wikipedia:en:<Page_title>", licence: "CC BY-SA 4.0"}`) and/or the Food Composition Table for Bangladesh entry.
-4. Set `reviewed_by` and `status: approved`, and delete `needs_verification` once the levels are checked.
+## Dishes (`data/seeds/dishes/`)
+For each dish the judge:
+1. Compares the ingredient list with every component level for a typical home or restaurant recipe, and corrects levels that don't fit. When unsure, `unknown` beats a guess.
+2. Checks the Bangla name.
+3. Checks that each gentler alternative is lower in the components that make the dish risky.
+4. Records the source as `llm-judge:typical-recipe` (a model judgement, no external text copied) unless a licensed composition source was actually consulted.
 
-**Demo dishes first:**
-- kacchi_biryani, borhani, chicken_rezala, plain_rice, murgir_patla_jhol
-- shorshe_ilish, masoor_dal, alu_bhorta, fuchka, dudh_cha
+## Spellings (`data/review/g2-aliases.csv`)
+The local model suggests extra spellings. The judge accepts a spelling only if people plausibly write **this exact dish** that way, and rejects words that mean something else (`gur mangsho bhuna`: *gur* is jaggery; `কলা ভুনা`: *কলা* is banana), names that fit more than one dish, and doubled-letter variants (fuzzy search already tolerates small typos). Every row gets a decision, `reviewer: llm-judge` and a reason; then:
+```bash
+cd pipelines && uv run python -m happygut_pipelines.aliases apply
+```
 
-## Dish-name spellings from G2 (`data/review/g2-aliases.csv`): a native Bangla speaker, ~15 minutes
-Gemma suggests extra Bangla and English-letter spellings for each dish. It is often wrong in a confident way (e.g. `gur mangsho bhuna`: *gur* is jaggery; `beef theory` for tehari), so nothing enters the seeds without a person accepting it.
-1. Windows, after G2's output is pulled: `cd pipelines; uv run python -m happygut_pipelines.aliases export`
-2. Open the CSV in Excel. For each row, write `yes` or `no` in **decision** and your initials in **reviewer**. Say yes only if you have seen people write the dish that way. `votes` (e.g. 3/3) is how often the model gave it, not proof it's right.
-3. Save as CSV (UTF-8), then: `uv run python -m happygut_pipelines.aliases apply`, `uv run python -m happygut_pipelines.seeds`, and the tests.
-4. Commit the CSV and the changed dish files together: the CSV is the record of who accepted each spelling. Rerun G3 next time Ubuntu is on.
+## Bangla interface text
+`apps/web/src/locales/bn.json` and `services/api/src/happygut_api/locales/bn.json`: same meaning as the English, natural phrasing, the same placeholders, none of the banned words. Automated tests check keys, placeholders and banned words; the judge checks meaning and tone.
 
-## Done when
-- [ ] ≥ 25 Rule Cards approved (both hard rules included)
-- [ ] ≥ 50 dishes approved (all demo dishes included)
-- [ ] Validator prints `OK` and the tests pass
+## Current state (2026-11-15)
+| What | Result | Report |
+|---|---|---|
+| Rule Cards | 25 approved (7 with edits), each with an exact retrieved quote | [`rule_cards.md`](../data/review/llm_judge/rule_cards.md), [`evidence.json`](../data/review/llm_judge/evidence.json) |
+| Dishes | 61 approved (3 with edits) | [`dishes.md`](../data/review/llm_judge/dishes.md) |
+| Spellings | 50 accepted, 87 rejected | [`g2-aliases.csv`](../data/review/g2-aliases.csv) |
+| Bangla text | reviewed | [`bangla.md`](../data/review/llm_judge/bangla.md) |

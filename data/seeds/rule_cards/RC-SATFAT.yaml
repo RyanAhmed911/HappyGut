@@ -1,6 +1,6 @@
 id: RC-SATFAT
 title_en: "Reduce saturated fat"
-title_bn: "স্যাচুরেটেড ফ্যাট কমান"  # native-speaker review needed
+title_bn: "স্যাচুরেটেড ফ্যাট কমান"
 component: fat
 min_level: high
 applies_to:
@@ -12,12 +12,24 @@ hard: false
 evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "IBD dietary guidance advises reducing saturated fat (ghee, butter, fatty red meat, vanaspati/dalda)."
 recommendation_bn: "আইবিডি রোগীদের জন্য স্যাচুরেটেড ফ্যাট (ঘি, মাখন, চর্বিযুক্ত লাল মাংস, ডালডা) কমানোর পরামর্শ দেওয়া হয়।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: GODALA2023
+    citation: "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023."
+    doi: "10.3390/jcm12103455"
+    pmid: "37240560"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "On the other hand, the IOIBD suggests reducing saturated-fatty-acid intake."
   - key: IOIBD2020
     citation: "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.cgh.2020.01.046"
+    pmid: "32068150"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: direct  # direct | class_level | partial
+  note: "A secondary source reporting the IOIBD guidance; the food examples (ghee, butter, dalda) are the card author's mapping."
+status: approved

@@ -26,7 +26,8 @@
 - Stricturing Crohn's safety rules applied before any AI output
 - Privacy: PII stripped inside our backend (Presidio + Bangladesh rules + Bengali NER) before any cloud call; EXIF/GPS removed; pseudonymous IDs; consent scopes; row-level security; export and delete on request
 - Free-tier cloud APIs only receive food photos and de-identified text
-- Bias checks: metrics broken down by language (Bangla / English), sex and disease phenotype; native-speaker review of Bangla output
+- Knowledge review: every dish and Rule Card is approved by an LLM judge following a written rubric (`docs/seed-review.md`); each Rule Card carries an exact sentence retrieved from the cited or an open-access (CC BY) paper, with DOI and PMID confirmed through Europe PMC. No clinician reviewed the knowledge
+- Bias checks: metrics broken down by language (Bangla / English), sex and disease phenotype; LLM-judge review of Bangla output
 - Transparency: evidence bar, citations, SHAP factors on alerts, model/data cards, prompt and model versions logged per verdict
 - Honesty: simulated-data results always labelled; no fabricated traction or outcomes
 - Human oversight: humans approve AI-extracted knowledge and review every AI-generated code change

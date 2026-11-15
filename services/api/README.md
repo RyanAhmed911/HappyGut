@@ -9,7 +9,7 @@ uv sync --group dev --extra pii
 uv run --group dev pytest -q
 uv run uvicorn --factory happygut_api.main:app --reload --port 8000
 ```
-Settings come from the repo-root `.env` (see `.env.example`). Without `SUPABASE_DB_URL` the API keeps data in memory. Until seeds are approved, set `INCLUDE_DRAFT_SEEDS=true` to try it; every verdict then carries an "unreviewed knowledge" note.
+Settings come from the repo-root `.env` (see `.env.example`). Without `SUPABASE_DB_URL` the API keeps data in memory. All seeds are approved by the LLM judge (`docs/seed-review.md`); `INCLUDE_DRAFT_SEEDS=true` is only for trying new drafts, and a verdict then carries an "unreviewed knowledge" note if any draft is loaded.
 
 ## Check the AI models
 ```bash

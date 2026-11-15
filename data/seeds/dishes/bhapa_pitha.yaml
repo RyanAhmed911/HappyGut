@@ -1,7 +1,7 @@
 id: dish.bhapa_pitha
 name_en: "Bhapa pitha"
 name_bn: "ভাপা পিঠা"
-aliases: ["bhapa pitha", "vapa pitha"]
+aliases: ["bhapa pitha", "vapa pitha", "bapa pitha"]
 cuisine: Bangladeshi
 category: sweet_snack
 preparation: ["steamed"]
@@ -9,11 +9,11 @@ ingredients:
   - {name: "rice flour"}
   - {name: "date molasses"}
   - {name: "grated coconut"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: low
   insoluble_fibre: medium
   lactose: none
-  fructans: low
+  fructans: none
   gos: none
   polyols: none
   excess_fructose: none
@@ -25,7 +25,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: [dish.chitoi_pitha]
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved_with_edits
+  note: "Fructans lowered from low to none: rice flour, date molasses and coconut are not fructan sources."
+status: approved

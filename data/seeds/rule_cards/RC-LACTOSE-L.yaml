@@ -1,6 +1,6 @@
 id: RC-LACTOSE-L
 title_en: "Lactose intolerance: small amounts"
-title_bn: "ল্যাকটোজ অসহিষ্ণুতা: অল্প পরিমাণ"  # native-speaker review needed
+title_bn: "ল্যাকটোজ অসহিষ্ণুতা: অল্প পরিমাণ"
 component: lactose
 min_level: low
 applies_to:
@@ -12,12 +12,30 @@ hard: false
 evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "Small amounts of lactose are often tolerated even with lactose intolerance; notice your own limit."
 recommendation_bn: "ল্যাকটোজ অসহিষ্ণুতা থাকলেও অল্প ল্যাকটোজ অনেক সময় সহ্য হয়; নিজের সীমা খেয়াল করুন।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: SOOD2019
+    citation: "Sood A, et al. Diet and inflammatory bowel disease: The Asian Working Group guidelines. Indian J Gastroenterol. 2019."
+    doi: "10.1007/s12664-019-00976-1"
+    pmid: "31352652"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "A subsequent review also concluded that even though hypolactasia is common in IBD, strict lactose exclusion is usually unnecessary."
+  - key: GODALA2022
+    citation: "Godala M, et al. Dietary Interventions in Inflammatory Bowel Disease. Nutrients. 2022."
+    doi: "10.3390/nu14204261"
+    pmid: "36296945"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "The lactose content of milk and milk products is similar, however, studies have confirmed that lacto-fermented products (such as yogurt) are better tolerated."
   - key: ESPEN2023
     citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.clnu.2022.12.004"
+    pmid: "36739756"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: direct  # direct | class_level | partial
+  note: ""
+status: approved

@@ -59,7 +59,7 @@ describe("locales (Constitution VI: every string in Bangla and English)", () => 
     const dynamicPrefixes = new Set<string>();
     for (const file of files) {
       const text = readFileSync(file, "utf8");
-      for (const m of text.matchAll(/["'`]((?:app|nav|verdict|welcome|today|check|redflag|diary|patterns|risk|gut|history|report|settings)\.[a-zA-Z0-9_]+)["'`]/g)) {
+      for (const m of text.matchAll(/["'`]((?:app|nav|verdict|welcome|today|check|redflag|diary|patterns|risk|gut|history|report|settings|notice|foods|reminder)\.[a-zA-Z0-9_]+)["'`]/g)) {
         if (!(m[1]! in EN)) missing.add(m[1]!);
       }
       for (const m of text.matchAll(/`((?:[a-zA-Z]+)\.(?:[a-zA-Z0-9_]*))\$\{/g)) dynamicPrefixes.add(m[1]!);

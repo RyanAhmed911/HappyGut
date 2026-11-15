@@ -1,6 +1,6 @@
 id: RC-FODMAP-FRUCTANS-H
 title_en: "IBS-like symptoms: high fructans (onion, garlic, wheat)"
-title_bn: "আইবিএস-ধরনের উপসর্গ: বেশি ফ্রুক্টান (পেঁয়াজ, রসুন, গম)"  # native-speaker review needed
+title_bn: "আইবিএস-ধরনের উপসর্গ: বেশি ফ্রুক্টান (পেঁয়াজ, রসুন, গম)"
 component: fructans
 min_level: high
 applies_to:
@@ -10,26 +10,32 @@ applies_to:
 severity: 2
 hard: false
 evidence_level: trial  # guideline | trial | clinical_practice | patient_reported
-recommendation_en: "Onion, garlic and wheat are high in fructans; in quiescent IBD with IBS-like symptoms, a dietitian-guided low-FODMAP approach can reduce bloating and pain."
-recommendation_bn: "পেঁয়াজ, রসুন ও গমে ফ্রুক্টান বেশি; রোগ শান্ত থাকা অবস্থায় আইবিএস-ধরনের উপসর্গ থাকলে পুষ্টিবিদের পরামর্শে লো-ফডম্যাপ খাদ্য পেট ফাঁপা ও ব্যথা কমাতে পারে।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+recommendation_en: "Onion, garlic and wheat are high in fructans; in quiescent IBD with IBS-like symptoms, a dietitian-guided low-FODMAP approach can relieve gut symptoms."
+recommendation_bn: "পেঁয়াজ, রসুন ও গমে ফ্রুক্টান বেশি; রোগ শান্ত থাকা অবস্থায় আইবিএস-ধরনের উপসর্গ থাকলে পুষ্টিবিদের পরামর্শে লো-ফডম্যাপ খাদ্য পেটের উপসর্গ কমাতে পারে।"
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
   - key: COX2020
     citation: "Cox SR, et al. Effects of Low FODMAP Diet on Symptoms, Fecal Microbiome, and Markers of Inflammation in Patients With Quiescent Inflammatory Bowel Disease in a Randomized Trial. Gastroenterology. 2020."
-    doi: ""
-    pmid: ""
-    licence: ""
-    quote: ""
+    doi: "10.1053/j.gastro.2019.09.024"
+    pmid: "31586453"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "A higher proportion of patients reported adequate relief of gut symptoms following the low FODMAP diet (14/27, 52%) than the control diet (4/25, 16%, P=.007)."
   - key: ESPEN2023
     citation: "Bischoff SC, et al. ESPEN guideline on Clinical Nutrition in inflammatory bowel disease. Clin Nutr. 2023."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.clnu.2022.12.004"
+    pmid: "36739756"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
   - key: AGA2024
     citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1053/j.gastro.2023.11.303"
+    pmid: "38276922"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved_with_edits
+  support: class_level  # direct | class_level | partial
+  note: "The trial tested the low-FODMAP diet as a whole in quiescent IBD with persistent gut symptoms; the individual FODMAP groups were not tested separately in the retrieved text. Reworded from 'reduce bloating and pain' to 'relieve gut symptoms', which is what the trial reports."
+status: approved

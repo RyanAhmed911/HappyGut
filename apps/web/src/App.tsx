@@ -5,6 +5,7 @@ import { AppShell } from "./components/shell";
 import { auth } from "./lib/api";
 import { Check } from "./pages/Check";
 import { Diary } from "./pages/Diary";
+import { Foods } from "./pages/Foods";
 import { Gut } from "./pages/Gut";
 import { History, HistoryDetail } from "./pages/History";
 import { Patterns } from "./pages/Patterns";
@@ -47,6 +48,7 @@ export function App() {
         <Route path="diary/:date" element={<Diary />} />
         <Route path="patterns" element={<Patterns />} />
         <Route path="gut" element={<Gut />} />
+        <Route path="foods" element={<Foods />} />
         <Route path="history" element={<History />} />
         <Route path="history/:id" element={<HistoryDetail />} />
         <Route path="report" element={<Report />} />

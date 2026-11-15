@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Info, NotebookPen } from "lucide-react";
+import { Info, NotebookPen, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { PatternCard, RiskCard } from "@/components/insights";
-import { LoadError, useLang } from "@/components/shell";
-import { Button, Empty, PageTitle, SectionTitle, Sheet, Skeleton, Tabs } from "@/components/ui";
+import { GutGraph } from "@/components/GutGraph";
+import { LoadError, useLang, useProfile } from "@/components/shell";
+import { Button, Card, Empty, PageTitle, SectionTitle, Sheet, Skeleton, Tabs } from "@/components/ui";
 import { api } from "@/lib/api";
 import { num } from "@/lib/format";
 import { keys } from "@/lib/hooks";
@@ -21,6 +22,7 @@ export function Patterns() {
   const [how, setHow] = useState(false);
   const patterns = useQuery({ queryKey: keys.patterns(scope), queryFn: () => api.patterns(scope) });
   const risk = useQuery({ queryKey: keys.risk, queryFn: api.risk });
+  const profile = useProfile();
   const data = patterns.data;
 
   return (
@@ -63,6 +65,13 @@ export function Patterns() {
           </Empty>
         ) : (
           <>
+            <Card className="mb-5 p-4">
+              <div className="mb-1 flex items-center justify-between">
+                <h2 className="font-bold">{t("patterns.graph_title")}</h2>
+                <Share2 className="h-4 w-4 text-ink-faint" />
+              </div>
+              <GutGraph patterns={data.results} name={profile.data?.display_name ?? ""} />
+            </Card>
             <p className="mb-1 text-sm text-ink-faint">{t("patterns.based_on", { days: num(data.days_logged, lang) })}</p>
             {ORDER.map((label) => {
               const items = data.results.filter((r) => r.label === label);

@@ -69,9 +69,9 @@
 - Vision-language model: meal photo → dishes, ingredients, cooking method, portion, confidence (JSON)
 - Labels/menus: vision-language model reads text → normalised ingredients
 - Food Composition Table PDF: Docling / pdfplumber → LLM repair of broken rows
-- Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → human review
-- Wikipedia text → LLM → dish–ingredient graph candidates with provenance → human review
-- Pydantic schema validation on every output; low confidence → ⚪ "Not sure" / human review
+- Guideline text → LLM → Rule Cards (condition · component · recommendation · citation) → LLM-judge review
+- Wikipedia text → LLM → dish–ingredient graph candidates with provenance → LLM-judge review
+- Pydantic schema validation on every output; low confidence → ⚪ "Not sure" / LLM-judge review
 
 ## 3. Parsing, formats and cleaning
 
@@ -102,7 +102,7 @@
 - Local portions → grams (plate, bati, cup, piece)
 - Entity resolution: dish names across Wikipedia EN/BN, Wikidata, food table, USDA and user text → one canonical dish ID
 - rapidfuzz + BGE-M3 multilingual embeddings + transliteration
-- LLM adjudication for ambiguous matches → human review
+- LLM adjudication for ambiguous matches → LLM-judge review
 - Ingredient → food-code mapping (Bangladesh food table first, USDA fallback)
 - Dedup: barcode (products), DOI/PMID (papers), content hash (chunks)
 - AI enrichment: LLM tags dishes with fat level, insoluble fibre, FODMAP groups, lactose, spice level, cooking method
@@ -391,7 +391,7 @@
 - Synthetic cohort as test oracle: injected ground-truth triggers make trigger discovery measurable
 
 **Agent-driven data ops**
-- Knowledge-gap loop: every ⚪ "Not sure" or unmatched dish is queued; an enrichment agent drafts graph facts → human review → graph update
+- Knowledge-gap loop: every ⚪ "Not sure" or unmatched dish is queued; an enrichment agent drafts graph facts → LLM-judge review → graph update
 - Data flywheel: "was this right for you?" feedback feeds Trigger Discovery and grows the evaluation sets
 - Curation via MCP: a coding agent uses the Neo4j and Supabase MCP servers to find orphan nodes and unmatched ingredients and propose fixes as reviewable diffs
 

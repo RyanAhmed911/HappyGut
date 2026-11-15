@@ -1,7 +1,7 @@
 id: dish.dim_bhuna
 name_en: "Egg curry"
 name_bn: "ডিম ভুনা"
-aliases: ["dim bhuna", "dimer torkari", "egg curry"]
+aliases: ["dim bhuna", "dimer torkari", "egg curry", "dimer bhuna"]
 cuisine: Bangladeshi
 category: egg
 preparation: ["fried then curried"]
@@ -11,7 +11,7 @@ ingredients:
   - {name: "oil"}
   - {name: "chilli"}
   - {name: "spices"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: medium
   insoluble_fibre: none
   lactose: none
@@ -27,7 +27,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: [dish.dim_sheddho]
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  note: ""
+status: approved

@@ -1,7 +1,7 @@
 id: dish.alu_bhorta
 name_en: "Mashed potato bhorta"
 name_bn: "আলু ভর্তা"
-aliases: ["alu bhorta", "aloo vorta", "alu vorta"]
+aliases: ["alu bhorta", "aloo vorta", "alu vorta", "aloo bhorta"]
 cuisine: Bangladeshi
 category: bhorta
 preparation: ["mashed with raw onion and chilli"]
@@ -10,7 +10,7 @@ ingredients:
   - {name: "raw onion"}
   - {name: "chilli"}
   - {name: "mustard oil"}
-components:  # typical-recipe estimate (team draft); levels: none | low | medium | high
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
   fat: low
   insoluble_fibre: none
   lactose: none
@@ -26,7 +26,12 @@ components:  # typical-recipe estimate (team draft); levels: none | low | medium
   emulsifiers: none
 level_basis: typical_recipe_estimate
 gentler_alternatives: [dish.lau_ghonto]
-sources: []  # add Wikipedia/Wikidata + Food Composition Table references during review
-needs_verification: true
-reviewed_by: null
-status: draft
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  note: ""
+status: approved

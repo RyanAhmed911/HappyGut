@@ -1,9 +1,6 @@
 {
   "app": {
-    "simulated": "Simulated data",
-    "simulated_short": "Simulated",
-    "simulated_long": "Demo account. Everything shown here is simulated data, not a real patient.",
-    "disclaimer": "HappyGut supports self-management. It is not a medical device and doesn't diagnose, treat or replace your doctor.",
+    "disclaimer": "HappyGut supports self-management. It is a competition prototype, not a medical device, and doesn't diagnose, treat or replace your doctor.",
     "error": "Something went wrong. Please try again.",
     "retry": "Try again",
     "back": "Back",
@@ -26,7 +23,8 @@
     "gut": "My Gut",
     "history": "Meal history",
     "report": "Doctor's report",
-    "settings": "Settings"
+    "settings": "Settings",
+    "foods": "Food guide"
   },
   "verdict": {
     "likely_ok": "Likely OK for you",
@@ -39,9 +37,6 @@
     "title_1": "Know what your gut can take,",
     "title_2": "before you eat.",
     "lead": "Snap a meal or type it in Bangla or English. HappyGut tells you whether it's likely to trigger you, shows the evidence, and suggests something gentler. Every night it learns a little more about you.",
-    "try_demo": "Try the demo",
-    "demo_note": "One tap. No sign-up. Simulated patient.",
-    "demo_off": "The demo account is switched off on this server.",
     "server_down": "Can't reach the HappyGut server. Is the backend running?",
     "f_check_title": "A personal verdict in seconds",
     "f_check_text": "Graded, never just \"safe\": likely OK, caution, likely trigger, or not sure.",
@@ -59,7 +54,10 @@
     "ex_3_name": "Plain rice & light chicken curry",
     "ex_3_why": "Nothing in it is flagged for you.",
     "ex_guideline": "IBD guidelines",
-    "ex_personal": "Your own diary"
+    "ex_personal": "Your own diary",
+    "start": "Get started",
+    "start_note": "No sign-up needed.",
+    "sign_in_soon": "Sign-in isn't available on this server yet."
   },
   "today": {
     "greeting_morning": "Good morning, {{name}}",
@@ -83,7 +81,8 @@
     "outlook": "Flare-risk outlook",
     "last_30": "Last 30 days",
     "recent_checks": "Recent meal checks",
-    "no_checks": "No meal checks yet."
+    "no_checks": "No meal checks yet.",
+    "more": "More"
   },
   "check": {
     "title": "Check a meal",
@@ -284,7 +283,9 @@
     "how_2": "For each food type and habit, we count how often a worse day followed it, and how often on other days.",
     "how_3": "A statistical model (Bayesian, built only from your own diary) works out how sure we can be. At least 3 occurrences are needed.",
     "how_4": "The result is a pattern, not a cause. Things that happen together, like late nights in exam weeks, are flagged as overlapping.",
-    "overlap_short": "Mostly together with: {{list}}"
+    "overlap_short": "Mostly together with: {{list}}",
+    "graph_title": "Personal Gut Graph",
+    "graph_note": "Numbers show how sure we are of a link (0–100). Thicker lines mean a stronger link."
   },
   "risk": {
     "title": "Next {{days}} days",
@@ -392,26 +393,36 @@
     "no_contributors": "No contributors found yet.",
     "contributors_note": "Counts are days followed by a worse day. Patterns from the patient's own diary; not proven causes.",
     "footer": "{{index}} is patient-reported (no examination items). Periods are proposed from the daily score and confirmed by the patient.",
-    "generated": "Generated on {{date}} by HappyGut"
+    "generated": "Generated on {{date}} by HappyGut",
+    "sample_data": "Generated from sample data in a demonstration account."
   },
   "settings": {
     "title": "Settings",
     "preferences": "Preferences",
     "language": "Language",
     "reminder": "Diary reminder time",
-    "reminder_note": "Saved now. Push notifications come in a later version.",
     "safety": "Safety",
     "safety_1": "HappyGut never calls a food \"safe\", never gives advice about starting, stopping or changing medicines, and stops all food advice when you report a warning sign.",
     "safety_2": "Heavy bleeding, fever with stomach pain, vomiting with no stool or gas, or signs of severe dehydration need a doctor or emergency care straight away.",
-    "about": "About this build",
     "knowledge": "Food knowledge",
     "knowledge_value": "{{dishes}} dishes · {{rules}} rules",
-    "reviewed": "Knowledge reviewed by the team",
-    "reviewed_no": "Not yet (development build)",
+    "reviewed": "Knowledge review",
     "photo_ai": "Photo recognition",
     "on": "On",
     "off": "Off (no AI key)",
-    "sign_out": "Sign out"
+    "sign_out": "Sign out",
+    "about": "About",
+    "health_profile": "Health profile",
+    "diagnosis": "Diagnosis",
+    "conditions": "This also applies to me",
+    "ph_stricturing": "Narrowing of the bowel (stricture)",
+    "ph_lactose_intolerant": "Lactose intolerance",
+    "ph_ibs_like_symptoms": "IBS-like symptoms when my disease is quiet",
+    "profile_note": "Your verdicts, food guide and meal ideas update as soon as you change these.",
+    "notify": "Notify me at that time",
+    "notify_note": "Reminders appear while HappyGut is open or installed on this device.",
+    "notify_blocked": "Notifications are blocked for this site. Allow them in your browser settings to turn reminders on.",
+    "reviewed_value": "AI judge, against published sources"
   },
   "factor": {
     "food_fat": "High-fat meals",
@@ -483,5 +494,31 @@
     "travel": "Travel",
     "menstruation": "Menstruation",
     "other": "Other"
+  },
+  "notice": {
+    "title": "Before you begin",
+    "data": "You are entering a demonstration account. The profile, diary and health records in it are sample data, not a real person's records.",
+    "purpose": "HappyGut is a prototype built for the International AI Builders Congress 2026. Its food knowledge was reviewed by an AI judge against published sources, not by clinicians, and it has not been clinically validated.",
+    "medical": "Please don't use it to make medical decisions. For any health concern, follow your doctor's advice.",
+    "accept": "I understand, continue"
+  },
+  "foods": {
+    "title": "Food guide",
+    "subtitle": "Every dish we know, judged for you.",
+    "tab_guide": "My dishes",
+    "tab_plan": "Meal ideas",
+    "search": "Search a dish",
+    "all": "All",
+    "none": "No dish matches. Try checking it as a meal.",
+    "plan_intro": "A week of ideas built only from the {{n}} dishes rated \"likely OK\" for you right now. Swap freely.",
+    "plan_none": "Not enough dishes are rated \"likely OK\" for you right now to build a week of ideas.",
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "footer": "Verdicts come from HappyGut's rules engine using IBD guidance and your own diary. They change when your profile, your diary or your flare state changes. These are ideas, not a prescribed diet; a dietitian can tailor a plan to you."
+  },
+  "reminder": {
+    "title": "How was your gut today?",
+    "body": "Two minutes for tonight's diary: food, stomach, sleep and stress."
   }
 }

@@ -21,14 +21,15 @@ LLMs handle perception (photos, labels, Bangla text) and explanation. The verdic
 - Weak or missing evidence produces ⚪ "Not sure" or a clarifying question, never a guess.
 - Personal patterns (food components, sleep, stress, stressful periods, missed doses) are reported as "linked to" or "likely contributor" with their counts and uncertainty, never as proven causes, and only after at least 3 exposures.
 - Only legally licensed data is ingested, and each source's licence is recorded in `docs/03-data.md` before ingestion.
+- **Review is done by an LLM judge** (the team has no clinical experts; this is a competition prototype). The judge follows the written rubric in `docs/seed-review.md` and records a verdict for every item in `data/review/llm_judge/`. A Rule Card is approved only when the cited paper is confirmed to exist (DOI / PMID) and at least one exact sentence retrieved from a source supports it; a card that claims more than the retrieved text is reworded or rejected. The judge never invents a quotation or an identifier. Wherever review is described (portal, README, /docs, video), it is described as LLM-judge review, never as clinical review.
 
 ### V. Privacy by Architecture
 - Text that may contain PII is scrubbed inside our own backend (Presidio + Bangladesh-specific rules + an open-source Bengali NER model) before any cloud AI call. Cloud free-tier APIs receive only food photos and de-identified text.
-- No real patient data in the repo or the prototype. Simulated data carries `is_synthetic = true` and is labelled "simulated" wherever it is shown.
+- No real patient data in the repo or the prototype. Sample (simulated) data carries `is_synthetic = true`. The app tells the user once, clearly, on entering an account that holds sample data: that the records are sample data, that HappyGut is a competition prototype that has not been clinically validated, and that it must not be used for medical decisions. Screens inside the app carry no further "simulated" labels. Documents that leave the app (the printed doctor's report) and all evaluation results (portal, video, /docs) still say when they come from sample data.
 - Secrets live only in `.env` files that are never committed.
 
 ### VI. Bangla-First
-Every user-facing string exists in both Bangla and English (i18n files, no hard-coded text). Native Bangla speakers review generated Bangla before release. Supported input languages are Bangla and English. Banglish (romanised Bangla sentences) is not supported; English-letter dish names stay in dish search, and romanised red-flag phrases stay in the sentinel as a safety net.
+Every user-facing string exists in both Bangla and English (i18n files, no hard-coded text). Generated Bangla is reviewed by the LLM judge before release (meaning, tone, banned wording, placeholders); a native speaker's check is welcome whenever one is available. Supported input languages are Bangla and English. Banglish (romanised Bangla sentences) is not supported; English-letter dish names stay in dish search, and romanised red-flag phrases stay in the sentinel as a safety net.
 
 ### VII. Measured, Not Claimed
 - Quality is shown with evaluation sets and numbers: verdict accuracy, red-flag recall, retrieval metrics, trigger recovery.
@@ -48,7 +49,7 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 
 ## Development Workflow and Quality Gates
 - Spec-Kit flow per feature: `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement`. Specs live in `specs/NNN-name/`.
-- One GitHub issue per task and one pull request per step. AI-generated code is reviewed by a named team member before merge.
+- One pull request per step. A pull request merges when CI passes and the coding agent's own review (tests, browser check where there is UI) is recorded in its description. The Team Leader can ask for any change afterwards.
 - Gates: every verdict-engine rule has a unit test; parsers have golden-file tests; the eval suite runs in CI on prompt, model or retrieval changes.
 - Long prompts live in `prompts/runtime/` as versioned files, never inline in code. Build prompts are recorded in `prompts/build/`.
 - Decisions are recorded in the decision log of the relevant `docs/` file.
@@ -56,6 +57,7 @@ Every user-facing string exists in both Bangla and English (i18n files, no hard-
 ## Governance
 This constitution takes precedence over other practices in this repository. `CLAUDE.md` and `AGENTS.md` carry the same rules for coding agents and must stay consistent with it. Amendments are made by pull request with a one-line reason, reviewed by the Team Leader, and versioned semantically (MAJOR: a principle removed or redefined; MINOR: a principle or section added; PATCH: wording). Every spec and plan includes a constitution check before implementation starts.
 
-**Version**: 1.4.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-11-07
+**Version**: 2.0.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-11-15
 
+_2.0.0 (approved by the Team Leader, 2026-11-15, together with every earlier amendment): review by an LLM judge replaces human expert review (IV, VI, workflow); sample data is announced once at entry instead of on every screen (V)._
 _1.4.0: Banglish dropped as an input language (I, VI); personal patterns are never reported as causes (IV)._

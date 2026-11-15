@@ -211,3 +211,41 @@ def test_storage_without_spec_003_tables_answers_501(issuer, store):
         r = c.get("/v1/insights/patterns", headers=auth(issuer))
         assert r.status_code == 501 and r.json()["detail"].startswith("not_available_on_this_storage")
         assert c.get("/v1/me", headers=auth(issuer)).json()["state"] == "flare"  # falls back to the stored profile
+
+
+def test_food_guide_and_plan_follow_the_profile(demo):
+    client, _ = demo
+    client.patch("/v1/me", json={"phenotypes": []})
+    guide = {d["dish_id"]: d for d in client.get("/v1/foods/guide").json()["items"]}
+    assert guide["dish.kacchi_biryani"]["verdict"] == "likely_trigger"  # her learned fat trigger
+    assert guide["dish.kacchi_biryani"]["components"][0] == {"component": "fat", "level": "high", "source": "personal"}
+    assert guide["dish.plain_rice"]["verdict"] == "likely_ok" and guide["dish.shak_bhaji"]["verdict"] == "likely_ok"
+
+    plan = client.get("/v1/foods/plan").json()
+    assert plan["enough"] and len(plan["days"]) == 7
+    ok = {d for d, v in guide.items() if v["verdict"] == "likely_ok"}
+    used = {i["dish_id"] for day in plan["days"] for meal in day["meals"].values() for i in meal}
+    assert used and used <= ok  # every idea is rated "likely OK" by the engine
+    assert plan == client.get("/v1/foods/plan").json()  # stable within the week
+
+    # A stricture changes the same dishes for the same person (the hard safety rule).
+    me = client.patch("/v1/me", json={"phenotypes": ["stricturing"]}).json()
+    assert me["phenotypes"] == ["stricturing"]
+    strict = {d["dish_id"]: d for d in client.get("/v1/foods/guide").json()["items"]}
+    assert strict["dish.shak_bhaji"]["verdict"] == "likely_trigger" and strict["dish.shak_bhaji"]["reason"] == "hard_rule"
+    used = {i["dish_id"] for day in client.get("/v1/foods/plan").json()["days"] for meal in day["meals"].values() for i in meal}
+    assert "dish.shak_bhaji" not in used
+    assert client.patch("/v1/me", json={"phenotypes": ["made_up"]}).status_code == 422
+    client.patch("/v1/me", json={"phenotypes": []})
+
+
+def test_changing_the_diagnosis_rescores_the_diary(demo):
+    client, _ = demo
+    assert client.get("/v1/insights/periods").json()["index_name"] == "HBI"
+    assert client.patch("/v1/me", json={"diagnosis": "UC"}).json()["diagnosis"] == "UC"
+    periods = client.get("/v1/insights/periods").json()
+    assert periods["index_name"] == "SCCAI"
+    day = client.get(f"/v1/diary/{periods['periods'][0]['start']}").json()["entry"]
+    assert day["index"]["name"] == "SCCAI"
+    client.patch("/v1/me", json={"diagnosis": "CD"})
+    assert client.get("/v1/insights/periods").json()["index_name"] == "HBI"

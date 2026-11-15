@@ -1,6 +1,6 @@
 id: RC-UC-REDMEAT
 title_en: "Ulcerative colitis: reduce red and processed meat"
-title_bn: "আলসারেটিভ কোলাইটিস: লাল ও প্রক্রিয়াজাত মাংস কমান"  # native-speaker review needed
+title_bn: "আলসারেটিভ কোলাইটিস: লাল ও প্রক্রিয়াজাত মাংস কমান"
 component: red_processed_meat
 min_level: medium
 applies_to:
@@ -12,12 +12,30 @@ hard: false
 evidence_level: guideline  # guideline | trial | clinical_practice | patient_reported
 recommendation_en: "For ulcerative colitis, IBD dietary guidance advises reducing red and processed meat."
 recommendation_bn: "আলসারেটিভ কোলাইটিসে লাল মাংস ও প্রক্রিয়াজাত মাংস কমানোর পরামর্শ দেওয়া হয়।"
-sources:  # candidate citations: verify each, add DOI/PMID and licence, copy the exact supporting sentence
+sources:  # quotes are exact sentences from the retrieved text (reference markers omitted); empty quote = identity verified only
+  - key: AGA2024
+    citation: "Hashash JG, et al. AGA Clinical Practice Update on Diet and Nutritional Therapies in Patients With Inflammatory Bowel Disease: Expert Review. Gastroenterology. 2024."
+    doi: "10.1053/j.gastro.2023.11.303"
+    pmid: "38276922"
+    licence: "Not open access: short quotation from the published abstract; full text not retrieved"
+    quote: "A diet low in red and processed meat may reduce ulcerative colitis flares, but has not been found to reduce relapse in Crohn's disease."
+  - key: GODALA2023
+    citation: "Godala M, et al. Dietary Behaviors and Beliefs in Patients with Inflammatory Bowel Disease. J Clin Med. 2023."
+    doi: "10.3390/jcm12103455"
+    pmid: "37240560"
+    licence: "CC BY 4.0 (open access, Europe PMC)"
+    quote: "The IOIBD recommends a moderate to high intake of vegetables and fruits and decreasing consumption of red meat for ulcerative colitis."
   - key: IOIBD2020
     citation: "Levine A, et al. Dietary Guidance From the International Organization for the Study of Inflammatory Bowel Diseases. Clin Gastroenterol Hepatol. 2020."
-    doi: ""
-    pmid: ""
-    licence: ""
+    doi: "10.1016/j.cgh.2020.01.046"
+    pmid: "32068150"
+    licence: "Not open access: citation only (identity verified; full text not retrieved, so no quotation)"
     quote: ""
-reviewed_by: null
-status: draft
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-15
+  verdict: approved
+  support: direct  # direct | class_level | partial
+  note: "Applies to ulcerative colitis only, as the quotes say."
+status: approved
