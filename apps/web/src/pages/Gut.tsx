@@ -21,7 +21,7 @@ function useRefreshPersonal(): () => void {
 
 function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl bg-paper p-3.5">
+    <div className="rounded-2xl border border-line/70 bg-card p-3.5 shadow-card">
       <p className="text-xs font-semibold text-ink-faint">{label}</p>
       <p className="tabular mt-0.5 text-2xl font-bold">{value}</p>
       {sub && <p className="text-xs text-ink-faint">{sub}</p>}
