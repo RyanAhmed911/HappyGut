@@ -19,12 +19,12 @@ cd apps/web
 npm install
 npm run dev
 ```
-Open http://localhost:5173 and tap **Get started**. A one-time notice explains that the account holds sample data and that HappyGut is a competition prototype, not for medical decisions; no screen carries a "simulated" label after that (the printed doctor's report keeps one footer line). The dev server proxies `/api` to the backend on port 8000. Add `GEMINI_API_KEY` to `.env` to turn on photo recognition and model-written explanations; without it, typed meals still work and explanations use the cited template.
+Open http://localhost:5173 and sign in with a test account (`nusrat@`, `rafi@` or `ayesha@happygut.test`; passwords come from `TEST_PASSWORD_*` in `.env`, or are printed by the backend at start-up when not set). A one-time notice explains that the account holds sample data and that HappyGut is a competition prototype, not for medical decisions; no screen carries a "simulated" label after that (the printed doctor's report keeps one footer line). The dev server proxies `/api` to the backend on port 8000. Add `GEMINI_API_KEY` to `.env` to turn on photo recognition and model-written explanations; without it, typed meals still work and explanations use the cited template.
 
 ## Screens
 | Route | What it shows |
 |---|---|
-| `/welcome` | Landing page, language switch, one-tap entry |
+| `/welcome` | Landing page, language switch, sign-in |
 | `/` | Today: flare-risk outlook with drivers, upcoming stressful period, diary status, 30-day trend, recent meal checks |
 | `/check` | Photo or text → streamed dishes → verdict → cited explanation, evidence bars, gentler alternative, feedback; red-flag escalation screen |
 | `/diary`, `/diary/:date` | Nightly diary in five steps: food (pre-filled from meal checks, per-food reactions), stool (Bristol chart), feeling and warning signs, sleep and stress, notes → index score |
@@ -53,5 +53,5 @@ npm run typecheck && npm test && npm run build
 Set `VITE_API_URL` to the backend's address (the Hugging Face Space) at build time, and add the site's origin to the backend's `CORS_ORIGINS`.
 
 ## Not done yet
-- Supabase sign-in and onboarding (the app has only the demo account for now)
+- Self-service sign-up with Supabase and an onboarding flow (sign-in today is for the three test accounts)
 - Server push for the diary reminder when the app is closed (today the notification appears while the app is open or installed and running)

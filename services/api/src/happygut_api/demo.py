@@ -10,8 +10,10 @@ Everything lives in the in-memory store and is rebuilt on every start.
 
 from __future__ import annotations
 
+import hmac
 import secrets
 import time
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from datetime import time as clock
 
@@ -28,8 +30,6 @@ from .insights import Insights
 from .knowledge import MemoryKnowledge
 from .store import MemoryStore, Patient
 
-DEMO_USER = "demo-nusrat"
-DEMO_PATIENT = "demo-patient-nusrat"
 DAYS = 120
 
 _MEALS = {
@@ -44,19 +44,83 @@ _WEIGHTS = {"staple": 3.0, "dal": 2.0, "vegetable": 1.5, "fish": 1.5, "curry": 1
 
 
 class DemoVerifier:
-    """Signs and checks demo tokens with a key that lives only in this process."""
+    """Signs and checks session tokens. With no SESSION_SECRET the key lives only in this process."""
 
-    def __init__(self) -> None:
-        self._key = secrets.token_urlsafe(32)
+    def __init__(self, secret: str = "") -> None:
+        self._key = secret or secrets.token_urlsafe(32)
 
-    def issue(self, user_id: str = DEMO_USER, ttl_s: int = 12 * 3600) -> str:
-        return jwt.encode({"sub": user_id, "aud": "demo", "exp": int(time.time()) + ttl_s}, self._key, algorithm="HS256")
+    def issue(self, user_id: str, ttl_s: int = 12 * 3600) -> str:
+        return jwt.encode({"sub": user_id, "aud": "happygut", "exp": int(time.time()) + ttl_s}, self._key, algorithm="HS256")
 
     def user_id(self, token: str) -> str:
         try:
-            return str(jwt.decode(token, self._key, algorithms=["HS256"], audience="demo")["sub"])
+            return str(jwt.decode(token, self._key, algorithms=["HS256"], audience="happygut")["sub"])
         except jwt.PyJWTError as exc:
             raise AuthError(type(exc).__name__) from None
+
+
+@dataclass(frozen=True)
+class Persona:
+    """A test account: who signs in, and which sample patient they get."""
+
+    key: str
+    email: str
+    role: str  # shown in the start-up log and the docs, for the portal's "test credentials" rows
+    name: str
+    diagnosis: Diagnosis
+    phenotypes: frozenset[str] = frozenset()
+    history: str | None = None  # which sample history to generate; None = a new patient with no records
+
+    @property
+    def user_id(self) -> str:
+        return f"account-{self.key}"
+
+    @property
+    def patient_id(self) -> str:
+        return f"patient-{self.key}"
+
+
+PERSONAS = (
+    Persona("nusrat", "nusrat@happygut.test", "Patient: Crohn's disease, in remission, 4 months of records", "Nusrat", Diagnosis.CD, history="cd_remission"),
+    Persona("rafi", "rafi@happygut.test", "Patient: ulcerative colitis, in a flare, 4 months of records", "Rafi", Diagnosis.UC, history="uc_flare"),
+    Persona("ayesha", "ayesha@happygut.test", "New patient: Crohn's disease with a stricture, no records yet", "Ayesha", Diagnosis.CD,
+            frozenset({"stricturing"})),
+)
+
+
+class TestAccounts:
+    """Sign-in for the test accounts. Passwords come from the environment (TEST_PASSWORD_<NAME>);
+    an account without one gets a random password for this run, printed in the start-up log."""
+
+    __test__ = False  # not a pytest class
+    MAX_FAILURES, WINDOW_S = 8, 300
+
+    def __init__(self, passwords: dict[str, str]):
+        self.generated: dict[str, str] = {}
+        self._passwords: dict[str, str] = {}
+        for p in PERSONAS:
+            password = passwords.get(p.key, "")
+            if not password:
+                password = self.generated[p.email] = secrets.token_urlsafe(9)
+            self._passwords[p.email] = password
+        self._failures: dict[str, list[float]] = {}
+
+    def locked(self, email: str) -> bool:
+        recent = [t for t in self._failures.get(email, []) if time.time() - t < self.WINDOW_S]
+        self._failures[email] = recent
+        return len(recent) >= self.MAX_FAILURES
+
+    def check(self, email: str, password: str) -> Persona | None:
+        """The persona for a correct email and password, else None (and the failure is counted)."""
+        email = email.strip().lower()
+        expected = self._passwords.get(email)
+        # Compare even for an unknown email, so timing doesn't reveal which emails exist.
+        ok = hmac.compare_digest((expected or secrets.token_urlsafe(9)).encode(), password.encode()) and expected is not None
+        if not ok:
+            self._failures.setdefault(email, []).append(time.time())
+            return None
+        self._failures.pop(email, None)
+        return next(p for p in PERSONAS if p.email == email)
 
 
 class ScriptedPerceiver:
@@ -88,8 +152,20 @@ def build_menu(knowledge: MemoryKnowledge) -> list[MenuItem]:
     return menu
 
 
-def persona_config(menu: list[MenuItem]) -> SimConfig:
+def _config(history: str, menu: list[MenuItem]) -> tuple[SimConfig, list[tuple[str, str, int, int]]]:
+    """(simulation settings, upcoming stressful periods as (type, name, days from today, length))."""
     names = {m.name for m in menu}
+    if history == "uc_flare":
+        # Ulcerative colitis: very spicy food and high-stress days raise symptoms; a flare began 8 days ago
+        # after a work deadline.
+        return SimConfig(
+            days=DAYS, seed=41, flare_load=7.0,
+            flare_windows=((30, 43), (112, DAYS - 1)),
+            food_effects={Component.CAPSAICIN_SPICE: Effect(2.2, 0.8)},
+            high_stress_effect=Effect(1.6, 0.7),
+            stress_periods=(StressPeriod("work", "Project deadline", 103, 112),),
+            calm_days=frozenset(range(60, 70)),
+        ), []
     kacchi = "dish.kacchi_biryani" if "dish.kacchi_biryani" in names else next((m.name for m in menu if m.rich), None)
     forced = {d: (kacchi,) for d in (77, 80, 118)} if kacchi else {}
     return SimConfig(
@@ -103,7 +179,7 @@ def persona_config(menu: list[MenuItem]) -> SimConfig:
         forced_missed_doses=frozenset({118}),
         forced_foods=forced,
         calm_days=frozenset(range(70, 76)) | frozenset(range(100, 116)),
-    )
+    ), [("exam", "Final exams", 3, 14)]
 
 
 def _entry(sim: SimDay, knowledge: MemoryKnowledge) -> DiaryIn:
@@ -120,17 +196,20 @@ def _entry(sim: SimDay, knowledge: MemoryKnowledge) -> DiaryIn:
     )
 
 
-async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: Insights, flow: MealCheckFlow) -> Patient:
-    """Fill the in-memory store with the simulated persona. Safe to call once at start-up."""
-    patient = Patient(DEMO_PATIENT, Diagnosis.CD, DiseaseState.REMISSION, frozenset(), "bn", is_synthetic=True,
-                      display_name="Nusrat")
-    store.patients[DEMO_USER] = patient
+async def seed_persona(persona: Persona, store: MemoryStore, knowledge: MemoryKnowledge, insights: Insights,
+                       flow: MealCheckFlow) -> Patient:
+    """(Re)create one test account's sample patient in the in-memory store."""
+    store.clear_patient(persona.patient_id)
+    insights.forget(persona.patient_id)
+    patient = Patient(persona.patient_id, persona.diagnosis, DiseaseState.REMISSION, persona.phenotypes, "bn", is_synthetic=True,
+                      display_name=persona.name)
+    store.patients[persona.user_id] = patient
     menu = build_menu(knowledge)
     today = insights.today()
     first = today - timedelta(days=DAYS)  # offset 0; offset DAYS-1 is yesterday
-    if not menu:
+    if not menu or persona.history is None:
         return patient
-    config = persona_config(menu)
+    config, upcoming = _config(persona.history, menu)
     sims = simulate(config, menu)
 
     bedtimes: list[str] = []
@@ -145,13 +224,14 @@ async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: In
 
     for p in config.stress_periods:
         await store.add_stress_period(patient.id, StressPeriodOut(
-            id=f"demo-{p.type}-{p.start}", type=p.type, name=p.name,
+            id=f"{persona.key}-{p.type}-{p.start}", type=p.type, name=p.name,
             start=first + timedelta(days=p.start), end=first + timedelta(days=p.end)))
-    await store.add_stress_period(patient.id, StressPeriodOut(
-        id="demo-exam-upcoming", type="exam", name="Final exams",
-        start=today + timedelta(days=3), end=today + timedelta(days=16)))
+    for kind, name, in_days, length in upcoming:
+        await store.add_stress_period(patient.id, StressPeriodOut(
+            id=f"{persona.key}-{kind}-upcoming", type=kind, name=name,
+            start=today + timedelta(days=in_days), end=today + timedelta(days=in_days + length - 1)))
 
-    # The persona confirmed her past flares.
+    # The patient confirmed the flares the index proposed.
     decisions = await store.period_decisions(patient.id)
     periods = await insights.periods(patient)
     decisions.confirmed |= {date.fromisoformat(p["start"]) for p in periods["periods"] if p["kind"] == "flare"}
@@ -182,3 +262,9 @@ async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: In
                 f.source, f.meal_check_id = "meal_check", meal_check_id
     await insights.personal_evidence(patient)  # warm the cache
     return patient
+
+
+async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: Insights, flow: MealCheckFlow) -> None:
+    """Create every test account's sample patient. Called once at start-up."""
+    for persona in PERSONAS:
+        await seed_persona(persona, store, knowledge, insights, flow)

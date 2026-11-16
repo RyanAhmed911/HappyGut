@@ -104,6 +104,7 @@ export type Profile = z.infer<typeof Profile>;
 export const Health = z.object({
   status: z.string(),
   demo_mode: z.boolean(),
+  sign_in: z.boolean().optional(),
   knowledge: z.object({ dishes: z.number(), rule_cards: z.number(), reviewed_only: z.boolean() }),
   models: z.object({ perception: z.boolean(), explanation: z.boolean() }),
 });

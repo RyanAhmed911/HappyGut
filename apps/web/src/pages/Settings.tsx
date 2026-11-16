@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Globe, LogOut, ShieldCheck, Stethoscope } from "lucide-react";
+import { Bell, Globe, LogOut, RotateCcw, ShieldCheck, Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LangToggle, useLang, useProfile } from "@/components/shell";
@@ -23,6 +23,13 @@ export function SettingsPage() {
     onSuccess: (data) => {
       queryClient.setQueryData(["me"], data);
       for (const key of PERSONAL_KEYS) if (key[0] !== "me") void queryClient.invalidateQueries({ queryKey: [...key] });
+    },
+  });
+  const restore = useMutation({
+    mutationFn: api.restoreAccount,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["me"], data);
+      void queryClient.invalidateQueries();
     },
   });
   const p = profile.data;
@@ -142,6 +149,20 @@ export function SettingsPage() {
         )}
         <p className="mt-3 border-t border-line/70 pt-3 text-xs">{t("notice.purpose")}</p>
       </Card>
+
+      {p?.is_synthetic && (
+        <>
+          <SectionTitle>{t("settings.account")}</SectionTitle>
+          <Card>
+            <p className="text-sm text-ink-soft">{t("settings.restore_note")}</p>
+            <Button variant="secondary" className="mt-3 w-full" disabled={restore.isPending} onClick={() => restore.mutate()}>
+              <RotateCcw className={restore.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+              {t("settings.restore")}
+            </Button>
+            {restore.isSuccess && <p className="mt-2 text-sm text-ok">{t("settings.restored")}</p>}
+          </Card>
+        </>
+      )}
 
       <Button variant="outline" className="mt-6 w-full" onClick={signOut}>
         <LogOut className="h-4 w-4" />

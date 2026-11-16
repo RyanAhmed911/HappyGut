@@ -1,11 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowRight, BookOpen, LoaderCircle, Moon, ScanLine, ShieldCheck, Sparkles, User } from "lucide-react";
+import { ArrowRight, BookOpen, Eye, EyeOff, LoaderCircle, Lock, Mail, Moon, ScanLine, ShieldCheck, Sparkles, User } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { LangToggle, Logo } from "@/components/shell";
-import { Button } from "@/components/ui";
+import { Button, inputClass } from "@/components/ui";
 import { VerdictDot } from "@/components/verdict";
-import { api, auth } from "@/lib/api";
+import { api, ApiError, auth } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import type { VerdictCode } from "@/lib/schemas";
 
 function PreviewRow({ verdict, name, why, delay }: { verdict: VerdictCode; name: string; why: string; delay: number }) {
@@ -24,10 +26,25 @@ export function Welcome() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const health = useQuery({ queryKey: ["health"], queryFn: api.health, retry: 1 });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const login = useMutation({
-    mutationFn: api.demoLogin,
+    mutationFn: () => api.login(email.trim(), password),
     onSuccess: () => void navigate("/", { replace: true }),
   });
+  const code = login.error instanceof ApiError ? login.error.code : "";
+  const error = !login.isError
+    ? health.isError
+      ? t("welcome.server_down")
+      : health.data?.sign_in === false
+        ? t("welcome.sign_in_off")
+        : null
+    : code === "invalid_credentials"
+      ? t("welcome.wrong_credentials")
+      : code === "too_many_attempts"
+        ? t("welcome.too_many_attempts")
+        : t("welcome.server_down");
   if (auth.token) return <Navigate to="/" replace />;
 
   const features = [
@@ -58,16 +75,65 @@ export function Welcome() {
             </h1>
             <p className="mt-5 max-w-xl text-lg text-ink-soft">{t("welcome.lead")}</p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button size="lg" className="w-full sm:w-auto" disabled={login.isPending || health.data?.demo_mode === false} onClick={() => login.mutate()}>
+            <form
+              className="mt-8 max-w-md rounded-3xl border border-line/70 bg-card p-5 shadow-card"
+              onSubmit={(e) => {
+                e.preventDefault();
+                login.mutate();
+              }}
+            >
+              <p className="text-lg font-bold">{t("welcome.sign_in")}</p>
+              <label className="mt-3 block">
+                <span className="mb-1 block text-sm font-semibold text-ink-soft">{t("welcome.email")}</span>
+                <span className="relative block">
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
+                  <input
+                    type="text"
+                    inputMode="email"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={cn(inputClass, "pl-10")}
+                  />
+                </span>
+              </label>
+              <label className="mt-3 block">
+                <span className="mb-1 block text-sm font-semibold text-ink-soft">{t("welcome.password")}</span>
+                <span className="relative block">
+                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
+                  <input
+                    type={show ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={cn(inputClass, "px-10")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((v) => !v)}
+                    aria-label={t(show ? "welcome.hide_password" : "welcome.show_password")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-ink-faint hover:bg-paper-deep"
+                  >
+                    {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </span>
+              </label>
+              {error && (
+                <p role="alert" className="mt-3 rounded-2xl bg-trigger-soft px-3.5 py-2 text-sm text-trigger">
+                  {error}
+                </p>
+              )}
+              <Button type="submit" size="lg" className="mt-4 w-full" disabled={login.isPending || !email.trim() || !password}>
                 {login.isPending && <LoaderCircle className="h-5 w-5 animate-spin" />}
-                {t("welcome.start")}
+                {t("welcome.sign_in")}
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <p className="text-sm text-ink-faint">{t("welcome.start_note")}</p>
-            </div>
-            {health.data?.demo_mode === false && <p className="mt-3 text-sm text-caution">{t("welcome.sign_in_soon")}</p>}
-            {(login.isError || health.isError) && <p className="mt-3 text-sm text-trigger">{t("welcome.server_down")}</p>}
+              <p className="mt-3 text-center text-xs text-ink-faint">{t("welcome.sign_in_note")}</p>
+            </form>
 
             <ul className="mt-10 grid gap-4 sm:grid-cols-2">
               {features.map(({ icon: Icon, key }) => (

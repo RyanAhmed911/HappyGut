@@ -49,6 +49,12 @@ class Settings(BaseSettings):
 
     # Demo mode: a one-tap demo account with a simulated patient, held in memory (no Supabase needed).
     demo_mode: bool = False
+    # Passwords for the three test accounts (nusrat@ / rafi@ / ayesha@happygut.test). An empty one gets a
+    # random password for that run, printed in the start-up log. Use throw-away values: judges see them.
+    test_password_nusrat: str = ""
+    test_password_rafi: str = ""
+    test_password_ayesha: str = ""
+    session_secret: str = ""  # signs session tokens; empty = a new key per start (everyone signs in again)
     timezone: str = "Asia/Dhaka"
 
     # CORS for the PWA

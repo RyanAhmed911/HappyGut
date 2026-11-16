@@ -120,6 +120,17 @@ class MemoryStore:
     def _bump(self, patient_id: str) -> None:
         self.versions[patient_id] = self.versions.get(patient_id, 0) + 1
 
+    def clear_patient(self, patient_id: str) -> None:
+        """Forget everything stored for one patient (used to restore a test account's sample records)."""
+        for user_id in [u for u, p in self.patients.items() if p.id == patient_id]:
+            del self.patients[user_id]
+        for table in (self.personal, self.diary, self.stress_periods, self.decisions):
+            table.pop(patient_id, None)
+        self.meal_checks = {k: r for k, r in self.meal_checks.items() if r.patient_id != patient_id}
+        self.feedback = [f for f in self.feedback if f[0] != patient_id]
+        self.red_flags = [f for f in self.red_flags if f[0] != patient_id]
+        self._bump(patient_id)  # never reuse a version number: caches keyed on it must miss
+
     async def patient_for_user(self, user_id: str) -> Patient | None:
         return self.patients.get(user_id)
 

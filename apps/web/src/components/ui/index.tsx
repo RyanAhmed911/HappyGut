@@ -31,7 +31,7 @@ export function Button({
   size,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof button>) {
-  return <button type="button" className={cn(button({ variant, size }), className)} {...props} />;
+  return <button type="button" {...props} className={cn(button({ variant, size }), className)} />;
 }
 
 // ---------------------------------------------------------------- Card, Badge, titles

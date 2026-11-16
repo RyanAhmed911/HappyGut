@@ -39,7 +39,7 @@ async function raw(path: string, init: RequestInit = {}): Promise<Response> {
     } catch {
       /* not JSON */
     }
-    if (response.status === 401) {
+    if (response.status === 401 && auth.token) {
       auth.clear();
       window.dispatchEvent(new Event("hg:signed-out"));
     }
@@ -57,10 +57,11 @@ const send = (method: string, body?: unknown): RequestInit => ({ method, body: b
 
 export const api = {
   health: () => json(S.Health, "/v1/health"),
-  async demoLogin(): Promise<void> {
-    const response = await raw("/v1/demo/login", { method: "POST" });
+  async login(email: string, password: string): Promise<void> {
+    const response = await raw("/v1/auth/login", send("POST", { email, password }));
     auth.set(((await response.json()) as { token: string }).token);
   },
+  restoreAccount: () => json(S.Profile, "/v1/account/restore", { method: "POST" }),
   me: () => json(S.Profile, "/v1/me"),
   updateMe: (body: { language?: "bn" | "en"; reminder_time?: string; diagnosis?: "CD" | "UC"; phenotypes?: S.Phenotype[] }) =>
     json(S.Profile, "/v1/me", send("PATCH", body)),

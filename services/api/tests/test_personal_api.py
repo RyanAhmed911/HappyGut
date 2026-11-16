@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from conftest import FIXTURE_SEEDS, events
 from happygut_api.agents import Unavailable
-from happygut_api.demo import DemoVerifier
+from happygut_api.demo import DemoVerifier, TestAccounts
 from happygut_api.flow import MealCheckFlow
 from happygut_api.knowledge import MemoryKnowledge
 from happygut_api.main import Services, create_app
@@ -25,12 +25,20 @@ def demo():
     store = MemoryStore()
     verifier = DemoVerifier()
     flow = MealCheckFlow(knowledge, Unavailable(), Unavailable(), Scrubber(), store)
+    accounts = TestAccounts({"nusrat": "nusrat-test-pass", "rafi": "rafi-test-pass"})  # ayesha: generated for the run
     services = Services(Settings(seeds_dir=FIXTURE_SEEDS, demo_mode=True), knowledge, store, verifier, flow, demo=verifier,
-                        models={"perception": False, "explanation": False})
+                        accounts=accounts, models={"perception": False, "explanation": False})
     with TestClient(create_app(services)) as client:
-        token = client.post("/v1/demo/login").json()["token"]
+        token = client.post("/v1/auth/login", json={"email": "nusrat@happygut.test", "password": "nusrat-test-pass"}).json()["token"]
         client.headers["Authorization"] = f"Bearer {token}"
         yield client, services
+
+
+def sign_in(client, email: str, password: str) -> dict:
+    """Headers for another account, without touching the shared client's default (Nusrat)."""
+    r = client.post("/v1/auth/login", json={"email": email, "password": password})
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['token']}"}
 
 
 def today_of(client) -> date:
@@ -46,9 +54,60 @@ def test_demo_login_and_profile(demo):
     assert client.patch("/v1/me", json={"reminder_time": "25:00"}).status_code == 422
 
 
-def test_demo_login_is_off_outside_demo_mode(make_client):
+def test_sign_in_is_off_outside_demo_mode(make_client):
     with make_client() as c:
-        assert c.post("/v1/demo/login").status_code == 404
+        assert c.post("/v1/auth/login", json={"email": "nusrat@happygut.test", "password": "x"}).status_code == 404
+
+
+def test_sign_in_checks_the_password_and_locks_after_repeated_failures(demo):
+    client, services = demo
+    bad = {"email": "nusrat@happygut.test", "password": "wrong"}
+    assert client.post("/v1/auth/login", json=bad).status_code == 401
+    assert client.post("/v1/auth/login", json={"email": "nobody@happygut.test", "password": "x"}).status_code == 401
+    assert client.post("/v1/auth/login", json={"email": " NUSRAT@happygut.test ", "password": "nusrat-test-pass"}).status_code == 200
+    assert client.post("/v1/auth/login", json={"email": "", "password": ""}).status_code == 422
+    for _ in range(services.accounts.MAX_FAILURES):
+        client.post("/v1/auth/login", json={"email": "rafi@happygut.test", "password": "guess"})
+    locked = client.post("/v1/auth/login", json={"email": "rafi@happygut.test", "password": "rafi-test-pass"})
+    assert locked.status_code == 429 and locked.json()["detail"] == "too_many_attempts"
+    services.accounts._failures.clear()
+    assert client.get("/v1/me", headers={"Authorization": "Bearer not-a-token"}).status_code == 401
+
+
+def test_each_account_gets_its_own_patient(demo):
+    client, services = demo
+    rafi = sign_in(client, "rafi@happygut.test", "rafi-test-pass")
+    me = client.get("/v1/me", headers=rafi).json()
+    assert me["display_name"] == "Rafi" and me["diagnosis"] == "UC" and me["state"] == "flare"
+    periods = client.get("/v1/insights/periods", headers=rafi).json()
+    assert periods["index_name"] == "SCCAI" and periods["periods"][-1]["kind"] == "flare" and periods["periods"][-1]["ongoing"]
+    assert len(client.get("/v1/diary/days", headers=rafi).json()["days"]) >= 100
+
+    # A password that wasn't configured is generated for the run (and printed in the start-up log).
+    generated = services.accounts.generated["ayesha@happygut.test"]
+    ayesha = sign_in(client, "ayesha@happygut.test", generated)
+    new = client.get("/v1/me", headers=ayesha).json()
+    assert new["display_name"] == "Ayesha" and new["phenotypes"] == ["stricturing"]
+    assert client.get("/v1/diary/days", headers=ayesha).json()["days"] == []
+    assert client.get("/v1/insights/patterns", headers=ayesha).json()["enough_data"] is False
+    assert client.get("/v1/insights/flare-risk", headers=ayesha).json()["enough_data"] is False
+    guide = {d["dish_id"]: d for d in client.get("/v1/foods/guide", headers=ayesha).json()["items"]}
+    assert guide["dish.shak_bhaji"]["reason"] == "hard_rule"  # her stricture applies from day one
+    assert client.get("/v1/me").json()["display_name"] == "Nusrat"  # the other session is untouched
+
+
+def test_restore_puts_the_sample_records_back(demo):
+    client, _ = demo
+    rafi = sign_in(client, "rafi@happygut.test", "rafi-test-pass")
+    before = client.get("/v1/diary/days", headers=rafi).json()["days"]
+    today = before and client.get("/v1/diary/days?limit=1", headers=rafi).json()["today"]
+    client.put(f"/v1/diary/{today}", json={"pain": 3, "wellbeing": 4}, headers=rafi)
+    client.patch("/v1/me", json={"phenotypes": ["lactose_intolerant"], "language": "en"}, headers=rafi)
+    assert len(client.get("/v1/diary/days", headers=rafi).json()["days"]) == len(before) + 1
+    restored = client.post("/v1/account/restore", headers=rafi).json()
+    assert restored["phenotypes"] == [] and restored["language"] == "en"  # records restored, language kept
+    assert client.get("/v1/diary/days", headers=rafi).json()["days"] == before
+    assert client.get("/v1/insights/periods", headers=rafi).json()["current_state"] == "flare"
 
 
 def test_persona_history_periods_and_patterns(demo):
