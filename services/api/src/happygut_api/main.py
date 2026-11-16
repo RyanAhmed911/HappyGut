@@ -20,7 +20,7 @@ from happygut_engine import DEFAULT_CONFIG, Diagnosis, ManualFlare, index_for, u
 from . import __version__, foods, i18n
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
-from .demo import DemoVerifier, seed_demo
+from .demo import PERSONAS, DemoVerifier, TestAccounts, seed_demo, seed_persona
 from .diary import CLOCK, DiaryIn, IndexOut, StressPeriodIn, StressPeriodOut, build_entry, items_of
 from .flow import Event, MealCheckFlow
 from .images import ImageRejected, sanitise
@@ -40,6 +40,11 @@ Lang = Literal["bn", "en"]
 
 class Feedback(BaseModel):
     answer: Literal["right", "wrong", "not_sure"]
+
+
+class Credentials(BaseModel):
+    email: str = Field(min_length=3, max_length=120)
+    password: str = Field(min_length=1, max_length=200)
 
 
 class ProfileUpdate(BaseModel):
@@ -69,6 +74,7 @@ class Services:
     insights: Insights | None = None
     scrubber: Scrubber | None = None
     demo: DemoVerifier | None = None
+    accounts: TestAccounts | None = None
     models: dict[str, bool] | None = None
     model_names: dict[str, list[str]] | None = None
 
@@ -81,7 +87,8 @@ class Services:
 
 def build_services(settings: Settings) -> Services:
     knowledge = MemoryKnowledge.from_seeds(settings.seeds_dir, include_drafts=settings.include_draft_seeds)
-    demo = DemoVerifier() if settings.demo_mode else None
+    demo = DemoVerifier(settings.session_secret) if settings.demo_mode else None
+    accounts = TestAccounts({p.key: getattr(settings, f"test_password_{p.key}", "") for p in PERSONAS}) if settings.demo_mode else None
     store: Store = MemoryStore() if settings.demo_mode or not settings.supabase_db_url else PostgresStore(settings.supabase_db_url)
     models = {"perception": True, "explanation": True}
     if settings.resolve_models and (settings.gemini_api_key or settings.groq_api_key):
@@ -110,7 +117,7 @@ def build_services(settings: Settings) -> Services:
     verifier: Verifier = demo if demo else SupabaseVerifier(settings.supabase_url, settings.jwt_audience)
     names = {"perception": perception_names if models["perception"] else [],
              "explanation": explanation_names if models["explanation"] else []}
-    return Services(settings, knowledge, store, verifier, flow, demo=demo, models=models, model_names=names)
+    return Services(settings, knowledge, store, verifier, flow, demo=demo, accounts=accounts, models=models, model_names=names)
 
 
 def create_app(services: Services | None = None) -> FastAPI:
@@ -122,7 +129,10 @@ def create_app(services: Services | None = None) -> FastAPI:
         log.info("knowledge loaded: %s (reviewed only: %s)", s.knowledge.counts(), s.knowledge.reviewed_only)
         if s.demo is not None and isinstance(s.store, MemoryStore) and isinstance(s.knowledge, MemoryKnowledge):
             await seed_demo(s.store, s.knowledge, s.insights, s.flow)
-            log.info("demo mode: simulated persona seeded")
+            log.info("test accounts ready: %s", ", ".join(p.email for p in PERSONAS))
+            for email, password in (s.accounts.generated if s.accounts else {}).items():
+                # Only generated, per-run passwords are printed; configured ones never are.
+                print(f"  test account {email}: no password configured, using {password} for this run", flush=True)
         yield
 
     settings = services.settings if services else get_settings()
@@ -169,16 +179,31 @@ def create_app(services: Services | None = None) -> FastAPI:
         return {
             "status": "ok", "version": __version__, "engine_version": DEFAULT_CONFIG.version,
             "knowledge": {**s.knowledge.counts(), "reviewed_only": s.knowledge.reviewed_only},
-            "storage": type(s.store).__name__, "demo_mode": s.demo is not None,
+            "storage": type(s.store).__name__, "demo_mode": s.demo is not None, "sign_in": s.accounts is not None,
             "models": s.models or {"perception": True, "explanation": True},
             "model_names": s.model_names or {},
         }
 
-    @app.post("/v1/demo/login")
-    async def demo_login(s: Services = Depends(svc)) -> dict:
-        if s.demo is None:
-            raise HTTPException(404, "demo_mode_off")
-        return {"token": s.demo.issue(), "expires_in": 12 * 3600}
+    @app.post("/v1/auth/login")
+    async def login(body: Credentials, s: Services = Depends(svc)) -> dict:
+        if s.demo is None or s.accounts is None:
+            raise HTTPException(404, "sign_in_unavailable")
+        if s.accounts.locked(body.email.strip().lower()):
+            raise HTTPException(429, "too_many_attempts")
+        persona = s.accounts.check(body.email, body.password)
+        if persona is None:
+            raise HTTPException(401, "invalid_credentials")
+        return {"token": s.demo.issue(persona.user_id), "expires_in": 12 * 3600}
+
+    @app.post("/v1/account/restore")
+    async def restore_account(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        """Put a test account's sample records back as they were (any judge may have changed them)."""
+        persona = next((p for p in PERSONAS if p.patient_id == patient.id), None)
+        if persona is None or not isinstance(s.store, MemoryStore) or not isinstance(s.knowledge, MemoryKnowledge):
+            raise HTTPException(404, "not_a_test_account")
+        restored = await seed_persona(persona, s.store, s.knowledge, s.insights, s.flow)
+        restored = await s.store.update_patient(restored.id, patient.language, None) or restored
+        return await profile(restored, s)
 
     @app.get("/v1/me")
     async def me(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:

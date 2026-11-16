@@ -88,10 +88,12 @@ export function RiskCard({ risk, compact }: { risk: Risk; compact?: boolean }) {
         <RiskGauge score={risk.score} level={risk.level} />
         <div className="min-w-0">
           <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("risk.title", { days: num(risk.horizon_days, lang) })}</p>
-          <p className="mt-1 text-xl font-bold leading-snug">{t(`risk.level_${risk.level}`)}</p>
-          <Badge tone={RISK_TONE[risk.level]} className="mt-1.5">
-            {t(`risk.badge_${risk.level}`)}
-          </Badge>
+          <p className="mt-1 text-xl font-bold leading-snug">{risk.enough_data ? t(`risk.level_${risk.level}`) : t("risk.level_unknown")}</p>
+          {risk.enough_data && (
+            <Badge tone={RISK_TONE[risk.level]} className="mt-1.5">
+              {t(`risk.badge_${risk.level}`)}
+            </Badge>
+          )}
         </div>
       </div>
       {!risk.enough_data ? (

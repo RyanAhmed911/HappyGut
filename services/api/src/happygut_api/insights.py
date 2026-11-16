@@ -45,6 +45,9 @@ class Insights:
         self.tz = ZoneInfo(timezone)
         self._cache: dict[str, tuple[int, Bundle]] = {}
 
+    def forget(self, patient_id: str) -> None:
+        self._cache.pop(patient_id, None)
+
     # ------------------------------------------------------------ time
 
     def now(self) -> datetime:

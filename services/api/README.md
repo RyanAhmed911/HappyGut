@@ -27,7 +27,7 @@ It shows whether each key is read and which models will be used, then calls each
 | GET | `/v1/meal-checks/{id}` | A stored meal check (own only) |
 | POST | `/v1/meal-checks/{id}/feedback` | `{"answer": "right" \| "wrong" \| "not_sure"}` |
 
-All `/v1` calls except health need `Authorization: Bearer <Supabase access token>` and a row in `core.patients`.
+All `/v1` calls except health and sign-in need `Authorization: Bearer <token>`. In demo mode the token comes from `POST /v1/auth/login` (email + password of a test account; 8 failed attempts lock that email for 5 minutes) and `POST /v1/account/restore` puts the account's sample records back. Outside demo mode the token is a Supabase access token and the patient is a row in `core.patients`.
 
 The browser calls `POST /v1/meal-checks` with `fetch` and reads the body as a stream (EventSource can't send a photo).
 

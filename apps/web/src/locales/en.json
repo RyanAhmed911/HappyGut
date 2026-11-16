@@ -55,9 +55,15 @@
     "ex_3_why": "Nothing in it is flagged for you.",
     "ex_guideline": "IBD guidelines",
     "ex_personal": "Your own diary",
-    "start": "Get started",
-    "start_note": "No sign-up needed.",
-    "sign_in_soon": "Sign-in isn't available on this server yet."
+    "sign_in": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "sign_in_note": "Use the account details you were given.",
+    "wrong_credentials": "That email or password isn't right. Please try again.",
+    "too_many_attempts": "Too many attempts. Please wait a few minutes and try again.",
+    "sign_in_off": "Sign-in isn't available on this server yet."
   },
   "today": {
     "greeting_morning": "Good morning, {{name}}",
@@ -303,7 +309,8 @@
     "driver_upcoming": "{{name}} start in {{days}} days",
     "driver_missed": "Missed doses this week: {{count}}",
     "driver_in_flare": "You are in a flare",
-    "advice": "Gentler meals and regular sleep may help. If symptoms keep rising, contact your doctor. This is a simple, transparent score, not a diagnosis."
+    "advice": "Gentler meals and regular sleep may help. If symptoms keep rising, contact your doctor. This is a simple, transparent score, not a diagnosis.",
+    "level_unknown": "Not enough diary days yet"
   },
   "gut": {
     "title": "My Gut",
@@ -422,7 +429,11 @@
     "notify": "Notify me at that time",
     "notify_note": "Reminders appear while HappyGut is open or installed on this device.",
     "notify_blocked": "Notifications are blocked for this site. Allow them in your browser settings to turn reminders on.",
-    "reviewed_value": "AI judge, against published sources"
+    "reviewed_value": "AI judge, against published sources",
+    "account": "Account",
+    "restore": "Restore original records",
+    "restore_note": "Puts this account's diary, meals and profile back to how they were at the start.",
+    "restored": "Records restored."
   },
   "factor": {
     "food_fat": "High-fat meals",
