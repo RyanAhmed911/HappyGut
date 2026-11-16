@@ -88,8 +88,7 @@ class Services:
 def build_services(settings: Settings) -> Services:
     knowledge = MemoryKnowledge.from_seeds(settings.seeds_dir, include_drafts=settings.include_draft_seeds)
     demo = DemoVerifier(settings.session_secret) if settings.demo_mode else None
-    accounts = TestAccounts({"nusrat": settings.test_password_nusrat, "rafi": settings.test_password_rafi,
-                             "ayesha": settings.test_password_ayesha}) if settings.demo_mode else None
+    accounts = TestAccounts({p.key: getattr(settings, f"test_password_{p.key}", "") for p in PERSONAS}) if settings.demo_mode else None
     store: Store = MemoryStore() if settings.demo_mode or not settings.supabase_db_url else PostgresStore(settings.supabase_db_url)
     models = {"perception": True, "explanation": True}
     if settings.resolve_models and (settings.gemini_api_key or settings.groq_api_key):
