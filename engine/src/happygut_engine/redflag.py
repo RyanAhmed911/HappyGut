@@ -34,7 +34,7 @@ _EN = {
     "pain": r"\b(abdominal|stomach|belly|tummy|abdomen) (pain|ache|cramps?)\b|\bpain in (my )?(stomach|belly|tummy|abdomen)\b|\bstomach ?ache\b|\bsevere cramps?\b",
     "vomit": r"\bvomit(ing|ed|s)?\b|\bthrowing up\b|\bthrew up\b|\bpuking\b",
     "no_pass": r"\b(can'?t|cannot|unable to|haven'?t|not) (pass(ed)?|poo(p)?|passed) (any )?(gas|wind|stool|motion)?|\bno (stool|bowel movement|gas|wind|poo(p)?)\b|\bhaven'?t pooped\b|\bnot pooped\b",
-    "dehydration": r"\bsevere(ly)? dehydrat(ed|ion)\b|\bvery dehydrated\b|\bcan'?t keep (any )?(water|fluids?|anything) down\b|\bno urine\b|\bhaven'?t (peed|urinated)\b|\bfaint(ed|ing)?\b|\bpass(ed|ing) out\b",
+    "dehydration": r"\bsevere(ly)? dehydrat(ed|ion)\b|\bvery dehydrated\b|\bcan'?t keep (any )?(water|fluids?|anything) down\b|\bno urine\b|\bhaven'?t (peed|urinated)\b|\b(haven'?t|not|no|can'?t|cannot) (passed|passing|pass) (any )?urine\b|\bnot (peeing|urinating)\b|\bfaint(ed|ing)?\b|\bpass(ed|ing) out\b",
 }
 _BN = {
     "blood": _terms("রক্ত"),
@@ -48,7 +48,11 @@ _BN = {
         "পায়খানা হচ্ছে না", "পায়খানা হয়নি", "পায়খানা হয় নি", "বায়ু বের হচ্ছে না",
         "গ্যাস বের হচ্ছে না", "পায়খানা বন্ধ",
     ),
-    "dehydration": _terms("পানিশূন্য", "প্রস্রাব হচ্ছে না", "প্রস্রাব হয়নি", "অজ্ঞান", "মাথা ঘুরে পড়ে"),
+    "dehydration": _terms("পানিশূন্য", "প্রস্রাব হচ্ছে না", "প্রস্রাব হয়নি", "প্রস্রাব হয় নি", "প্রস্রাব বন্ধ", "অজ্ঞান", "মাথা ঘুরে পড়ে"),
+}
+# Bangla word pairs that count wherever they stand in the message ("পেটে তীব্র ব্যথা": a word in between).
+_BN_PAIRS = {
+    "pain": (_terms("পেট"), _terms("ব্যথা", "ব্যাথা")),
 }
 _BANGLISH = {
     "blood": r"\b(rokto|rakto|roktho|rokt)\b",
@@ -72,7 +76,10 @@ class RedFlagResult:
 def _found(concept: str, text: str) -> bool:
     if re.search(_EN[concept], text) or re.search(_BANGLISH[concept], text):
         return True
-    return any(term in text for term in _BN[concept])
+    if any(term in text for term in _BN[concept]):
+        return True
+    first, second = _BN_PAIRS.get(concept, ((), ()))
+    return any(a in text for a in first) and any(b in text for b in second)
 
 
 def check_red_flags(text: str) -> RedFlagResult:

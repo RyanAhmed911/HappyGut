@@ -19,16 +19,16 @@ Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.
 |---|---|---|---|---|
 | Oct 21 | **0. Foundation** | — | Accounts ready, dev setup on Windows ([`setup.md`](setup.md)); skeleton, constitution, AGENTS.md, skills, specs 001–002 pushed | ✅ Accounts created (2026-11-07); keys go in `.env` on Windows |
 | Nov 7–9 | **1. Knowledge layer** | [001](../specs/001-knowledge-layer/spec.md) | Demo dishes + stricture Rule Cards approved first, then the rest; loader (T013) puts them in Neo4j + pgvector; foodgraph MCP | 🟡 61 dishes and 25 Rule Cards approved by the LLM judge (2026-11-15; every Rule Card has an exact retrieved quote); 50 spellings added. Graph, schema, MCP and GPU jobs G2/G3 done. Open: loader to Neo4j / Supabase, guideline corpus, rerun G3 for the new spellings |
-| Nov 9–11 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text (Bangla or English) → Bangla verdict card with citations, end to end on a phone | 🟡 Backend and PWA built and working in demo mode (typed meals; photos need the Gemini key). Next: live test with real keys, Supabase sign-in |
+| Nov 9–11 | **2. Hero flow** | [002](../specs/002-meal-check/spec.md) | Photo/text (Bangla or English) → Bangla verdict card with citations, end to end on a phone | 🟡 Backend and PWA built and working in demo mode (typed meals; photos need the Gemini key). Photo checks confirmed working with the team's keys (2026-11-15); sign-in with three test accounts. Next: deployment |
 | Nov 11–14 | **3. Personal layer** | [003](../specs/003-personal-layer/spec.md) | Nightly diary (foods, reactions, stool, HBI/SCCAI, sleep, stress, doses), stressful periods, simulated cohort + demo persona, Flare Pattern Finder, remission / flare timeline and tabs, flare-risk v0, "My Gut" | 🟡 Built and working in demo mode on the simulated persona: nightly diary, sleep, stress, stressful periods, Flare Pattern Finder, remission / flare periods, flare-risk v0, doctor's report. Open: Postgres storage for the diary, web push, simulated cohort (200 patients) |
-| Nov 14–15 | **4. Proof** | 004 | Eval sets, red-flag suite, trigger / pattern recovery on the simulated cohort, LightGBM + SHAP outlook (B), RAG ablation, Eval Lab | ⏳ |
+| Nov 14–15 | **4. Proof** | 004 | Eval sets, red-flag suite, trigger / pattern recovery on the simulated cohort, LightGBM + SHAP outlook (B), RAG ablation, Eval Lab | 🟡 Measured on 2026-11-17 ([`../evals/RESULTS.md`](../evals/RESULTS.md)): Pattern Finder on 200 simulated patients, red-flag suite by language, verdict rules, dish names. Open: photo accuracy, dietitian-labelled verdict set, RAG ablation, LightGBM |
 | Nov 16–17 | **5. Ship** | — | Deployed URL, demo account, /docs, clinician PDF, Figma prototype | ⏳ |
-| Nov 18 | **6. Video** | — | 180s video on YouTube + Facebook, 1-page summary | ⏳ |
+| Nov 18 | **6. Video** | — | 180s video on YouTube + Facebook, 1-page summary | 🟡 Script: [`portal/video-script.md`](portal/video-script.md); summary draft: [`portal/one-page-summary.md`](portal/one-page-summary.md). Recording is open |
 | Nov 19 | **7. Reconcile & submit** | — | Checklist in `portal/submission-scope.md` §4 done; submitted a day early | ⏳ |
 
 **Cut order if behind:** smolagents → CrewAI → DSPy → embedding fine-tune → research MCP → dietitian agent → LightGBM outlook (keep the Bayesian Pattern Finder) → per-period patterns (keep the period timeline). Never cut: hero flow, nightly diary, evals, video.
 
-## Proposed role mapping (fill in names)
+## Proposed role mapping (fill in names: mandatory, see [`portal/guide-checklist.md`](portal/guide-checklist.md))
 
 The team works across everything, but the portal needs named owners. This mapping gives each role the workstream it naturally leads.
 

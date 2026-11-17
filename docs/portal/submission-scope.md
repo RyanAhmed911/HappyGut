@@ -27,7 +27,7 @@
 | Item | Content | Owner |
 |---|---|---|
 | YouTube + Facebook video | 180s: problem → solution → **real** demo → AI approach (architecture + Eval Lab numbers) → impact | Presentation lead |
-| Live / demo link | Deployed PWA + one-tap demo account (synthetic persona) + /docs | Frontend + backend |
+| Live / demo link | Deployed PWA + three test accounts ([`test-credentials.md`](test-credentials.md)) + the in-app "How it works" page | Frontend + backend |
 | GitHub repo | Code for the A/B tiers + docs, specs, prompt library; public before submission | Everyone |
 | Figma / design | Clickable prototype of the **full vision** (incl. C features, labelled "design prototype") | UI/UX |
 
@@ -48,7 +48,7 @@
 | Flare-risk outlook (rule-based v0) | **A** |
 | Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers | B |
 | Clinician pre-visit PDF | B |
-| /docs page | B |
+| "How it works" page (flow, safeguards, data sources, measured results), open without sign-in | B (arrives with the interface update) |
 | Reminders (web push) | B |
 | Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine | **A** |
 | Sign-in with test accounts for judges (three patient types), restore-records action | **A** |
@@ -96,7 +96,8 @@
 | Agent frameworks: LangGraph, Pydantic-AI | A |
 | Agent frameworks: CrewAI, smolagents, DSPy | **C**: untick unless built |
 | Fine-tuning (embedding) | **C**: keep only the "prompt-level adaptation" lines unless done |
-| Eval: verdict set, red-flag suite, RAG ablation, Eval Lab | A |
+| Eval: red-flag suite, simulated-cohort pattern recovery, verdict rules, dish names (`evals/RESULTS.md`) | A |
+| Eval: dietitian-labelled verdict set, RAG ablation, Eval Lab | **C**: not built; untick or build |
 | Eval: LLM judge, 50-sample human eval, McNemar, CI gate | B |
 | Guardrails (input + output) | A |
 | Frontend builders: Lovable | A |

@@ -16,6 +16,7 @@ from happygut_pipelines.graph import (
     SourceRef,
     VerdictPathStep,
     name_score,
+    normalise_name,
 )
 
 ALL_DISHES = """
@@ -65,10 +66,12 @@ class Neo4jGraph:
         matches = []
         for d in self._read(ALL_DISHES):
             names = [d["name_en"], d["name_bn"], *d["aliases"]]
-            score, name = max((name_score(n, query), n) for n in names)
+            score, _, name = max((name_score(n, query), len(normalise_name(n)), n) for n in names)
             if score >= threshold:
                 matches.append(DishMatch(d["id"], d["name_en"], d["name_bn"], name, round(score, 3)))
-        matches.sort(key=lambda m: (-m.score, m.dish_id))
+        # Equal scores: the longer matched name is the more specific dish ("light chicken curry"
+        # must not lose to "chicken curry", which is also found inside the query).
+        matches.sort(key=lambda m: (-m.score, -len(normalise_name(m.matched_name)), m.dish_id))
         return matches[:limit]
 
     def get_components(self, dish_id: str) -> dict:

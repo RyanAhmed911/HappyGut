@@ -38,6 +38,11 @@ def test_approved_only_by_default():
     ("shorshe ilish", "dish.shorshe_ilish"),
     ("musur dal", "dish.masoor_dal"),
     ("ফুচকা", "dish.fuchka"),
+    # A name that contains another dish's shorter name must still find the more specific dish.
+    ("Light chicken curry", "dish.murgir_patla_jhol"),
+    ("mutton rezala", "dish.mutton_rezala"),
+    ("patla khichuri", "dish.patla_khichuri"),
+    ("lal cha", "dish.rong_cha"),
 ])
 def test_search_dish(g, query, expected):
     assert g.search_dish(query)[0].dish_id == expected
@@ -91,3 +96,9 @@ def test_neo4j_statements_cover_everything(g):
 def test_statements_are_parameterised(g):
     for statement, _ in graph_statements(g):
         assert "kacchi" not in statement.lower(), "data must go in parameters, never in Cypher text"
+
+
+def test_every_stored_name_leads_to_its_own_dish(g):
+    wrong = [(n, d.id) for d in g.dishes.values() for n in (d.name_en, d.name_bn, *d.aliases)
+             if n and g.search_dish(n)[0].dish_id != d.id]
+    assert wrong == []
