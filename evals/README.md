@@ -6,7 +6,7 @@ uv run python -m happygut_api.evaluate            # full run, about 6 minutes on
 uv run python -m happygut_api.evaluate --patients 40
 ```
 
-Writes [`RESULTS.md`](RESULTS.md) (the report) and `summary.json` (the same numbers for the app's "How it works" page). The run is deterministic and calls no language model.
+Writes [`RESULTS.md`](RESULTS.md) (the report), `summary.json`, and `apps/web/src/data/evaluation.json` (the few numbers the app's "How it works" page shows; a test checks it matches). The run is deterministic and calls no language model.
 
 | Suite | What it measures | Gate in CI |
 |---|---|---|

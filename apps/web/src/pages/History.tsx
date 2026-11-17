@@ -8,12 +8,13 @@ import { Card, Empty, PageTitle } from "@/components/ui";
 import { MealResult, VerdictDot } from "@/components/verdict";
 import { api } from "@/lib/api";
 import { dayOfTimestamp, longDate, timeOfDay } from "@/lib/format";
-import { keys } from "@/lib/hooks";
+import { keys, useDishName } from "@/lib/hooks";
 import type { MealCheck } from "@/lib/schemas";
 
 export function History() {
   const { t } = useTranslation();
   const lang = useLang();
+  const dishName = useDishName(lang);
   const checks = useQuery({ queryKey: keys.mealChecks, queryFn: () => api.mealChecks(30) });
   const groups = useMemo(() => {
     const map = new Map<string, MealCheck[]>();
@@ -44,7 +45,7 @@ export function History() {
                 <Link key={c.id} to={`/history/${c.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-paper/60">
                   <VerdictDot verdict={c.verdict} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">{c.dishes.map((d) => d.name).join(", ")}</span>
+                    <span className="block truncate font-semibold">{c.dishes.map(dishName).join(", ")}</span>
                     <span className="flex items-center gap-1.5 text-xs text-ink-faint">
                       {c.input_type === "photo" ? <Camera className="h-3 w-3" /> : <Type className="h-3 w-3" />}
                       {timeOfDay(c.created_at, lang)} · {t(`verdict.${c.verdict}`)}

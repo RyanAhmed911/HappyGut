@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from happygut_api import evaluate
 from happygut_api.demo import build_menu
 from happygut_api.knowledge import MemoryKnowledge
@@ -31,3 +33,9 @@ def test_cohort_scoring_runs_and_is_reproducible():
     first = evaluate.evaluate_patient((3, menu, candidates))
     assert first == evaluate.evaluate_patient((3, menu, candidates))
     assert set(first["horizons"]) == set(evaluate.HORIZONS)
+
+
+def test_the_apps_copy_of_the_results_matches_the_report():
+    summary = json.loads((evaluate.ROOT / "evals" / "summary.json").read_text(encoding="utf-8"))
+    web = json.loads((evaluate.ROOT / "apps" / "web" / "src" / "data" / "evaluation.json").read_text(encoding="utf-8"))
+    assert web == evaluate.for_web(summary)

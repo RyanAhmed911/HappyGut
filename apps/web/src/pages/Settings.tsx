@@ -124,7 +124,7 @@ export function SettingsPage() {
           <Stethoscope className="h-5 w-5 shrink-0 text-brand" />
           {t("settings.safety_2")}
         </p>
-        <p className="rounded-2xl bg-paper p-3 text-xs">{t("app.disclaimer")}</p>
+        <p className="rounded-xl bg-paper p-3 text-xs">{t("app.disclaimer")}</p>
       </Card>
 
       <SectionTitle>{t("settings.about")}</SectionTitle>
@@ -147,7 +147,7 @@ export function SettingsPage() {
             </div>
           </dl>
         )}
-        <p className="mt-3 border-t border-line/70 pt-3 text-xs">{t("notice.purpose")}</p>
+        <p className="mt-3 border-t border-line pt-3 text-xs">{t("notice.purpose")}</p>
       </Card>
 
       {p?.is_synthetic && (

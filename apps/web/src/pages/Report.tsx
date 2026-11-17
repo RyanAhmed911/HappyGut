@@ -11,7 +11,7 @@ import type { DaySummary } from "@/lib/schemas";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-line/70 py-1.5 text-sm">
+    <div className="flex justify-between gap-4 border-b border-line py-1.5 text-sm">
       <dt className="text-ink-soft">{label}</dt>
       <dd className="text-right font-semibold">{value}</dd>
     </div>
@@ -48,7 +48,7 @@ export function Report() {
         />
       </div>
 
-      <article className="rounded-3xl border border-line bg-card p-6 shadow-card print:border-0 print:p-0 print:shadow-none">
+      <article className="rounded-2xl border border-line bg-card p-6 shadow-card print:border-0 print:p-0 print:shadow-none">
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
           <div>
             <Logo />
@@ -114,7 +114,7 @@ export function Report() {
               </thead>
               <tbody>
                 {r.contributors.map((c) => (
-                  <tr key={c.factor} className="border-b border-line/60">
+                  <tr key={c.factor} className="border-b border-line">
                     <td className="py-1.5 font-semibold">{name(c.factor)}</td>
                     <td className="py-1.5">{t(`patterns.label_${c.label}`)}</td>
                     <td className="tabular py-1.5 text-right">

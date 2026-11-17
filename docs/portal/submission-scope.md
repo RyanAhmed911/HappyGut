@@ -48,7 +48,7 @@
 | Flare-risk outlook (rule-based v0) | **A** |
 | Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers | B |
 | Clinician pre-visit PDF | B |
-| "How it works" page (flow, safeguards, data sources, measured results), open without sign-in | B (arrives with the interface update) |
+| "How it works" page (flow, safeguards, data sources, measured results), open without sign-in at `/about` | **A** |
 | Reminders (web push) | B |
 | Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine | **A** |
 | Sign-in with test accounts for judges (three patient types), restore-records action | **A** |

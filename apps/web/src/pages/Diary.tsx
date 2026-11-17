@@ -76,7 +76,7 @@ function BristolPicker({ value, onChange }: { value: number | null; onChange: (v
           aria-checked={value === type}
           onClick={() => onChange(type)}
           className={cn(
-            "flex items-center gap-3 rounded-2xl border px-3 py-2 text-left transition active:scale-[0.98]",
+            "flex items-center gap-3 rounded-xl border px-3 py-2 text-left transition active:scale-[0.98]",
             value === type ? "border-brand bg-brand-tint ring-2 ring-brand/20" : "border-line bg-card hover:border-brand/40",
           )}
         >
@@ -135,7 +135,7 @@ function AddFoodSheet({ open, onOpenChange, onAdd }: { open: boolean; onOpenChan
       <ul className="mt-3 max-h-64 space-y-1.5 overflow-y-auto">
         {results.data?.map((m) => (
           <li key={m.dish_id}>
-            <button type="button" onClick={() => add(m)} className="flex w-full items-center justify-between gap-3 rounded-2xl border border-line px-4 py-2.5 text-left hover:border-brand/50 hover:bg-brand-tint">
+            <button type="button" onClick={() => add(m)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-line px-4 py-2.5 text-left hover:border-brand/50 hover:bg-brand-tint">
               <span>
                 <span className="block font-semibold">{lang === "bn" ? m.name_bn : m.name_en}</span>
                 <span className="text-xs text-ink-faint">{lang === "bn" ? m.name_en : m.name_bn}</span>
@@ -146,7 +146,7 @@ function AddFoodSheet({ open, onOpenChange, onAdd }: { open: boolean; onOpenChan
         ))}
         {q.trim().length >= 2 && (
           <li>
-            <button type="button" onClick={() => add(null)} className="flex w-full items-center justify-between gap-3 rounded-2xl border border-dashed border-line px-4 py-2.5 text-left text-sm text-ink-soft hover:border-brand/50">
+            <button type="button" onClick={() => add(null)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-dashed border-line px-4 py-2.5 text-left text-sm text-ink-soft hover:border-brand/50">
               <span>{t("diary.add_as_typed", { text: q.trim() })}</span>
               <Plus className="h-4 w-4" />
             </button>
@@ -164,7 +164,7 @@ function FoodRow({ food, onChange, onRemove }: { food: DiaryFood; onChange: (f: 
   const toggle = (r: (typeof REACTIONS)[number]): void =>
     onChange({ ...food, reactions: food.reactions.includes(r) ? food.reactions.filter((x) => x !== r) : [...food.reactions, r] });
   return (
-    <li className="rounded-2xl border border-line bg-card p-3.5">
+    <li className="rounded-xl border border-line bg-card p-3.5">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="font-bold leading-snug">{name}</p>
@@ -249,7 +249,7 @@ function Result({ saved, date, onEdit }: { saved: DiarySaved; date: string; onEd
         <Button variant="outline" onClick={onEdit}>
           {t("diary.edit")}
         </Button>
-        <Link to="/patterns" className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-[15px] font-semibold text-white shadow-float">
+        <Link to="/patterns" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 text-[15px] font-semibold text-white shadow-float">
           {t("diary.see_patterns")}
           <ArrowRight className="h-4 w-4" />
         </Link>
@@ -328,13 +328,13 @@ export function Diary() {
       </div>
 
       {day.data.tags.map((tag) => (
-        <p key={tag.id} className="mb-3 flex items-center gap-2 rounded-2xl bg-brand-tint px-3.5 py-2 text-sm text-brand-deep">
+        <p key={tag.id} className="mb-3 flex items-center gap-2 rounded-xl bg-brand-tint px-3.5 py-2 text-sm text-brand-deep">
           <GraduationCap className="h-4 w-4 shrink-0" />
           {t("diary.tagged", { name: tag.name })}
         </p>
       ))}
 
-      {!editable && <p className="mb-4 rounded-2xl bg-unsure-soft px-4 py-3 text-sm text-unsure">{t("diary.too_late")}</p>}
+      {!editable && <p className="mb-4 rounded-xl bg-unsure-soft px-4 py-3 text-sm text-unsure">{t("diary.too_late")}</p>}
 
       {/* Progress */}
       <ol className="mb-5 flex gap-1.5" aria-label={t("diary.progress")}>
@@ -353,7 +353,7 @@ export function Diary() {
           <div>
             <h2 className="text-xl font-bold">{t("diary.q_food")}</h2>
             <p className="mb-4 mt-1 text-sm text-ink-soft">{t("diary.q_food_hint")}</p>
-            {byTime.length === 0 && <p className="mb-3 rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink-soft">{t("diary.no_food")}</p>}
+            {byTime.length === 0 && <p className="mb-3 rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink-soft">{t("diary.no_food")}</p>}
             {byTime.map(([time, foods]) => (
               <div key={time} className="mb-3">
                 <p className="mb-1.5 text-xs font-bold uppercase tracking-[0.08em] text-ink-faint">{t(`time.${time}`)}</p>
@@ -464,7 +464,7 @@ export function Diary() {
               rows={3}
               maxLength={500}
               placeholder={t("diary.notes_placeholder")}
-              className="w-full resize-none rounded-3xl border border-line bg-card p-4 text-[15px] outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+              className="w-full resize-none rounded-2xl border border-line bg-card p-4 text-[15px] outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
             />
             <Card className="mt-4 p-4 text-sm">
               <p className="mb-2 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("diary.summary")}</p>
@@ -479,7 +479,7 @@ export function Diary() {
                   [t("diary.bedtime"), form.sleep.bedtime ? clock(form.sleep.bedtime, lang) : "–"],
                   [t("diary.stress"), form.stress === null ? "–" : n(form.stress)],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-2 border-b border-line/60 pb-1.5">
+                  <div key={k} className="flex justify-between gap-2 border-b border-line pb-1.5">
                     <dt className="text-ink-soft">{k}</dt>
                     <dd className="font-semibold">{v}</dd>
                   </div>

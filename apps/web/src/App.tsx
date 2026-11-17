@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { AppShell } from "./components/shell";
+import { About, PublicFrame } from "./pages/About";
 import { auth } from "./lib/api";
 import { Check } from "./pages/Check";
 import { Diary } from "./pages/Diary";
@@ -41,6 +42,9 @@ export function App() {
   return (
     <Routes>
       <Route path="/welcome" element={<Welcome />} />
+      <Route path="/about" element={auth.token ? <AppShell /> : <PublicFrame />}>
+        <Route index element={<About />} />
+      </Route>
       <Route element={<Protected />}>
         <Route index element={<Today />} />
         <Route path="check" element={<Check />} />

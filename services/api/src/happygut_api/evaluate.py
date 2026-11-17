@@ -418,6 +418,28 @@ def knowledge_counts(knowledge: MemoryKnowledge) -> dict:
     return {"dishes": len(knowledge.graph.dishes), "rule_cards": len(cards), "rule_cards_with_quote": with_quote}
 
 
+def for_web(s: dict) -> dict:
+    """The few numbers the app's "How it works" page shows."""
+    c = s["cohort"]
+    last = c["by_horizon"][str(HORIZONS[-1])]
+    return {
+        "date": s["date"],
+        "cohort": {
+            "patients": c["patients"], "days": c["days"],
+            "horizons": [{"days": int(h), "found": r["found"], "of": r["true_contributors"], "false_reports": r["false_reports"]}
+                         for h, r in c["by_horizon"].items()],
+            "food": {"found": last["recall_by_group"]["food"]["found"], "of": last["recall_by_group"]["food"]["of"]},
+        },
+        "red_flags": {"caught": s["red_flags"]["caught"], "phrases": s["red_flags"]["phrases"],
+                      "false_alarms": len(s["red_flags"]["false_alarms"]), "ordinary": s["red_flags"]["ordinary_messages"]},
+        "verdicts": {"assessments": s["verdicts"]["assessments"], "identical": s["verdicts"]["identical_on_repeat"],
+                     "dishes": s["verdicts"]["dishes"], "profiles": len(s["verdicts"]["by_profile"]),
+                     "stricture": {"rated": s["verdicts"]["stricture_rule"]["rated_likely_trigger"],
+                                   "of": s["verdicts"]["stricture_rule"]["dishes_with_fibre_skins_seeds_nuts"]}},
+        "knowledge": {"dishes": s["knowledge"]["dishes"], "rule_cards": s["knowledge"]["rule_cards"]},
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--patients", type=int, default=200)
@@ -442,7 +464,9 @@ def main() -> None:
     out = ROOT / "evals"
     (out / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     (out / "RESULTS.md").write_text(markdown(summary), encoding="utf-8")
-    print(f"done in {time.time() - started:.0f}s: evals/summary.json, evals/RESULTS.md")
+    web = ROOT / "apps" / "web" / "src" / "data" / "evaluation.json"
+    web.write_text(json.dumps(for_web(summary), indent=2) + "\n", encoding="utf-8")
+    print(f"done in {time.time() - started:.0f}s: evals/summary.json, evals/RESULTS.md, {web.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
