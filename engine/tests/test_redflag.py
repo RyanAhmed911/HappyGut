@@ -17,6 +17,7 @@ POSITIVE = [
     ("high temperature and abdominal cramps", "fever_with_abdominal_pain"),
     ("জ্বর আর পেটে ব্যথা", "fever_with_abdominal_pain"),
     ("jor ase ar pete betha", "fever_with_abdominal_pain"),
+    ("গায়ে জ্বর, সাথে পেটে তীব্র ব্যথা", "fever_with_abdominal_pain"),
     # possible obstruction
     ("I keep vomiting and can't pass gas", "possible_obstruction"),
     ("belly pain and no bowel movement for two days", "possible_obstruction"),
@@ -27,6 +28,7 @@ POSITIVE = [
     ("I fainted after the diarrhoea", "severe_dehydration"),
     ("সারাদিন প্রস্রাব হচ্ছে না", "severe_dehydration"),
     ("pani shunnota hoye geche", "severe_dehydration"),
+    ("I haven't passed urine all day and feel very dizzy", "severe_dehydration"),
 ]
 
 NEGATIVE = [
