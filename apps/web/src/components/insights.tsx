@@ -83,7 +83,7 @@ export function RiskCard({ risk, compact }: { risk: Risk; compact?: boolean }) {
   const text = useDriverText(risk);
   const drivers = risk.drivers.slice(0, compact ? 3 : 6);
   return (
-    <div className="rounded-3xl border border-line/70 bg-card p-5 shadow-card">
+    <div className="rounded-2xl border border-line bg-card p-5 shadow-card">
       <div className="flex items-center gap-4">
         <RiskGauge score={risk.score} level={risk.level} />
         <div className="min-w-0">
@@ -122,7 +122,7 @@ export function RiskCard({ risk, compact }: { risk: Risk; compact?: boolean }) {
       ) : (
         <p className="mt-4 text-sm text-ink-soft">{t("risk.calm")}</p>
       )}
-      {risk.level !== "low" && <p className="mt-4 rounded-2xl bg-paper px-3.5 py-2.5 text-xs text-ink-soft">{t("risk.advice")}</p>}
+      {risk.level !== "low" && <p className="mt-4 rounded-xl bg-paper px-3.5 py-2.5 text-xs text-ink-soft">{t("risk.advice")}</p>}
     </div>
   );
 }
@@ -194,11 +194,11 @@ export function PatternCard({ p, indexName }: { p: Pattern; indexName: string })
   const n = (v: number, d = 0): string => num(v, lang, d);
   const enough = p.label !== "not_enough_data";
   return (
-    <div className="rounded-3xl border border-line/70 bg-card p-4 shadow-card">
+    <div className="rounded-2xl border border-line bg-card p-4 shadow-card">
       <button type="button" className="flex w-full items-start gap-3 text-left" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span
           className={cn(
-            "grid h-11 w-11 shrink-0 place-items-center rounded-2xl",
+            "grid h-11 w-11 shrink-0 place-items-center rounded-xl",
             p.label === "likely_contributor" ? "bg-trigger-soft text-trigger" : p.label === "possible" ? "bg-caution-soft text-caution" : p.label === "not_linked" ? "bg-ok-soft text-ok" : "bg-unsure-soft text-unsure",
           )}
         >
@@ -231,14 +231,14 @@ export function PatternCard({ p, indexName }: { p: Pattern; indexName: string })
       )}
 
       {open && (
-        <dl className="mt-3 space-y-1.5 border-t border-line/70 pt-3 pl-14 text-sm text-ink-soft">
+        <dl className="mt-3 space-y-1.5 border-t border-line pt-3 pl-14 text-sm text-ink-soft">
           {p.avg_index_exposed !== null && p.avg_index_unexposed !== null && (
             <div>{t("patterns.avg_index", { index: indexName, a: n(p.avg_index_exposed, 1), b: n(p.avg_index_unexposed, 1) })}</div>
           )}
           <div>{t(`patterns.sure_${p.label}`)}</div>
           <div>{t(`patterns.window_${p.group}`)}</div>
           {p.overlaps_with.length > 0 && (
-            <div className="rounded-xl bg-saffron-soft px-3 py-2 text-caution">
+            <div className="rounded-lg bg-saffron-soft px-3 py-2 text-caution">
               {t("patterns.overlap", { list: p.overlaps_with.map(name).join(lang === "bn" ? " ও " : ", ") })}
             </div>
           )}

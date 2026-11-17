@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, ImagePlus, LoaderCircle, Moon, RotateCcw, Send, ThumbsDown, ThumbsUp, UtensilsCrossed, X } from "lucide-react";
+import { BookOpen, Camera, ImagePlus, LoaderCircle, Moon, RotateCcw, Send, ShieldCheck, ThumbsDown, ThumbsUp, UtensilsCrossed, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useLang } from "@/components/shell";
 import { Button, Card, Chip, PageTitle } from "@/components/ui";
-import { Escalation, MealResult } from "@/components/verdict";
+import { Escalation, MealResult, VerdictDot } from "@/components/verdict";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { DishesEvent, ExplanationEvent, RedFlag, VerdictEvent } from "@/lib/schemas";
@@ -123,9 +123,9 @@ export function Check() {
   if (stage.name === "working" || stage.name === "done") {
     const { verdict, explanation } = stage;
     return (
-      <div>
+      <div className="mx-auto max-w-3xl">
         <PageTitle title={t("check.result_title")} />
-        {preview && <img src={preview} alt="" className="mb-3 h-40 w-full rounded-3xl object-cover" />}
+        {preview && <img src={preview} alt="" className="mb-3 h-40 w-full rounded-2xl object-cover" />}
 
         {!verdict && (
           <Card className="animate-rise">
@@ -177,7 +177,7 @@ export function Check() {
                 <RotateCcw className="h-4 w-4" />
                 {t("check.another")}
               </Button>
-              <Link to="/diary" className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-[15px] font-semibold text-white shadow-float">
+              <Link to="/diary" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white shadow-float transition hover:bg-brand-deep">
                 <Moon className="h-4 w-4" />
                 {t("check.to_diary")}
               </Link>
@@ -196,17 +196,19 @@ export function Check() {
       <PageTitle title={t("check.title")} subtitle={t("check.subtitle")} />
 
       {stage.name === "message" && (
-        <div className={cn("animate-rise mb-4 flex gap-3 rounded-3xl p-4 text-[15px]", stage.kind === "error" ? "bg-trigger-soft text-trigger" : "bg-unsure-soft text-unsure")}>
+        <div className={cn("animate-rise mb-4 flex gap-3 rounded-2xl p-4 text-[15px]", stage.kind === "error" ? "bg-trigger-soft text-trigger" : "bg-unsure-soft text-unsure")}>
           <UtensilsCrossed className="mt-0.5 h-5 w-5 shrink-0" />
           <p>{stage.text}</p>
         </div>
       )}
 
+      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-6">
+      <div className="lg:col-span-7">
       <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
 
       {preview ? (
-        <div className="relative overflow-hidden rounded-3xl shadow-card">
+        <div className="relative overflow-hidden rounded-2xl shadow-card">
           <img src={preview} alt={t("check.photo_alt")} className="h-56 w-full object-cover" />
           <button type="button" onClick={() => setPhoto(null)} aria-label={t("app.remove")} className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-ink/70 text-white">
             <X className="h-4 w-4" />
@@ -217,7 +219,7 @@ export function Check() {
           <button
             type="button"
             onClick={() => cameraRef.current?.click()}
-            className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-brand/30 bg-brand-tint px-4 py-7 text-brand-deep transition hover:border-brand active:scale-[0.98]"
+            className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-brand/30 bg-brand-tint px-4 py-7 text-brand-deep transition hover:border-brand active:scale-[0.98]"
           >
             <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-white shadow-float">
               <Camera className="h-6 w-6" />
@@ -228,7 +230,7 @@ export function Check() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-line bg-card px-4 py-7 text-ink-soft transition hover:border-brand/50 active:scale-[0.98]"
+            className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-line bg-card px-4 py-7 text-ink-soft transition hover:border-brand/50 active:scale-[0.98]"
           >
             <span className="grid h-14 w-14 place-items-center rounded-full bg-paper-deep">
               <ImagePlus className="h-6 w-6" />
@@ -238,7 +240,7 @@ export function Check() {
           </button>
         </div>
       )}
-      {photoOff && <p className="mt-2 rounded-2xl bg-caution-soft px-3.5 py-2 text-xs text-caution">{t("check.photo_off")}</p>}
+      {photoOff && <p className="mt-2 rounded-xl bg-caution-soft px-3.5 py-2 text-xs text-caution">{t("check.photo_off")}</p>}
 
       <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.1em] text-ink-faint">
         <span className="h-px flex-1 bg-line" />
@@ -254,7 +256,7 @@ export function Check() {
           rows={3}
           maxLength={1000}
           placeholder={t("check.placeholder")}
-          className="w-full resize-none rounded-3xl border border-line bg-card p-4 text-base outline-none transition placeholder:text-ink-faint focus:border-brand focus:ring-4 focus:ring-brand/10"
+          className="w-full resize-none rounded-2xl border border-line bg-card p-4 text-base outline-none transition placeholder:text-ink-faint focus:border-brand focus:ring-4 focus:ring-brand/10"
         />
       </label>
       <div className="mt-2.5 flex flex-wrap gap-2">
@@ -270,6 +272,35 @@ export function Check() {
         {t("check.submit")}
       </Button>
       <p className="mt-3 text-center text-xs text-ink-faint">{t("check.privacy")}</p>
+      </div>
+
+      <aside className="mt-8 lg:col-span-5 lg:mt-0">
+        <Card>
+          <h2 className="font-bold">{t("check.legend_title")}</h2>
+          <ul className="mt-3 space-y-3">
+            {(["likely_ok", "caution", "likely_trigger", "not_sure"] as const).map((v) => (
+              <li key={v} className="flex items-start gap-3">
+                <VerdictDot verdict={v} className="mt-0.5 h-8 w-8" />
+                <div>
+                  <p className="text-sm font-bold leading-snug">{t(`verdict.${v}`)}</p>
+                  <p className="text-[13px] leading-snug text-ink-soft">{t(`check.legend_${v}`)}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 space-y-2 border-t border-line pt-4 text-[13px] text-ink-soft">
+            <p className="flex gap-2">
+              <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+              {t("check.legend_sources")}
+            </p>
+            <p className="flex gap-2">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+              {t("check.legend_engine")}
+            </p>
+          </div>
+        </Card>
+      </aside>
+      </div>
     </div>
   );
 }

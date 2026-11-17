@@ -37,41 +37,48 @@ export function Patterns() {
         }
       />
 
-      <Tabs
-        value={scope}
-        onChange={setScope}
-        tabs={[
-          { value: "all", label: t("patterns.scope_all") },
-          { value: "remission", label: t("patterns.scope_remission") },
-          { value: "flare", label: t("patterns.scope_flare") },
-        ]}
-      />
+      <div className="lg:max-w-md">
+        <Tabs
+          value={scope}
+          onChange={setScope}
+          tabs={[
+            { value: "all", label: t("patterns.scope_all") },
+            { value: "remission", label: t("patterns.scope_remission") },
+            { value: "flare", label: t("patterns.scope_flare") },
+          ]}
+        />
+      </div>
 
-      <div className="mt-5">
+      <div className="mt-5 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-6">
         {patterns.isLoading ? (
-          <div className="space-y-3">
+          <div className="space-y-3 lg:col-span-12">
             <Skeleton className="h-28" />
             <Skeleton className="h-28" />
             <Skeleton className="h-28" />
           </div>
         ) : patterns.isError || !data ? (
-          <LoadError onRetry={() => void patterns.refetch()} />
+          <div className="lg:col-span-12">
+            <LoadError onRetry={() => void patterns.refetch()} />
+          </div>
         ) : !data.enough_data ? (
+          <div className="lg:col-span-7">
           <Empty icon={<NotebookPen className="h-8 w-8" />} title={t("patterns.need_more_title")}>
             <p>{t(scope === "all" ? "patterns.need_more" : "patterns.need_more_scope", { have: num(data.days_logged, lang), need: num(data.min_days, lang) })}</p>
             <Link to="/diary" className="mt-3 inline-block font-semibold text-brand">
               {t("today.diary_cta")} →
             </Link>
           </Empty>
+          </div>
         ) : (
           <>
-            <Card className="mb-5 p-4">
+            <Card className="mb-5 p-4 lg:col-span-5 lg:col-start-8 lg:row-start-1">
               <div className="mb-1 flex items-center justify-between">
                 <h2 className="font-bold">{t("patterns.graph_title")}</h2>
                 <Share2 className="h-4 w-4 text-ink-faint" />
               </div>
               <GutGraph patterns={data.results} name={profile.data?.display_name ?? ""} />
             </Card>
+            <div className="lg:col-span-7 lg:col-start-1 lg:row-span-2 lg:row-start-1">
             <p className="mb-1 text-sm text-ink-faint">{t("patterns.based_on", { days: num(data.days_logged, lang) })}</p>
             {ORDER.map((label) => {
               const items = data.results.filter((r) => r.label === label);
@@ -89,18 +96,19 @@ export function Patterns() {
                 </section>
               );
             })}
+            </div>
           </>
+        )}
+
+        {scope === "all" && risk.data && (
+          <div className="lg:col-span-5 lg:col-start-8 lg:[&>div:first-child]:mt-0">
+            <SectionTitle>{t("today.outlook")}</SectionTitle>
+            <RiskCard risk={risk.data} compact />
+          </div>
         )}
       </div>
 
-      {scope === "all" && risk.data && (
-        <>
-          <SectionTitle>{t("today.outlook")}</SectionTitle>
-          <RiskCard risk={risk.data} />
-        </>
-      )}
-
-      <p className="mt-8 rounded-3xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("patterns.footer")}</p>
+      <p className="mt-8 rounded-2xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("patterns.footer")}</p>
 
       <Sheet open={how} onOpenChange={setHow} title={t("patterns.how_title")}>
         <ol className="space-y-3 text-[15px] text-ink-soft">

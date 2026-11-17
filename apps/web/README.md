@@ -19,7 +19,7 @@ cd apps/web
 npm install
 npm run dev
 ```
-Open http://localhost:5173 and sign in with a test account (`nusrat@`, `rafi@` or `ayesha@happygut.test`; passwords come from `TEST_PASSWORD_*` in `.env`, or are printed by the backend at start-up when not set). A one-time notice explains that the account holds sample data and that HappyGut is a competition prototype, not for medical decisions; no screen carries a "simulated" label after that (the printed doctor's report keeps one footer line). The dev server proxies `/api` to the backend on port 8000. Add `GEMINI_API_KEY` to `.env` to turn on photo recognition and model-written explanations; without it, typed meals still work and explanations use the cited template.
+Open http://localhost:5173 and sign in with a test account (`nusrat@`, `rafi@` or `ayesha@happygut.test`; passwords come from `TEST_PASSWORD_*` in `.env`, or are printed by the backend at start-up when not set). A one-time notice explains that the account holds sample data and that HappyGut is a competition prototype, not for medical decisions; no screen carries a "simulated" label after that (the printed doctor's report keeps one footer line). `/about` ("How it works") is open without sign-in: it shows the flow from plate to verdict, the safeguards, where the data comes from and the measured results (the evaluation's results page also says its cohort is simulated). The dev server proxies `/api` to the backend on port 8000. Add `GEMINI_API_KEY` to `.env` to turn on photo recognition and model-written explanations; without it, typed meals still work and explanations use the cited template.
 
 ## Screens
 | Route | What it shows |

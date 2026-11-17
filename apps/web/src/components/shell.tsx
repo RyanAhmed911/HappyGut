@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Activity, FileText, History, House, NotebookPen, Salad, ScanLine, Settings, Sparkles } from "lucide-react";
+import { Activity, FileText, History, House, Info, LogOut, NotebookPen, Salad, ScanLine, Settings, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, NavLink, Outlet } from "react-router";
-import { api } from "@/lib/api";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { api, auth } from "@/lib/api";
+import { isoDay, longDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { DataNotice } from "./notice";
 import { useDiaryReminder } from "@/lib/reminder";
@@ -18,15 +19,15 @@ export function useProfile() {
   return useQuery({ queryKey: ["me"], queryFn: api.me, staleTime: 60_000 });
 }
 
-export function Logo({ className }: { className?: string }) {
+export function Logo({ className, inverse }: { className?: string; inverse?: boolean }) {
   return (
     <span className={cn("inline-flex items-center gap-2 font-bold tracking-tight", className)}>
       <svg viewBox="0 0 64 64" className="h-8 w-8 shrink-0" aria-hidden>
-        <rect width="64" height="64" rx="18" fill="var(--color-brand)" />
+        <rect width="64" height="64" rx="16" fill={inverse ? "#ffffff" : "var(--color-brand)"} />
         <path
           d="M20 22c0-4 3-7 7-7h10c4 0 7 3 7 7s-3 7-7 7H27c-2.2 0-4 1.8-4 4s1.8 4 4 4h10c4 0 7 3 7 7s-3 7-7 7H24"
           fill="none"
-          stroke="var(--color-paper)"
+          stroke={inverse ? "var(--color-brand)" : "#ffffff"}
           strokeWidth="5"
           strokeLinecap="round"
         />
@@ -41,7 +42,7 @@ export function LangToggle({ className }: { className?: string }) {
   const lang = useLang();
   const { t } = useTranslation();
   return (
-    <div role="group" aria-label={t("settings.language")} className={cn("inline-flex rounded-full border border-line bg-card p-0.5 text-sm font-semibold", className)}>
+    <div role="group" aria-label={t("settings.language")} className={cn("inline-flex rounded-lg border border-line bg-card p-0.5 text-[13px] font-semibold", className)}>
       {(["bn", "en"] as const).map((code) => (
         <button
           key={code}
@@ -51,7 +52,7 @@ export function LangToggle({ className }: { className?: string }) {
             setLang(code);
             void api.updateMe({ language: code }).catch(() => undefined);
           }}
-          className={cn("rounded-full px-3 py-1 transition", lang === code ? "bg-brand text-white" : "text-ink-soft hover:text-ink")}
+          className={cn("rounded-md px-2.5 py-1 transition", lang === code ? "bg-brand text-white" : "text-ink-soft hover:text-ink")}
         >
           {code === "bn" ? "বাংলা" : "EN"}
         </button>
@@ -60,17 +61,79 @@ export function LangToggle({ className }: { className?: string }) {
   );
 }
 
-const NAV = [
-  { to: "/", icon: House, key: "today", end: true },
-  { to: "/check", icon: ScanLine, key: "check" },
-  { to: "/diary", icon: NotebookPen, key: "diary" },
-  { to: "/patterns", icon: Sparkles, key: "patterns" },
-  { to: "/gut", icon: Activity, key: "gut" },
-  { to: "/foods", icon: Salad, key: "foods" },
-  { to: "/history", icon: History, key: "history" },
-  { to: "/report", icon: FileText, key: "report" },
+type NavItem = { to: string; icon: typeof House; key: string; end?: boolean };
+const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
+  {
+    key: "daily",
+    items: [
+      { to: "/", icon: House, key: "today", end: true },
+      { to: "/check", icon: ScanLine, key: "check" },
+      { to: "/diary", icon: NotebookPen, key: "diary" },
+    ],
+  },
+  {
+    key: "insights",
+    items: [
+      { to: "/patterns", icon: Sparkles, key: "patterns" },
+      { to: "/gut", icon: Activity, key: "gut" },
+      { to: "/foods", icon: Salad, key: "foods" },
+    ],
+  },
+  {
+    key: "records",
+    items: [
+      { to: "/history", icon: History, key: "history" },
+      { to: "/report", icon: FileText, key: "report" },
+    ],
+  },
+];
+const FOOTER_NAV: NavItem[] = [
+  { to: "/about", icon: Info, key: "about" },
   { to: "/settings", icon: Settings, key: "settings" },
-] as const;
+];
+
+/** Pages that use the full desktop width; the rest read better as a single column. */
+const WIDE = new Set(["/", "/patterns", "/gut", "/foods", "/check"]);
+
+export function signOut(): void {
+  auth.clear();
+  window.dispatchEvent(new Event("hg:signed-out"));
+}
+
+function initials(name: string): string {
+  return Array.from(name.trim())[0]?.toUpperCase() ?? "?";
+}
+
+export function Avatar({ name, className }: { name: string; className?: string }) {
+  return (
+    <span aria-hidden className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-sm font-bold text-white", className)}>
+      {initials(name)}
+    </span>
+  );
+}
+
+function SideLink({ to, icon: Icon, label, end }: { to: string; icon: typeof House; label: string; end?: boolean }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition",
+          isActive ? "bg-brand-tint text-brand-deep" : "text-ink-soft hover:bg-paper hover:text-ink",
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          <span aria-hidden className={cn("absolute inset-y-1.5 left-0 w-[3px] rounded-full transition", isActive ? "bg-brand" : "bg-transparent")} />
+          <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-brand" : "text-ink-faint group-hover:text-ink-soft")} strokeWidth={2.1} />
+          {label}
+        </>
+      )}
+    </NavLink>
+  );
+}
 
 function BottomLink({ to, icon: Icon, label, end }: { to: string; icon: typeof House; label: string; end?: boolean }) {
   return (
@@ -89,62 +152,113 @@ function BottomLink({ to, icon: Icon, label, end }: { to: string; icon: typeof H
 
 export function AppShell() {
   const { t } = useTranslation();
+  const lang = useLang();
   const profile = useProfile();
+  const { pathname } = useLocation();
   useDiaryReminder(profile.data?.reminder_time);
+  const me = profile.data;
+  const dx = me ? t(`today.dx_${me.diagnosis}`) : "";
+  const wide = WIDE.has(pathname);
 
   return (
     <div className="min-h-dvh">
       {/* Desktop side rail */}
-      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line/70 bg-card/70 px-4 py-6 backdrop-blur lg:flex">
-        <Link to="/" className="px-2">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-card lg:flex">
+        <Link to="/" className="flex h-16 items-center px-5">
           <Logo />
         </Link>
-        <nav className="mt-8 flex flex-1 flex-col gap-1">
-          {NAV.map(({ to, icon: Icon, key, ...rest }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={"end" in rest}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-semibold transition",
-                  isActive ? "bg-brand text-white shadow-float" : "text-ink-soft hover:bg-paper-deep/70",
-                )
-              }
-            >
-              <Icon className="h-5 w-5" />
-              {t(`nav.${key}`)}
-            </NavLink>
+        <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-3 pt-2">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.key}>
+              <p className="mb-1 px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-faint">{t(`nav.group_${group.key}`)}</p>
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => (
+                  <SideLink key={item.to} to={item.to} icon={item.icon} label={t(`nav.${item.key}`)} end={item.end} />
+                ))}
+              </div>
+            </div>
           ))}
+          <div className="mt-auto flex flex-col gap-0.5 border-t border-line pt-3">
+            {FOOTER_NAV.map((item) => (
+              <SideLink key={item.to} to={item.to} icon={item.icon} label={t(`nav.${item.key}`)} />
+            ))}
+          </div>
         </nav>
-        <div className="px-1">
-          <LangToggle />
-        </div>
+        {me && (
+          <div className="flex items-center gap-3 border-t border-line px-4 py-3">
+            <Avatar name={me.display_name} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold leading-tight">{me.display_name}</p>
+              <p className="truncate text-xs text-ink-faint">{dx}</p>
+            </div>
+            <button
+              type="button"
+              onClick={signOut}
+              title={t("settings.sign_out")}
+              aria-label={t("settings.sign_out")}
+              className="rounded-lg p-2 text-ink-faint transition hover:bg-paper hover:text-ink"
+            >
+              <LogOut className="h-[18px] w-[18px]" />
+            </button>
+          </div>
+        )}
       </aside>
 
-      {/* Phone top bar */}
-      <header className="no-print sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-line/60 bg-paper/85 px-4 py-2.5 backdrop-blur lg:hidden">
-        <Link to="/">
-          <Logo className="[&>span]:text-lg" />
-        </Link>
-        <LangToggle />
+      {/* Top bar: brand on phones, context and actions on desktop */}
+      <header className="no-print sticky top-0 z-20 border-b border-line bg-paper/85 backdrop-blur lg:ml-64">
+        <div className="flex h-14 items-center justify-between gap-3 px-4 lg:h-16 lg:px-8">
+          <Link to="/" className="lg:hidden">
+            <Logo className="[&>span]:text-lg" />
+          </Link>
+          <div className="hidden min-w-0 items-center gap-3 lg:flex">
+            <p className="truncate text-sm font-medium text-ink-soft">{longDate(isoDay(new Date()), lang)}</p>
+            {me && (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                  me.state === "flare" ? "bg-trigger-soft text-trigger" : "bg-ok-soft text-ok",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", me.state === "flare" ? "bg-trigger" : "bg-ok")} />
+                {t(`nav.state_${me.state}`)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2.5">
+            {pathname !== "/check" && (
+              <Link
+                to="/check"
+                className="hidden h-9 items-center gap-2 rounded-lg bg-brand px-3.5 text-sm font-semibold text-white shadow-float transition hover:bg-brand-deep lg:inline-flex"
+              >
+                <ScanLine className="h-4 w-4" strokeWidth={2.4} />
+                {t("nav.check")}
+              </Link>
+            )}
+            <LangToggle />
+            {me && (
+              <Link to="/settings" aria-label={t("nav.settings")} className="lg:hidden">
+                <Avatar name={me.display_name} className="h-8 w-8 text-[13px]" />
+              </Link>
+            )}
+          </div>
+        </div>
       </header>
 
-      {profile.data?.is_synthetic && <DataNotice />}
+      {me?.is_synthetic && <DataNotice />}
 
       <main className="lg:pl-64">
-        <div className="mx-auto w-full max-w-3xl px-4 pb-28 pt-5 lg:px-8 lg:pb-12 lg:pt-10">
+        <div className={cn("mx-auto w-full px-4 pb-28 pt-5 lg:px-8 lg:pb-14 lg:pt-8", wide ? "max-w-6xl" : pathname.startsWith("/diary") ? "max-w-2xl" : "max-w-3xl")}>
           <Outlet />
         </div>
       </main>
 
       {/* Phone bottom navigation with the meal check in the middle */}
-      <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-card/95 backdrop-blur lg:hidden">
+      <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-md items-end px-2">
           <BottomLink to="/" end icon={House} label={t("nav.today")} />
           <BottomLink to="/diary" icon={NotebookPen} label={t("nav.diary")} />
           <NavLink to="/check" className="-mt-6 flex flex-1 flex-col items-center gap-0.5 pb-2 text-[11px] font-semibold text-brand" aria-label={t("nav.check")}>
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-white shadow-float ring-4 ring-paper">
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-white shadow-raised ring-4 ring-paper">
               <ScanLine className="h-6 w-6" strokeWidth={2.4} />
             </span>
             <span>{t("nav.check_short")}</span>
@@ -171,7 +285,7 @@ export function PageLoading({ children }: { children?: ReactNode }) {
 export function LoadError({ onRetry }: { onRetry: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="rounded-3xl border border-trigger/20 bg-trigger-soft p-5 text-sm text-trigger">
+    <div className="rounded-2xl border border-trigger/20 bg-trigger-soft p-5 text-sm text-trigger">
       <p className="font-semibold">{t("app.error")}</p>
       <button type="button" className="mt-2 font-semibold underline" onClick={onRetry}>
         {t("app.retry")}

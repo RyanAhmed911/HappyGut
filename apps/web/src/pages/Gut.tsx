@@ -21,7 +21,7 @@ function useRefreshPersonal(): () => void {
 
 function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-line/70 bg-card p-3.5 shadow-card">
+    <div className="rounded-xl border border-line bg-card p-3.5 shadow-card">
       <p className="text-xs font-semibold text-ink-faint">{label}</p>
       <p className="tabular mt-0.5 text-2xl font-bold">{value}</p>
       {sub && <p className="text-xs text-ink-faint">{sub}</p>}
@@ -35,7 +35,7 @@ function SummaryTiles({ s, indexName }: { s: PeriodSummary; indexName: string })
   const n = (v: number | null | undefined, d = 0): string => (v === null || v === undefined ? "–" : num(v, lang, d));
   if (!s.days) return <Empty title={t("gut.no_days_of_kind")} />;
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-2">
       <StatTile label={t("gut.stat_days")} value={n(s.days)} sub={t("gut.stat_periods", { n: n(s.periods) })} />
       <StatTile label={t("gut.stat_avg", { index: indexName })} value={n(s.avg_index, 1)} sub={t("gut.stat_worst", { n: n(s.worst_index) })} />
       <StatTile label={t("gut.stat_stools")} value={n(s.avg_stools, 1)} />
@@ -154,8 +154,10 @@ export function Gut() {
     <div>
       <PageTitle title={t("gut.title")} subtitle={t("gut.subtitle")} />
 
+      <div className="lg:grid lg:grid-cols-12 lg:gap-x-6">
+      <div className="lg:col-span-8">
       {/* Current state */}
-      <div className={cn("mb-4 flex items-center gap-3 rounded-3xl p-4", data.current_state === "flare" ? "bg-trigger text-white" : "bg-ok-soft text-ok")}>
+      <div className={cn("mb-4 flex items-center gap-3 rounded-2xl p-4", data.current_state === "flare" ? "bg-trigger text-white" : "bg-ok-soft text-ok")}>
         <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-full", data.current_state === "flare" ? "bg-white/20" : "bg-ok text-white")}>
           <KindIcon k={data.current_state} className="h-5 w-5" />
         </span>
@@ -210,7 +212,10 @@ export function Gut() {
         )}
       </Card>
 
+      </div>
+
       {/* Remission vs flare, kept apart */}
+      <div className="lg:col-span-4 lg:[&>div:first-child]:mt-0">
       <SectionTitle>{t("gut.compare")}</SectionTitle>
       <Tabs
         value={kind}
@@ -257,7 +262,10 @@ export function Gut() {
         </>
       )}
 
+      </div>
+
       {/* Period list */}
+      <div className="lg:col-span-6">
       <SectionTitle
         action={
           <button type="button" className="text-sm font-semibold text-brand" onClick={() => setMarkingFlare(true)}>
@@ -295,8 +303,10 @@ export function Gut() {
         <Empty title={t("gut.keep_logging", { need: n(data.min_days) })} />
       )}
 
+      </div>
+
       {/* Stressful periods */}
-      <div id="periods" className="scroll-mt-20">
+      <div id="periods" className="scroll-mt-20 lg:col-span-6">
         <SectionTitle
           action={
             <button type="button" className="text-sm font-semibold text-brand" onClick={() => setAddingPeriod(true)}>
@@ -338,7 +348,9 @@ export function Gut() {
         )}
       </div>
 
-      <p className="mt-8 rounded-3xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("gut.footer", { index: data.index_name })}</p>
+      </div>
+
+      <p className="mt-8 rounded-2xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("gut.footer", { index: data.index_name })}</p>
 
       <AddStressPeriod open={addingPeriod} onOpenChange={setAddingPeriod} today={today} />
       <MarkFlare open={markingFlare} onOpenChange={setMarkingFlare} today={today} />

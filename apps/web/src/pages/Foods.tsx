@@ -20,7 +20,7 @@ function GuideRow({ item }: { item: GuideItem }) {
   const name = lang === "bn" ? item.name_bn : item.name_en;
   const alt = item.alternative ? (lang === "bn" ? item.alternative.name_bn : item.alternative.name_en) : null;
   return (
-    <li className="flex items-start gap-3 px-4 py-3">
+    <li className="flex items-start gap-3 bg-card px-4 py-3">
       <VerdictDot verdict={item.verdict} className="mt-0.5" />
       <div className="min-w-0 flex-1">
         <p className="font-bold leading-snug">{name}</p>
@@ -73,24 +73,28 @@ export function Foods() {
   return (
     <div>
       <PageTitle title={t("foods.title")} subtitle={t("foods.subtitle")} />
-      <Tabs value={view} onChange={setView} tabs={[{ value: "guide", label: t("foods.tab_guide") }, { value: "plan", label: t("foods.tab_plan") }]} />
+      <div className="lg:max-w-sm">
+        <Tabs value={view} onChange={setView} tabs={[{ value: "guide", label: t("foods.tab_guide") }, { value: "plan", label: t("foods.tab_plan") }]} />
+      </div>
 
       {view === "guide" ? (
         <div className="mt-4">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
+          <div className="lg:flex lg:items-center lg:gap-4">
+          <div className="relative lg:w-80 lg:shrink-0">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("foods.search")} className={cn(inputClass, "pl-10")} />
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 lg:mt-0">
             {FILTERS.map((f) => (
               <Chip key={f} selected={filter === f} className="min-h-9 text-[13px]" onClick={() => setFilter(f)}>
                 {f === "all" ? t("foods.all") : t(`verdict.${f}`)} · {num(counts[f] ?? 0, lang)}
               </Chip>
             ))}
           </div>
+          </div>
           {shown.length ? (
-            <Card className="mt-4 p-0">
-              <ul className="divide-y divide-line/70">
+            <Card className="mt-4 overflow-hidden p-0">
+              <ul className="grid gap-px bg-line md:grid-cols-2 xl:grid-cols-3">
                 {shown.map((item) => (
                   <GuideRow key={item.dish_id} item={item} />
                 ))}
@@ -124,8 +128,9 @@ export function Foods() {
           <Empty title={t("foods.plan_none")} />
         </div>
       ) : (
-        <div className="mt-4 space-y-3">
-          <p className="text-sm text-ink-soft">{t("foods.plan_intro", { n: num(plan.data.pool_size, lang) })}</p>
+        <div className="mt-4">
+          <p className="mb-3 text-sm text-ink-soft">{t("foods.plan_intro", { n: num(plan.data.pool_size, lang) })}</p>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {plan.data.days.map((day) => (
             <Card key={day.date} className="p-4">
               <p className="mb-2 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{longDate(day.date, lang)}</p>
@@ -145,10 +150,11 @@ export function Foods() {
               </dl>
             </Card>
           ))}
+          </div>
         </div>
       )}
 
-      <p className="mt-6 rounded-3xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("foods.footer")}</p>
+      <p className="mt-6 rounded-2xl bg-paper-deep/70 p-4 text-sm text-ink-soft">{t("foods.footer")}</p>
     </div>
   );
 }

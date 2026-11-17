@@ -27,9 +27,9 @@ export function DataNotice() {
           onEscapeKeyDown={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
-          className="fixed inset-x-4 top-1/2 z-[70] mx-auto max-w-md -translate-y-1/2 animate-pop rounded-[28px] bg-card p-6 shadow-2xl"
+          className="fixed inset-x-4 top-1/2 z-[70] mx-auto max-w-md -translate-y-1/2 animate-pop rounded-2xl bg-card p-6 shadow-2xl"
         >
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-soft text-brand-deep">
+          <span className="grid h-12 w-12 place-items-center rounded-xl bg-brand-soft text-brand-deep">
             <Info className="h-6 w-6" />
           </span>
           <Dialog.Title className="mt-4 text-2xl font-bold">{t("notice.title")}</Dialog.Title>

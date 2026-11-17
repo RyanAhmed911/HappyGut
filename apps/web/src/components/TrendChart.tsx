@@ -54,7 +54,7 @@ export default function TrendChart({ days, periods, activeAt, height = 220 }: Tr
               const row = active ? (payload?.[0]?.payload as { date: string; index: number } | undefined) : undefined;
               if (!row) return null;
               return (
-                <div className="rounded-xl border border-line bg-card px-3 py-2 text-xs shadow-card">
+                <div className="rounded-lg border border-line bg-card px-3 py-2 text-xs shadow-card">
                   <p className="font-semibold">{shortDate(row.date, lang)}</p>
                   <p className="text-ink-soft">{t("gut.score_value", { value: num(row.index, lang) })}</p>
                 </div>

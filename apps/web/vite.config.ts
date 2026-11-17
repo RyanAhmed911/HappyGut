@@ -18,7 +18,7 @@ export default defineConfig({
         description: "A chronic-care companion for Crohn's disease and ulcerative colitis.",
         lang: "bn",
         theme_color: "#0f5c4d",
-        background_color: "#f6f3ec",
+        background_color: "#f4f6f4",
         display: "standalone",
         start_url: "/",
         icons: [

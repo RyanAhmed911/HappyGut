@@ -55,7 +55,7 @@ export function VerdictHero({ verdict, confidence, note }: { verdict: VerdictCod
   const lang = useLang();
   const Icon = ICON[verdict];
   return (
-    <div className={cn("animate-pop relative overflow-hidden rounded-[28px] p-6", SURFACE[verdict])}>
+    <div className={cn("animate-pop relative overflow-hidden rounded-2xl p-6", SURFACE[verdict])}>
       <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
       <div className="pointer-events-none absolute -bottom-14 right-10 h-32 w-32 rounded-full bg-white/10" />
       <div className="relative flex items-center gap-4">
@@ -72,7 +72,7 @@ export function VerdictHero({ verdict, confidence, note }: { verdict: VerdictCod
           </p>
         </div>
       </div>
-      {note && <p className="relative mt-4 rounded-xl bg-black/10 px-3 py-2 text-xs">{note}</p>}
+      {note && <p className="relative mt-4 rounded-lg bg-black/10 px-3 py-2 text-xs">{note}</p>}
     </div>
   );
 }
@@ -105,7 +105,7 @@ function CitationRow({ c }: { c: Citation }) {
   const lang = useLang();
   if (c.type === "guideline") {
     return (
-      <li className="rounded-2xl bg-brand-tint p-3">
+      <li className="rounded-xl bg-brand-tint p-3">
         <p className="flex items-center gap-1.5 text-xs font-bold text-brand-deep">
           <BookOpen className="h-3.5 w-3.5" />
           {t("check.cite_guideline")}
@@ -125,7 +125,7 @@ function CitationRow({ c }: { c: Citation }) {
   if (c.type === "personal") {
     const key = c.tolerated ? "check.personal_tolerated" : (c.probability ?? 0) > 0.8 ? "check.personal_linked" : "check.personal_unclear";
     return (
-      <li className="rounded-2xl bg-saffron-soft p-3">
+      <li className="rounded-xl bg-saffron-soft p-3">
         <p className="flex items-center gap-1.5 text-xs font-bold text-caution">
           <User className="h-3.5 w-3.5" />
           {t("check.cite_personal")}
@@ -137,7 +137,7 @@ function CitationRow({ c }: { c: Citation }) {
     );
   }
   return (
-    <li className="rounded-2xl bg-paper p-3">
+    <li className="rounded-xl bg-paper p-3">
       <p className="flex items-center gap-1.5 text-xs font-bold text-ink-soft">
         <FlaskConical className="h-3.5 w-3.5" />
         {t("check.cite_composition")}
@@ -163,7 +163,7 @@ export function DishCard({ dish, explanation }: { dish: DishVerdict; explanation
   const [open, setOpen] = useState(false);
   const citations = explanation?.citations ?? [];
   return (
-    <div className={cn("animate-rise rounded-3xl border bg-card p-5 shadow-card", SOFT[dish.verdict].split(" ").at(-1))}>
+    <div className={cn("animate-rise rounded-2xl border bg-card p-5 shadow-card", SOFT[dish.verdict].split(" ").at(-1))}>
       <div className="flex items-start gap-3">
         <VerdictDot verdict={dish.verdict} />
         <div className="min-w-0 flex-1">
@@ -177,7 +177,7 @@ export function DishCard({ dish, explanation }: { dish: DishVerdict; explanation
       <EvidenceBar dish={dish} />
 
       {dish.alternative?.name && (
-        <div className="mt-4 flex items-center gap-2.5 rounded-2xl bg-ok-soft px-3.5 py-2.5 text-sm">
+        <div className="mt-4 flex items-center gap-2.5 rounded-xl bg-ok-soft px-3.5 py-2.5 text-sm">
           <Sparkles className="h-4 w-4 shrink-0 text-ok" />
           <span>
             <span className="text-ink-soft">{t("check.instead_try")} </span>
@@ -192,7 +192,7 @@ export function DishCard({ dish, explanation }: { dish: DishVerdict; explanation
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="flex w-full items-center justify-between rounded-xl py-1.5 text-sm font-semibold text-brand"
+            className="flex w-full items-center justify-between rounded-lg py-1.5 text-sm font-semibold text-brand"
           >
             {t("check.why_evidence", { n: num(citations.length, lang) })}
             <ChevronDown className={cn("h-4 w-4 transition", open && "rotate-180")} />
@@ -211,7 +211,7 @@ export function MealResult({ verdict, explanation }: { verdict: VerdictEvent; ex
     <div className="space-y-3">
       <VerdictHero verdict={verdict.verdict} confidence={verdict.confidence} note={verdict.note} />
       {question && (
-        <div className="animate-rise flex gap-3 rounded-3xl border border-unsure/20 bg-unsure-soft p-4 text-[15px]">
+        <div className="animate-rise flex gap-3 rounded-2xl border border-unsure/20 bg-unsure-soft p-4 text-[15px]">
           <CircleHelp className="mt-0.5 h-5 w-5 shrink-0 text-unsure" />
           <div>
             <p className="font-semibold">{t("check.we_need_to_know")}</p>
@@ -231,7 +231,7 @@ export function MealResult({ verdict, explanation }: { verdict: VerdictEvent; ex
 export function Escalation({ flag, onClose }: { flag: RedFlag; onClose?: () => void }) {
   const { t } = useTranslation();
   return (
-    <div role="alertdialog" aria-labelledby="escalation-title" className="animate-pop overflow-hidden rounded-[28px] bg-trigger text-white shadow-2xl">
+    <div role="alertdialog" aria-labelledby="escalation-title" className="animate-pop overflow-hidden rounded-2xl bg-trigger text-white shadow-2xl">
       <div className="p-6">
         <span className="grid h-14 w-14 place-items-center rounded-full bg-white/20">
           <ShieldAlert className="h-8 w-8" />
@@ -241,7 +241,7 @@ export function Escalation({ flag, onClose }: { flag: RedFlag; onClose?: () => v
         </h2>
         <p className="mt-2 text-[15px] leading-relaxed text-white/90">{flag.message}</p>
         {flag.reasons.length > 0 && (
-          <ul className="mt-4 space-y-1.5 rounded-2xl bg-black/15 p-4 text-sm">
+          <ul className="mt-4 space-y-1.5 rounded-xl bg-black/15 p-4 text-sm">
             <li className="text-xs font-bold uppercase tracking-wide text-white/70">{t("redflag.because")}</li>
             {flag.reasons.map((r) => (
               <li key={r} className="flex gap-2">
@@ -253,7 +253,7 @@ export function Escalation({ flag, onClose }: { flag: RedFlag; onClose?: () => v
         )}
       </div>
       <div className="space-y-2.5 bg-black/15 p-5">
-        <a href="tel:999" className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white text-base font-bold text-trigger active:scale-[0.98]">
+        <a href="tel:999" className="flex h-14 items-center justify-center gap-2 rounded-xl bg-white text-base font-bold text-trigger active:scale-[0.98]">
           <Phone className="h-5 w-5" />
           {t("redflag.call_999")}
         </a>

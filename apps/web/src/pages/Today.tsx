@@ -8,11 +8,12 @@ import { Card, SectionTitle, Skeleton } from "@/components/ui";
 import { VerdictDot } from "@/components/verdict";
 import { api } from "@/lib/api";
 import { dayOfTimestamp, longDate, num, shortDate, timeOfDay } from "@/lib/format";
-import { keys, useToday } from "@/lib/hooks";
+import { keys, useDishName, useToday } from "@/lib/hooks";
 
 export function Today() {
   const { t } = useTranslation();
   const lang = useLang();
+  const dishName = useDishName(lang);
   const profile = useProfile();
   const today = useToday();
   const risk = useQuery({ queryKey: keys.risk, queryFn: api.risk });
@@ -32,8 +33,8 @@ export function Today() {
     <div>
       <header className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-ink-faint">{today ? longDate(today, lang) : " "}</p>
-          <h1 className="mt-0.5 text-[28px] font-bold tracking-tight lg:text-[34px]">
+          <p className="text-sm font-semibold text-ink-faint lg:hidden">{today ? longDate(today, lang) : " "}</p>
+          <h1 className="mt-0.5 text-[26px] font-bold tracking-tight lg:mt-0 lg:text-[30px]">
             {t(`today.greeting_${greeting}`, { name: profile.data?.display_name ?? "" })}
           </h1>
           <p className="mt-1 text-[15px] text-ink-soft">
@@ -42,8 +43,10 @@ export function Today() {
         </div>
       </header>
 
+      <div className="lg:grid lg:grid-cols-12 lg:gap-x-6">
+      <div className="lg:col-span-8">
       {upcoming && risk.data?.level !== "low" && (
-        <Link to="/gut" className="mb-4 flex items-center gap-3 rounded-3xl bg-brand p-4 text-white shadow-float">
+        <Link to="/gut" className="mb-4 flex items-center gap-3 rounded-2xl bg-brand p-4 text-white shadow-float">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/15">
             <CalendarClock className="h-5 w-5" />
           </span>
@@ -56,14 +59,14 @@ export function Today() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Link to="/check" className="group relative overflow-hidden rounded-3xl bg-ink p-5 text-white shadow-card transition active:scale-[0.99]">
+        <Link to="/check" className="group relative overflow-hidden rounded-2xl bg-ink p-5 text-white shadow-card transition active:scale-[0.99]">
           <div aria-hidden className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-brand/60" />
           <div className="relative">
             <div className="flex gap-2">
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15">
                 <Camera className="h-5 w-5" />
               </span>
-              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/15">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15">
                 <Type className="h-5 w-5" />
               </span>
             </div>
@@ -76,8 +79,8 @@ export function Today() {
           </div>
         </Link>
 
-        <Link to="/diary" className="group rounded-3xl border border-line/70 bg-card p-5 shadow-card transition active:scale-[0.99]">
-          <span className={`grid h-10 w-10 place-items-center rounded-2xl ${entry ? "bg-ok-soft text-ok" : "bg-brand-soft text-brand-deep"}`}>
+        <Link to="/diary" className="group rounded-2xl border border-line bg-card p-5 shadow-card transition active:scale-[0.99]">
+          <span className={`grid h-10 w-10 place-items-center rounded-xl ${entry ? "bg-ok-soft text-ok" : "bg-brand-soft text-brand-deep"}`}>
             {entry ? <CircleCheck className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </span>
           <p className="mt-4 text-xl font-bold">{t("today.diary_title")}</p>
@@ -97,8 +100,18 @@ export function Today() {
         </Link>
       </div>
 
-      <SectionTitle>{t("today.outlook")}</SectionTitle>
-      {risk.isLoading ? <Skeleton className="h-44" /> : risk.isError ? <LoadError onRetry={() => void risk.refetch()} /> : risk.data && <RiskCard risk={risk.data} compact />}
+      </div>
+
+      <aside className="lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1">
+        <div className="lg:hidden">
+          <SectionTitle>{t("today.outlook")}</SectionTitle>
+        </div>
+        <div className="lg:sticky lg:top-24">
+          {risk.isLoading ? <Skeleton className="h-44" /> : risk.isError ? <LoadError onRetry={() => void risk.refetch()} /> : risk.data && <RiskCard risk={risk.data} compact />}
+        </div>
+      </aside>
+
+      <div className="lg:col-span-8">
 
       <SectionTitle
         action={
@@ -138,10 +151,10 @@ export function Today() {
       ) : recent.length ? (
         <Card className="divide-y divide-line/70 p-0">
           {recent.map((c) => (
-            <Link key={c.id} to={`/history/${c.id}`} className="flex items-center gap-3 px-4 py-3 first:rounded-t-3xl last:rounded-b-3xl hover:bg-paper/60">
+            <Link key={c.id} to={`/history/${c.id}`} className="flex items-center gap-3 px-4 py-3 first:rounded-t-2xl last:rounded-b-2xl hover:bg-paper/60">
               <VerdictDot verdict={c.verdict} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-semibold">{c.dishes.map((d) => d.name).join(", ")}</span>
+                <span className="block truncate font-semibold">{c.dishes.map(dishName).join(", ")}</span>
                 <span className="text-xs text-ink-faint">
                   {shortDate(dayOfTimestamp(c.created_at), lang)} · {timeOfDay(c.created_at, lang)} · {t(`verdict.${c.verdict}`)}
                 </span>
@@ -154,6 +167,7 @@ export function Today() {
         <Card className="text-sm text-ink-soft">{t("today.no_checks")}</Card>
       )}
 
+      <div className="lg:hidden">
       <SectionTitle>{t("today.more")}</SectionTitle>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {(
@@ -164,13 +178,16 @@ export function Today() {
             { to: "/settings", icon: Settings, key: "settings" },
           ] as const
         ).map(({ to, icon: Icon, key }) => (
-          <Link key={to} to={to} className="flex flex-col items-start gap-2 rounded-2xl border border-line/70 bg-card p-3.5 text-sm font-semibold shadow-card transition active:scale-[0.98]">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-soft text-brand-deep">
+          <Link key={to} to={to} className="flex flex-col items-start gap-2 rounded-xl border border-line bg-card p-3.5 text-sm font-semibold shadow-card transition active:scale-[0.98]">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-soft text-brand-deep">
               <Icon className="h-[18px] w-[18px]" />
             </span>
             {t(`nav.${key}`)}
           </Link>
         ))}
+      </div>
+      </div>
+      </div>
       </div>
 
       <p className="mt-8 text-center text-xs text-ink-faint">{t("app.disclaimer")}</p>
