@@ -93,7 +93,8 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Supabase sign-up for real users | ❌ | The test accounts live in memory |
 | Diary saved in Postgres | ❌ | Database tables exist; diary storage on Postgres is not written |
 | Loading the knowledge into Neo4j / Supabase | ❌ | The app reads the seed files directly |
-| Langfuse tracing, n8n workflows, server push notifications (reminders while the app is closed) | ❌ Designed only | |
+| Langfuse tracing | ✅ | Turns on when `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` are set; one trace per meal check with the model calls inside; no photos or names |
+| n8n workflows, server push notifications (reminders while the app is closed) | ❌ Designed only | |
 | Guideline corpus with retrieval (RAG) | ❌ Designed only | Rule Cards carry the cited sentences instead |
 | LightGBM flare model, wearables, voice, federated learning | ❌ Roadmap | |
 

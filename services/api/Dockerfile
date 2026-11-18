@@ -23,7 +23,7 @@ COPY services/api/src services/api/src
 COPY data/seeds data/seeds
 COPY prompts/runtime prompts/runtime
 
-RUN cd services/api && uv sync --frozen --no-dev --extra pii --python /usr/local/bin/python3.11 && chown -R user /app
+RUN cd services/api && uv sync --frozen --no-dev --extra pii --extra tracing --python /usr/local/bin/python3.11 && chown -R user /app
 
 USER user
 EXPOSE 7860

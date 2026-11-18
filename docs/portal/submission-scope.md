@@ -74,7 +74,8 @@
 | Delta + DuckDB (evaluation results, synthetic cohort) | B |
 | Partitions, retention job | B |
 | Recharts, Streamlit + Plotly | A |
-| D3, Langfuse dashboards | B |
+| D3 | B |
+| Langfuse tracing: one trace per meal check (steps, timings, verdict) with the model calls nested inside; photos and names never sent | **A** once the keys are set on the deployed backend |
 | Calendar heatmap, waterfall chart | B (drop if short on time) |
 | Rule engine, Bayesian statistics | A |
 | Anomaly z-score, LightGBM | B |

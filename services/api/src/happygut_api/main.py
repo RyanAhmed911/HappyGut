@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from happygut_engine import DEFAULT_CONFIG, DEFAULT_WEIGHT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
 
-from . import __version__, foods, i18n
+from . import __version__, foods, i18n, tracing
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
 from .care import (MAX_APPOINTMENTS, MAX_MEDICATIONS, AppointmentIn, AppointmentOut, DoseIn, MedicationIn, MedicationOut,
@@ -141,7 +141,13 @@ def create_app(services: Services | None = None) -> FastAPI:
             for email, password in (s.accounts.generated if s.accounts else {}).items():
                 # Only generated, per-run passwords are printed; configured ones never are.
                 print(f"  test account {email}: no password configured, using {password} for this run", flush=True)
+        # After seeding, so only real meal checks are traced (not the sample history).
+        cfg = s.settings
+        if not tracing.enabled() and tracing.setup(cfg.langfuse_public_key, cfg.langfuse_secret_key, cfg.langfuse_host,
+                                                   environment="demo" if cfg.demo_mode else "production", version=__version__):
+            print(f"  tracing to Langfuse at {cfg.langfuse_host}", flush=True)
         yield
+        tracing.shutdown()  # flush what is queued
 
     settings = services.settings if services else get_settings()
     app = FastAPI(title="HappyGut API", version=__version__, lifespan=lifespan,
@@ -187,7 +193,7 @@ def create_app(services: Services | None = None) -> FastAPI:
         return {
             "status": "ok", "version": __version__, "engine_version": DEFAULT_CONFIG.version,
             "knowledge": {**s.knowledge.counts(), "reviewed_only": s.knowledge.reviewed_only},
-            "storage": type(s.store).__name__, "demo_mode": s.demo is not None, "sign_in": s.accounts is not None,
+            "storage": type(s.store).__name__, "demo_mode": s.demo is not None, "sign_in": s.accounts is not None, "tracing": tracing.enabled(),
             "models": s.models or {"perception": True, "explanation": True},
             "model_names": s.model_names or {},
         }
