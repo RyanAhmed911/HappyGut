@@ -311,6 +311,22 @@ export const Risk = z.object({
   upcoming_periods: z.array(
     z.object({ id: z.string(), type: z.string(), name: z.string(), start: z.string(), end: z.string(), days_until: z.number() }),
   ),
+  /** The machine-learning estimate (v1), shown next to the rule-based score; null when the model isn't installed. */
+  model: z
+    .object({
+      version: z.string(),
+      in_flare: z.boolean(),
+      enough_data: z.boolean().optional(),
+      probability: z.number().optional(),
+      level: z.enum(["low", "raised", "high"]).optional(),
+      drivers: z.array(z.object({ feature: z.string(), value: z.number().nullable(), effect: z.number() })).optional(),
+      trained_on: z.string().optional(),
+      test_roc_auc: z.number().nullable().optional(),
+      v0_test_roc_auc: z.number().nullable().optional(),
+      scale_checked: z.boolean().optional(),
+    })
+    .nullable()
+    .optional(),
   is_synthetic: z.boolean(),
 });
 export type Risk = z.infer<typeof Risk>;

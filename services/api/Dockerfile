@@ -10,7 +10,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_PYTHON_DOWNLOADS=never \
     PII_PRESIDIO=true
 
-RUN pip install --no-cache-dir "uv==0.11.32" && useradd -m -u 1000 user
+# libgomp1: OpenMP runtime that LightGBM (the flare-risk model) needs.
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir "uv==0.11.32" && useradd -m -u 1000 user
 WORKDIR /app
 
 # Only what the API needs: engine, pipelines (seed loader), the API, approved seeds, runtime prompts and the
@@ -25,7 +27,7 @@ COPY data/seeds data/seeds
 COPY prompts/runtime prompts/runtime
 COPY evals/sets evals/sets
 
-RUN cd services/api && uv sync --frozen --no-dev --extra pii --extra tracing --python /usr/local/bin/python3.11 && chown -R user /app
+RUN cd services/api && uv sync --frozen --no-dev --extra pii --extra tracing --extra ml --python /usr/local/bin/python3.11 && chown -R user /app
 
 USER user
 EXPOSE 7860

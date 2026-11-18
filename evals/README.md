@@ -15,4 +15,6 @@ Writes [`RESULTS.md`](RESULTS.md) (the report), `summary.json`, and `apps/web/sr
 | Verdict rules | Reproducibility, a rule behind every warning, the stricture rule, on the real dishes | All three hold |
 | Dish names | Every stored name leads back to its own dish | All names resolve |
 
+The flare-risk model v1 has its own run and report: `uv run python -m happygut_api.flare_model train` writes the model, its card and [`FLARE_MODEL.md`](FLARE_MODEL.md) (about 2 minutes on 4 cores; a test checks the shipped model still beats the rules).
+
 Results on the simulated cohort are always reported as "simulated". Not built yet: verdict agreement with a dietitian-labelled list, photo recognition accuracy, guideline retrieval (Ragas), the Streamlit Eval Lab.

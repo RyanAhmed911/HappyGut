@@ -97,7 +97,8 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | n8n workflows | ✅ | Four, in `n8n/workflows`: keep-awake health check, nightly refresh, weekly safety self-check, failure email. Need n8n running (Docker locally, a Space in production); see `n8n/README.md` |
 | Server push notifications (reminders while the app is closed) | ❌ Designed only | |
 | Guideline corpus with retrieval (RAG) | ❌ Designed only | Rule Cards carry the cited sentences instead |
-| LightGBM flare model, wearables, voice, federated learning | ❌ Roadmap | |
+| Machine-learning flare model (LightGBM) | ✅ | Second opinion beside the rule-based outlook, top three SHAP reasons; trained on simulated patients; `evals/FLARE_MODEL.md` |
+| Wearables, voice, federated learning | ❌ Roadmap | |
 
 **The test accounts** hold sample patient records made by a simulator, because real patient data may not be used. The app says so once when you first sign in.
 
@@ -356,7 +357,7 @@ The guide forbids "fabricated demos" and "fake or simulated results" (§20.4) bu
 | Lower the Pattern Finder's false reports; detect missed doses better (5% today) | `engine/src/happygut_engine/patterns.py`; re-run the evaluation |
 | Real diaries from consenting team members for two weeks (no identity shown) | Would answer the "simulated" concern directly |
 | Push reminders for the nightly diary | `apps/web/src/lib/reminder.ts` |
-| Langfuse tracing, LightGBM flare model | `docs/02-architecture.md`, `docs/portal/submission-scope.md` |
+| Retrain the flare model on real, consented diaries | `services/api/src/happygut_api/flare_model.py`, `evals/FLARE_MODEL.md` |
 | Bangla voice input | **Needs a decision first:** the browser's speech service sends audio to its vendor before our privacy step runs, which breaks rule 6 |
 | Rehearse the 3-minute live pitch (5-minute slot: 1 transition, 3 pitch, 1 scoring) | Guide §9.3 |
 

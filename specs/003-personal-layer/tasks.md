@@ -36,5 +36,5 @@
 
 ## Proof (step 4)
 - [ ] T020 Simulated cohort (≥ 200 patients × 180 days) and the recovery metrics SC-002 to SC-004 in the Eval Lab
-- [ ] T021 Flare-risk v1 (LightGBM + SHAP on the cohort) against v0 (SC-005)
+- [x] T021 Flare-risk v1 (LightGBM + SHAP on the cohort) against v0 (SC-005): ROC AUC 0.658 vs 0.558 on 50 held-out simulated patients (`evals/FLARE_MODEL.md`)
 - [ ] T022 Timed diary walkthrough with 5 testers (SC-001)

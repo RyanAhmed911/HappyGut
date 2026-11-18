@@ -28,18 +28,21 @@ from happygut_engine import (
     kind_by_day,
     personal_evidence,
 )
+from happygut_engine.flare_features import features as flare_features
 from happygut_engine.flare_risk import DEFAULT_RISK_CONFIG
 from happygut_engine.patterns import DEFAULT_PATTERN_CONFIG, LIKELY, POSSIBLE
 from happygut_engine.periods import DEFAULT_PERIOD_CONFIG, FLARE, REMISSION, Period
 from happygut_engine.weight import DEFAULT_WEIGHT_CONFIG, WeightEntry, weight_trend
 from happygut_engine.weight import SOURCE as WEIGHT_SOURCE
 
+from . import flare_model
 from .diary import DiaryEntry, StressPeriodOut
 from .knowledge import Knowledge
 from .store import NotSupported, Patient, PeriodDecisions, Store
 
 SCOPES = ("all", REMISSION, FLARE)
 MIN_DAYS_FOR_PATTERNS = 14
+MIN_DAYS_FOR_MODEL = 14  # the model was trained from day 14 of each diary
 BEFORE_FLARE_DAYS = 7
 
 
@@ -247,6 +250,7 @@ class Insights:
         as_of = max(b.records[-1].day, today - timedelta(days=1)) if b.records else today
         out = flare_risk(b.records, self._patterns(b, "all") if enough else [], [p.type for p in upcoming], as_of)
         return {
+            "model": self._flare_model(b, as_of, bool(upcoming)),
             "score": out.score, "level": out.level, "horizon_days": out.horizon_days, "as_of": out.as_of.isoformat(),
             "enough_data": enough, "version": out.version,
             "drivers": [{"code": d.code, "points": d.points, "factor": d.factor, "count": d.count, "value": d.value}
@@ -255,6 +259,20 @@ class Insights:
                                   "end": p.end.isoformat(), "days_until": (p.start - today).days} for p in upcoming],
             "is_synthetic": patient.is_synthetic,
         }
+
+    def _flare_model(self, b, as_of: date, period_soon: bool) -> dict | None:
+        """The v1 estimate (flare_model.py), shown next to v0. None when the model isn't installed."""
+        model = flare_model.load()
+        if model is None:
+            return None
+        if b.records and b.records[-1].period_kind == FLARE:
+            return {"version": model.card["version"], "in_flare": True}  # it predicts new flares only
+        if len(b.records) < MIN_DAYS_FOR_MODEL:
+            return {"version": model.card["version"], "in_flare": False, "enough_data": False}
+        row = flare_features(b.records, as_of, active_at=THRESHOLDS[b.index].active_at, stressful_period_soon=period_soon,
+                             flare_days={r.day for r in b.records if r.period_kind == FLARE})
+        return {**model.predict(row), "in_flare": False, "enough_data": True, "index_scale": b.index,
+                "scale_checked": b.index == "HBI"}
 
     async def weight(self, patient: Patient) -> dict:
         """Weigh-ins, the trend and any loss past the GLIM threshold (engine/weight.py)."""

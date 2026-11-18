@@ -1,0 +1,205 @@
+{
+  "version": "flare-risk-v1.0",
+  "question": "Does a flare start within the next 3 days? (asked on days not already in a flare)",
+  "trained_on": "simulated patients only",
+  "features": [
+    "index_today",
+    "index_mean_3",
+    "index_max_7",
+    "index_rise",
+    "index_slope_3",
+    "active_days_7",
+    "days_logged_7",
+    "food_reaction_days_3",
+    "late_nights_3",
+    "short_sleep_3",
+    "poor_sleep_3",
+    "high_stress_days_3",
+    "stress_mean_3",
+    "in_stressful_period",
+    "stressful_period_soon",
+    "missed_doses_7",
+    "high_fat_days_3",
+    "very_spicy_days_3",
+    "high_lactose_days_3",
+    "high_gos_days_3",
+    "high_fibre_days_3",
+    "red_meat_days_3",
+    "flare_days_30",
+    "days_since_flare"
+  ],
+  "params": {
+    "objective": "binary",
+    "learning_rate": 0.03,
+    "num_leaves": 15,
+    "min_data_in_leaf": 40,
+    "feature_fraction": 0.8,
+    "bagging_fraction": 0.8,
+    "bagging_freq": 1,
+    "lambda_l2": 1.0,
+    "seed": 7,
+    "deterministic": true,
+    "force_row_wise": true,
+    "num_threads": 1,
+    "verbose": -1,
+    "num_boost_round": 94
+  },
+  "levels": {
+    "raised_at": 0.025,
+    "high_at": 0.0543
+  },
+  "data": {
+    "patients": 200,
+    "days_per_patient": 120,
+    "warm_up_days": 14,
+    "train_patients": 100,
+    "valid_patients": 50,
+    "test_patients": 50,
+    "train_days": 9567,
+    "valid_days": 4830,
+    "test_days": 4862,
+    "train_flare_start_days": 218,
+    "valid_flare_start_days": 109,
+    "test_flare_start_days": 98
+  },
+  "test": {
+    "base_rate": 0.0202,
+    "v1": {
+      "roc_auc": 0.658,
+      "average_precision": 0.077,
+      "brier": 0.0193,
+      "top_10_percent": {
+        "flagged_share": 0.1,
+        "caught": 30,
+        "of": 98,
+        "recall": 0.306,
+        "precision": 0.062
+      },
+      "top_20_percent": {
+        "flagged_share": 0.2,
+        "caught": 41,
+        "of": 98,
+        "recall": 0.418,
+        "precision": 0.042
+      }
+    },
+    "v0": {
+      "roc_auc": 0.558,
+      "average_precision": 0.031,
+      "top_10_percent": {
+        "flagged_share": 0.1,
+        "caught": 11,
+        "of": 98,
+        "recall": 0.112,
+        "precision": 0.023
+      },
+      "top_20_percent": {
+        "flagged_share": 0.2,
+        "caught": 21,
+        "of": 98,
+        "recall": 0.214,
+        "precision": 0.022
+      }
+    }
+  },
+  "importance": [
+    {
+      "feature": "days_since_flare",
+      "gain": 3164.9
+    },
+    {
+      "feature": "stressful_period_soon",
+      "gain": 1616.3
+    },
+    {
+      "feature": "index_rise",
+      "gain": 1151.8
+    },
+    {
+      "feature": "index_mean_3",
+      "gain": 670.4
+    },
+    {
+      "feature": "stress_mean_3",
+      "gain": 588.9
+    },
+    {
+      "feature": "index_max_7",
+      "gain": 547.2
+    },
+    {
+      "feature": "index_today",
+      "gain": 445.2
+    },
+    {
+      "feature": "flare_days_30",
+      "gain": 371.2
+    },
+    {
+      "feature": "in_stressful_period",
+      "gain": 349.8
+    },
+    {
+      "feature": "active_days_7",
+      "gain": 342.7
+    },
+    {
+      "feature": "missed_doses_7",
+      "gain": 317.2
+    },
+    {
+      "feature": "days_logged_7",
+      "gain": 224.2
+    },
+    {
+      "feature": "high_gos_days_3",
+      "gain": 219.8
+    },
+    {
+      "feature": "index_slope_3",
+      "gain": 203.3
+    },
+    {
+      "feature": "high_fibre_days_3",
+      "gain": 197.0
+    },
+    {
+      "feature": "food_reaction_days_3",
+      "gain": 195.3
+    },
+    {
+      "feature": "very_spicy_days_3",
+      "gain": 180.4
+    },
+    {
+      "feature": "high_stress_days_3",
+      "gain": 172.0
+    },
+    {
+      "feature": "late_nights_3",
+      "gain": 167.5
+    },
+    {
+      "feature": "high_fat_days_3",
+      "gain": 109.1
+    },
+    {
+      "feature": "poor_sleep_3",
+      "gain": 104.4
+    },
+    {
+      "feature": "high_lactose_days_3",
+      "gain": 87.2
+    },
+    {
+      "feature": "short_sleep_3",
+      "gain": 87.2
+    },
+    {
+      "feature": "red_meat_days_3",
+      "gain": 38.9
+    }
+  ],
+  "trained": "2026-11-18",
+  "seconds": 121
+}

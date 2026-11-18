@@ -26,6 +26,7 @@ Only licensed sources, each recorded with its licence: open-access IBD guidance 
 |---|---|
 | Pattern Finder on 200 **simulated** patients with hidden contributors, 120 days of diary | Found 293 of 409 (72%); 80% of food contributors; 52 false reports |
 | Red-flag check, Bangla and English | 29 of 29 emergency phrases caught; 0 of 30 ordinary messages flagged |
+| Flare-risk model v1 (LightGBM), 50 held-out **simulated** patients | ROC AUC 0.658 vs 0.558 for the rule-based score; flagging 10% of days catches 31% of flare starts vs 11% |
 | Verdict engine on 61 real dishes × 7 patient profiles | 427 of 427 reproducible; every warning cites a rule; stricture rule 11 of 11 |
 
 Full report and how to reproduce: `evals/RESULTS.md`.

@@ -1,4 +1,4 @@
-import { BedDouble, Brain, CalendarClock, ChevronDown, GraduationCap, Pill, TrendingUp, Utensils } from "lucide-react";
+import { BedDouble, Brain, CalendarClock, ChevronDown, Cpu, GraduationCap, Pill, TrendingUp, Utensils } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
@@ -123,6 +123,54 @@ export function RiskCard({ risk, compact }: { risk: Risk; compact?: boolean }) {
         <p className="mt-4 text-sm text-ink-soft">{t("risk.calm")}</p>
       )}
       {risk.level !== "low" && <p className="mt-4 rounded-xl bg-paper px-3.5 py-2.5 text-xs text-ink-soft">{t("risk.advice")}</p>}
+      {risk.model && <ModelEstimate model={risk.model} />}
+    </div>
+  );
+}
+
+/** The machine-learning estimate (v1) with its own top drivers (SHAP values), as a second opinion. */
+function ModelEstimate({ model }: { model: NonNullable<Risk["model"]> }) {
+  const { t } = useTranslation();
+  const lang = useLang();
+  const value = (v: number | null): string => (v === null ? "–" : num(v, lang, Number.isInteger(v) ? 0 : 1));
+  return (
+    <div className="mt-4 border-t border-line pt-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em] text-ink-faint">
+          <Cpu className="h-3.5 w-3.5" />
+          {t("risk.ml_title")}
+        </p>
+        <span className="text-[11px] font-semibold text-ink-faint">{t("risk.ml_badge", { version: model.version.replace("flare-risk-", "") })}</span>
+      </div>
+      {model.in_flare ? (
+        <p className="mt-2 text-sm text-ink-soft">{t("risk.ml_in_flare")}</p>
+      ) : !model.enough_data || !model.level ? (
+        <p className="mt-2 text-sm text-ink-soft">{t("risk.ml_not_enough")}</p>
+      ) : (
+        <>
+          <p className="mt-2 flex items-center gap-2 text-sm font-bold">
+            <Badge tone={RISK_TONE[model.level]}>{t(`risk.badge_${model.level}`)}</Badge>
+            {t(`risk.ml_level_${model.level}`)}
+          </p>
+          {model.drivers && model.drivers.length > 0 ? (
+            <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+              <li className="text-xs font-semibold text-ink-faint">{t("risk.ml_why")}</li>
+              {model.drivers.map((d) => (
+                <li key={d.feature} className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-caution" />
+                  {t(`risk.ml_feature.${d.feature}`, { value: value(d.value) })}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-1 text-sm text-ink-soft">{t("risk.ml_nothing")}</p>
+          )}
+        </>
+      )}
+      <p className="mt-2 text-[11px] leading-snug text-ink-faint">
+        {t("risk.ml_note", { auc: num(model.test_roc_auc ?? 0, lang, 2), v0: num(model.v0_test_roc_auc ?? 0, lang, 2) })}
+        {model.scale_checked === false && ` ${t("risk.ml_scale_note")}`}
+      </p>
     </div>
   );
 }
