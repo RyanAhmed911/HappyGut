@@ -17,6 +17,7 @@ from datetime import date
 
 from happygut_engine import Component, Diagnosis, DiseaseState, ManualFlare, PersonalEvidence, Profile
 
+from .care import AppointmentOut, MedicationOut
 from .diary import DiaryEntry, StressPeriodOut
 
 
@@ -104,6 +105,14 @@ class Store(Protocol):
     async def list_weights(self, patient_id: str) -> list[tuple[date, float]]: ...
     async def save_weight(self, patient_id: str, day: date, kg: float) -> None: ...
     async def delete_weight(self, patient_id: str, day: date) -> bool: ...
+    async def list_medications(self, patient_id: str) -> list[MedicationOut]: ...
+    async def save_medication(self, patient_id: str, med: MedicationOut) -> None: ...
+    async def delete_medication(self, patient_id: str, medication_id: str) -> bool: ...
+    async def doses_taken(self, patient_id: str, day: date) -> set[tuple[str, str]]: ...
+    async def set_dose(self, patient_id: str, day: date, medication_id: str, time: str, taken: bool) -> None: ...
+    async def list_appointments(self, patient_id: str) -> list[AppointmentOut]: ...
+    async def add_appointment(self, patient_id: str, appointment: AppointmentOut) -> None: ...
+    async def delete_appointment(self, patient_id: str, appointment_id: str) -> bool: ...
 
 
 class MemoryStore:
@@ -119,6 +128,9 @@ class MemoryStore:
         self.stress_periods: dict[str, list[StressPeriodOut]] = {}
         self.decisions: dict[str, PeriodDecisions] = {}
         self.weights: dict[str, dict[date, float]] = {}
+        self.medications: dict[str, dict[str, MedicationOut]] = {}  # patient → id → medicine (insertion order kept)
+        self.doses: dict[str, dict[date, set[tuple[str, str]]]] = {}  # patient → day → {(medicine id, time)} taken
+        self.appointments: dict[str, list[AppointmentOut]] = {}
         self.versions: dict[str, int] = {}
 
     def _bump(self, patient_id: str) -> None:
@@ -128,7 +140,8 @@ class MemoryStore:
         """Forget everything stored for one patient (used to restore a test account's sample records)."""
         for user_id in [u for u, p in self.patients.items() if p.id == patient_id]:
             del self.patients[user_id]
-        for table in (self.personal, self.diary, self.stress_periods, self.decisions, self.weights):
+        for table in (self.personal, self.diary, self.stress_periods, self.decisions, self.weights, self.medications,
+                      self.doses, self.appointments):
             table.pop(patient_id, None)
         self.meal_checks = {k: r for k, r in self.meal_checks.items() if r.patient_id != patient_id}
         self.feedback = [f for f in self.feedback if f[0] != patient_id]
@@ -216,6 +229,37 @@ class MemoryStore:
 
     async def delete_weight(self, patient_id: str, day: date) -> bool:
         return self.weights.get(patient_id, {}).pop(day, None) is not None
+
+    async def list_medications(self, patient_id: str) -> list[MedicationOut]:
+        return list(self.medications.get(patient_id, {}).values())
+
+    async def save_medication(self, patient_id: str, med: MedicationOut) -> None:
+        self.medications.setdefault(patient_id, {})[med.id] = med  # add, or replace when editing
+
+    async def delete_medication(self, patient_id: str, medication_id: str) -> bool:
+        return self.medications.get(patient_id, {}).pop(medication_id, None) is not None
+
+    async def doses_taken(self, patient_id: str, day: date) -> set[tuple[str, str]]:
+        return set(self.doses.get(patient_id, {}).get(day, set()))
+
+    async def set_dose(self, patient_id: str, day: date, medication_id: str, time: str, taken: bool) -> None:
+        marks = self.doses.setdefault(patient_id, {}).setdefault(day, set())
+        if taken:
+            marks.add((medication_id, time))
+        else:
+            marks.discard((medication_id, time))
+
+    async def list_appointments(self, patient_id: str) -> list[AppointmentOut]:
+        return sorted(self.appointments.get(patient_id, []), key=lambda a: (a.date, a.time or ""))
+
+    async def add_appointment(self, patient_id: str, appointment: AppointmentOut) -> None:
+        self.appointments.setdefault(patient_id, []).append(appointment)
+
+    async def delete_appointment(self, patient_id: str, appointment_id: str) -> bool:
+        items = self.appointments.get(patient_id, [])
+        kept = [a for a in items if a.id != appointment_id]
+        self.appointments[patient_id] = kept
+        return len(kept) != len(items)
 
 
 class PostgresStore:
@@ -349,3 +393,27 @@ class PostgresStore:
 
     async def delete_weight(self, patient_id: str, day: date) -> bool:
         raise NotSupported("weights")
+
+    async def list_medications(self, patient_id: str) -> list[MedicationOut]:
+        raise NotSupported("medications")
+
+    async def save_medication(self, patient_id: str, med: MedicationOut) -> None:
+        raise NotSupported("medications")
+
+    async def delete_medication(self, patient_id: str, medication_id: str) -> bool:
+        raise NotSupported("medications")
+
+    async def doses_taken(self, patient_id: str, day: date) -> set[tuple[str, str]]:
+        raise NotSupported("medications")
+
+    async def set_dose(self, patient_id: str, day: date, medication_id: str, time: str, taken: bool) -> None:
+        raise NotSupported("medications")
+
+    async def list_appointments(self, patient_id: str) -> list[AppointmentOut]:
+        raise NotSupported("appointments")
+
+    async def add_appointment(self, patient_id: str, appointment: AppointmentOut) -> None:
+        raise NotSupported("appointments")
+
+    async def delete_appointment(self, patient_id: str, appointment_id: str) -> bool:
+        raise NotSupported("appointments")

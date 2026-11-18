@@ -375,3 +375,77 @@ def test_weights_need_supported_storage():
             assert type(exc).__name__ == "NotSupported"
         else:
             raise AssertionError("expected NotSupported")
+
+
+# ---------------------------------------------------------------- medicines and tests
+
+def test_sample_medicines_doses_and_appointments(demo):
+    client, _ = demo
+    meds = client.get("/v1/medications").json()
+    assert {m["name"] for m in meds["items"]} == {"Azathioprine", "Vitamin D"}
+    doses = meds["day"]["doses"]
+    assert [d["time"] for d in doses] == ["08:00", "09:00"] and not any(d["taken"] for d in doses)  # weekly one is due today
+    appts = client.get("/v1/appointments").json()["items"]
+    assert [a["kind"] for a in appts] == ["colonoscopy", "blood_test", "doctor_visit"]  # sorted by date
+    rafi = client.get("/v1/medications", headers=sign_in(client, "rafi@happygut.test", SIGN_IN["rafi"])).json()
+    assert [d["time"] for d in rafi["day"]["doses"]] == ["08:00", "20:00"]
+
+
+def test_ticking_doses_feeds_the_diary_question(demo):
+    client, services = demo
+    ayesha = sign_in(client, "ayesha@happygut.test", services.accounts.generated["ayesha@happygut.test"])
+    today = today_of(client)
+    med = client.post("/v1/medications", json={"name": "  Budesonide ", "times": ["20:00", "08:00", "08:00"], "start": today.isoformat()},
+                      headers=ayesha).json()
+    assert med["name"] == "Budesonide" and med["times"] == ["08:00", "20:00"] and med["every_days"] == 1
+    assert client.get(f"/v1/diary/{today}", headers=ayesha).json()["doses"] == {"due": 2, "taken": 0}
+    body = client.put(f"/v1/doses/{today}", json={"medication_id": med["id"], "time": "08:00", "taken": True}, headers=ayesha).json()
+    assert [d["taken"] for d in body["day"]["doses"]] == [True, False]
+    assert client.get(f"/v1/diary/{today}", headers=ayesha).json()["doses"] == {"due": 2, "taken": 1}
+    client.put(f"/v1/doses/{today}", json={"medication_id": med["id"], "time": "08:00", "taken": False}, headers=ayesha)
+    assert client.get(f"/v1/diary/{today}", headers=ayesha).json()["doses"]["taken"] == 0
+    # Only scheduled doses can be ticked, and not for the future or long ago.
+    assert client.put(f"/v1/doses/{today}", json={"medication_id": med["id"], "time": "12:00", "taken": True}, headers=ayesha).status_code == 404
+    assert client.put(f"/v1/doses/{today + timedelta(days=1)}", json={"medication_id": med["id"], "time": "08:00", "taken": True},
+                      headers=ayesha).status_code == 422
+    assert client.put(f"/v1/doses/{today - timedelta(days=5)}", json={"medication_id": med["id"], "time": "08:00", "taken": True},
+                      headers=ayesha).json()["detail"] == "too_old"
+    edited = client.put(f"/v1/medications/{med['id']}", json={"name": "Budesonide", "times": ["09:00"], "every_days": 7,
+                                                                "start": today.isoformat(), "note": "with food"}, headers=ayesha).json()
+    assert edited["every_days"] == 7 and edited["note"] == "with food"
+    assert client.delete(f"/v1/medications/{med['id']}", headers=ayesha).status_code == 204
+    assert client.delete(f"/v1/medications/{med['id']}", headers=ayesha).status_code == 404
+    assert client.get(f"/v1/diary/{today}", headers=ayesha).json()["doses"] is None
+
+
+def test_medicine_and_appointment_validation(demo):
+    client, _ = demo
+    today = today_of(client).isoformat()
+    bad = [{"name": "   ", "times": ["08:00"], "start": today}, {"name": "X", "times": [], "start": today},
+           {"name": "X", "times": ["25:00"], "start": today}, {"name": "X", "times": ["08:00"], "every_days": 3, "start": today},
+           {"name": "X" * 61, "times": ["08:00"], "start": today}]
+    for body in bad:
+        assert client.post("/v1/medications", json=body).status_code == 422, body
+    assert client.put("/v1/medications/nope", json={"name": "X", "times": ["08:00"], "start": today}).status_code == 404
+    far = (today_of(client) + timedelta(days=800)).isoformat()
+    assert client.post("/v1/appointments", json={"kind": "colonoscopy", "date": far}).json()["detail"] == "bad_date"
+    assert client.post("/v1/appointments", json={"kind": "massage", "date": today}).status_code == 422
+    assert client.post("/v1/appointments", json={"kind": "other", "date": today, "time": "9am"}).status_code == 422
+
+
+def test_appointments_add_delete_report_and_restore(demo):
+    client, _ = demo
+    rafi = sign_in(client, "rafi@happygut.test", SIGN_IN["rafi"])
+    in_ten = (today_of(client) + timedelta(days=10)).isoformat()
+    added = client.post("/v1/appointments", json={"kind": "colonoscopy", "date": in_ten, "note": " fasting from midnight "}, headers=rafi).json()
+    assert added["note"] == "fasting from midnight" and added["time"] is None
+    report = client.get("/v1/reports/previsit", headers=rafi).json()
+    assert [m["name"] for m in report["medications"]] == ["Mesalamine"]
+    assert [a["kind"] for a in report["appointments"]] == ["stool_test", "doctor_visit", "colonoscopy"]
+    assert client.delete(f"/v1/appointments/{added['id']}", headers=rafi).status_code == 204
+    assert client.delete(f"/v1/appointments/{added['id']}", headers=rafi).status_code == 404
+    client.post("/v1/medications", json={"name": "Extra", "times": ["10:00"], "start": today_of(client).isoformat()}, headers=rafi)
+    client.post("/v1/account/restore", headers=rafi)
+    assert [m["name"] for m in client.get("/v1/medications", headers=rafi).json()["items"]] == ["Mesalamine"]
+    # Accounts never see each other's medicines.
+    assert "Mesalamine" not in {m["name"] for m in client.get("/v1/medications").json()["items"]}

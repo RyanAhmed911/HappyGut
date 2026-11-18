@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarClock, Camera, ChevronRight, CircleCheck, FileText, History, Moon, Salad, Settings, Type } from "lucide-react";
+import { ArrowRight, CalendarClock, Camera, ChevronRight, CircleCheck, FileText, History, Moon, Pill, Salad, Settings, Type } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { RiskCard, TrendChart } from "@/components/insights";
+import { TodayCare } from "@/components/care";
 import { TodayWeight } from "@/components/weight";
 import { LoadError, useLang, useProfile } from "@/components/shell";
 import { Card, SectionTitle, Skeleton } from "@/components/ui";
@@ -100,6 +101,7 @@ export function Today() {
           </p>
         </Link>
       </div>
+      <TodayCare />
       <TodayWeight />
 
       </div>
@@ -174,6 +176,7 @@ export function Today() {
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {(
           [
+            { to: "/care", icon: Pill, key: "care" },
             { to: "/foods", icon: Salad, key: "foods" },
             { to: "/history", icon: History, key: "history" },
             { to: "/report", icon: FileText, key: "report" },

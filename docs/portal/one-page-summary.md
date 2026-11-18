@@ -11,6 +11,7 @@ HappyGut is a Bangla-first companion that answers "is this meal likely to trigge
 - **Nightly diary:** the day's foods, reactions, stool, sleep and stress; computes the Harvey-Bradshaw Index or SCCAI.
 - **Flare Pattern Finder:** shows which foods and habits (late nights, exam weeks, missed doses) are linked to that person's worse days.
 - **My Gut:** remission and flare periods kept apart, a transparent flare-risk outlook, and a one-page report for the doctor.
+- **Medicines & tests:** the patient's own medicine schedule and upcoming tests, with doses to tick off and reminders on the phone. Reminders only, never advice.
 - **Weight:** a weekly weigh-in with the trend; past the GLIM weight-loss threshold (more than 5% in 6 months) it tells the patient to contact their doctor.
 
 ## AI architecture (input → AI → output)

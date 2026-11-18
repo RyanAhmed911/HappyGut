@@ -52,6 +52,7 @@
 | Reminders (web push) | B |
 | Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine | **A** |
 | Sign-in with test accounts for judges (three patient types), restore-records action | **A** |
+| Medicines and tests: the patient's own medicine schedule with dose ticks, tests and appointments, reminders on the phone (while the app is open or installed), in the diary and the doctor's report; no medicine advice | **A** |
 | Weight tracking: weekly weigh-ins, trend, change over 30 / 90 / 180 days, a notice to tell the doctor past the GLIM weight-loss threshold, in the doctor's report | **A** |
 | Health profile editing; verdicts change at once (stricture, lactose intolerance, IBS-like symptoms) | **A** |
 | Personal Gut Graph view (SVG) | **A** |

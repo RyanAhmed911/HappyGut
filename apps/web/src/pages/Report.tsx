@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Printer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TrendChart, useFactorName } from "@/components/insights";
+import { useEvery } from "@/components/care";
 import { signedKg } from "@/components/weight";
 import { LoadError, Logo, PageLoading, useLang } from "@/components/shell";
 import { Button, PageTitle } from "@/components/ui";
@@ -25,6 +26,7 @@ export function Report() {
   const name = useFactorName();
   const report = useQuery({ queryKey: ["report"], queryFn: () => api.report(90) });
   const periods = useQuery({ queryKey: keys.periods, queryFn: api.periods });
+  const every = useEvery(); // before the early returns: hooks must run in the same order every render
   if (report.isLoading || periods.isLoading) return <PageLoading />;
   if (report.isError || !report.data || !periods.data) return <LoadError onRetry={() => void report.refetch()} />;
   const r = report.data;
@@ -104,6 +106,33 @@ export function Report() {
                     })}
                   </p>
                 )}
+              </>
+            )}
+            {(r.medications?.length ?? 0) > 0 && (
+              <>
+                <h3 className="mb-1 mt-4 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("care.report_medicines")}</h3>
+                <ul className="text-sm">
+                  {r.medications?.map((m) => (
+                    <li key={m.name} className="flex justify-between gap-3 border-b border-line py-1.5">
+                      <span className="font-semibold">{m.name}</span>
+                      <span className="text-right text-ink-soft">{m.times.join(", ")} · {every(m.every_days)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-xs text-ink-faint">{t("care.report_medicines_note")}</p>
+              </>
+            )}
+            {(r.appointments?.length ?? 0) > 0 && (
+              <>
+                <h3 className="mb-1 mt-4 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("care.report_tests")}</h3>
+                <ul className="text-sm">
+                  {r.appointments?.map((a) => (
+                    <li key={a.id} className="flex justify-between gap-3 border-b border-line py-1.5">
+                      <span className="font-semibold">{t(`care.kind_${a.kind}`)}</span>
+                      <span className="text-ink-soft">{shortDate(a.date, lang)}{a.time ? ` · ${a.time}` : ""}</span>
+                    </li>
+                  ))}
+                </ul>
               </>
             )}
             <h3 className="mb-1 mt-4 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("report.meals")}</h3>

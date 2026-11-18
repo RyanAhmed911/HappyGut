@@ -310,8 +310,19 @@ class Insights:
             "risk": await self.flare_risk(patient),
             "meal_verdicts": verdicts,
             "weight": await self._report_weight(patient, since),
+            **await self._report_care(patient, today),
             "is_synthetic": patient.is_synthetic,
         }
+
+    async def _report_care(self, patient: Patient, today: date) -> dict:
+        """The patient's own medicine list and next tests, as they entered them (no advice)."""
+        try:
+            meds = await self.store.list_medications(patient.id)
+            upcoming = [a for a in await self.store.list_appointments(patient.id) if a.date >= today][:4]
+        except NotSupported:
+            return {"medications": [], "appointments": []}
+        return {"medications": [{"name": m.name, "times": m.times, "every_days": m.every_days, "note": m.note} for m in meds],
+                "appointments": [a.model_dump(mode="json") for a in upcoming]}
 
     async def _report_weight(self, patient: Patient, since: date) -> dict | None:
         try:
