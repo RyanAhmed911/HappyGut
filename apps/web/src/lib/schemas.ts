@@ -185,6 +185,7 @@ export const DiaryDay = z.object({
   prefill: z.array(DiaryFood),
   usual: z.object({ index: z.number().nullable(), bedtime: z.string().nullable(), medication: z.string() }),
   tags: z.array(StressPeriod),
+  doses: z.object({ due: z.number(), taken: z.number() }).nullable().optional(),
 });
 export type DiaryDay = z.infer<typeof DiaryDay>;
 
@@ -354,9 +355,44 @@ export const Report = z.object({
     })
     .nullable()
     .optional(),
+  medications: z.array(z.object({ name: z.string(), times: z.array(z.string()), every_days: z.number(), note: z.string() })).optional(),
+  appointments: z.array(z.lazy(() => Appointment)).optional(),
   is_synthetic: z.boolean(),
 });
 export type Report = z.infer<typeof Report>;
+
+// ---------------------------------------------------------------- medicines and tests
+
+export const EVERY_DAYS = [1, 7, 14, 21, 28, 42, 56] as const;
+export const APPOINTMENT_KINDS = ["blood_test", "stool_test", "colonoscopy", "imaging", "doctor_visit", "other"] as const;
+export const Medication = z.object({
+  id: z.string(),
+  name: z.string(),
+  times: z.array(z.string()),
+  every_days: z.number(),
+  start: z.string(),
+  note: z.string(),
+});
+export type Medication = z.infer<typeof Medication>;
+export type MedicationBody = Omit<Medication, "id">;
+export const Dose = z.object({ medication_id: z.string(), name: z.string(), note: z.string(), time: z.string(), taken: z.boolean() });
+export type Dose = z.infer<typeof Dose>;
+export const Medications = z.object({
+  items: z.array(Medication),
+  today: z.string(),
+  day: z.object({ date: z.string(), doses: z.array(Dose) }),
+});
+export type Medications = z.infer<typeof Medications>;
+export const Appointment = z.object({
+  id: z.string(),
+  kind: z.enum(APPOINTMENT_KINDS),
+  date: z.string(),
+  time: z.string().nullable(),
+  note: z.string(),
+});
+export type Appointment = z.infer<typeof Appointment>;
+export type AppointmentBody = Omit<Appointment, "id">;
+export const Appointments = z.object({ items: z.array(Appointment), today: z.string() });
 
 // ---------------------------------------------------------------- weight
 

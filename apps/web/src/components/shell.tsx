@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Activity, FileText, History, House, Info, LogOut, NotebookPen, Salad, ScanLine, Settings, Sparkles } from "lucide-react";
+import { Activity, FileText, History, House, Info, LogOut, NotebookPen, Pill, Salad, ScanLine, Settings, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
@@ -7,7 +7,7 @@ import { api, auth } from "@/lib/api";
 import { isoDay, longDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { DataNotice } from "./notice";
-import { useDiaryReminder } from "@/lib/reminder";
+import { useCareReminders, useDiaryReminder } from "@/lib/reminder";
 import { setLang, type Lang } from "@/lib/i18n";
 
 export function useLang(): Lang {
@@ -69,6 +69,7 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
       { to: "/", icon: House, key: "today", end: true },
       { to: "/check", icon: ScanLine, key: "check" },
       { to: "/diary", icon: NotebookPen, key: "diary" },
+      { to: "/care", icon: Pill, key: "care" },
     ],
   },
   {
@@ -93,7 +94,7 @@ const FOOTER_NAV: NavItem[] = [
 ];
 
 /** Pages that use the full desktop width; the rest read better as a single column. */
-const WIDE = new Set(["/", "/patterns", "/gut", "/foods", "/check"]);
+const WIDE = new Set(["/", "/patterns", "/gut", "/foods", "/check", "/care"]);
 
 export function signOut(): void {
   auth.clear();
@@ -156,6 +157,7 @@ export function AppShell() {
   const profile = useProfile();
   const { pathname } = useLocation();
   useDiaryReminder(profile.data?.reminder_time);
+  useCareReminders();
   const me = profile.data;
   const dx = me ? t(`today.dx_${me.diagnosis}`) : "";
   const wide = WIDE.has(pathname);

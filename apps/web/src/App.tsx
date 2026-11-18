@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router"
 import { AppShell } from "./components/shell";
 import { About, PublicFrame } from "./pages/About";
 import { auth } from "./lib/api";
+import { CarePage } from "./pages/Care";
 import { Check } from "./pages/Check";
 import { Diary } from "./pages/Diary";
 import { Foods } from "./pages/Foods";
@@ -50,6 +51,7 @@ export function App() {
         <Route path="check" element={<Check />} />
         <Route path="diary" element={<Diary />} />
         <Route path="diary/:date" element={<Diary />} />
+        <Route path="care" element={<CarePage />} />
         <Route path="patterns" element={<Patterns />} />
         <Route path="gut" element={<Gut />} />
         <Route path="foods" element={<Foods />} />

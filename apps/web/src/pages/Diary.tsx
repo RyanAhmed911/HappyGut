@@ -419,6 +419,9 @@ export function Diary() {
             </Field>
             <Field label={t("diary.medication")} hint={t("diary.medication_hint")}>
               <Segmented value={form.medication} onChange={(v) => set("medication", v)} options={(["taken", "missed", "na"] as const).map((v) => ({ value: v, label: t(`diary.med_${v}`) }))} />
+              {day.data.doses && (
+                <p className="mt-2 text-xs text-ink-faint">{t("care.diary_ticked", { taken: num(day.data.doses.taken, lang), due: num(day.data.doses.due, lang) })}</p>
+              )}
             </Field>
             <Field label={t("diary.signs")} hint={t("diary.signs_hint")}>
               <div className="space-y-2">

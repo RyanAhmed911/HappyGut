@@ -20,6 +20,8 @@ from happygut_engine import DEFAULT_CONFIG, DEFAULT_WEIGHT_CONFIG, Diagnosis, Ma
 from . import __version__, foods, i18n
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
+from .care import (MAX_APPOINTMENTS, MAX_MEDICATIONS, AppointmentIn, AppointmentOut, DoseIn, MedicationIn, MedicationOut,
+                   doses_for)
 from .demo import PERSONAS, DemoVerifier, TestAccounts, seed_demo, seed_persona
 from .diary import CLOCK, DiaryIn, IndexOut, StressPeriodIn, StressPeriodOut, build_entry, items_of
 from .flow import Event, MealCheckFlow
@@ -35,6 +37,7 @@ from .store import MemoryStore, NotSupported, Patient, PostgresStore, Store
 log = logging.getLogger("happygut.api")
 MAX_TEXT = 1000
 DIARY_EDIT_DAYS = 2  # a diary can be filled in up to 2 days late (spec 003 FR-007)
+APPOINTMENT_HORIZON_DAYS = 730  # tests and appointments up to two years ahead
 WEIGHT_BACKFILL_DAYS = 365  # older weigh-ins (e.g. from a clinic visit) can be added up to a year back
 Lang = Literal["bn", "en"]
 
@@ -356,6 +359,7 @@ def create_app(services: Services | None = None) -> FastAPI:
                       "bedtime": usual_bedtime(bedtimes),
                       "medication": "taken" if any(e.medication != "na" for e in recent) else "na"},
             "tags": [p.model_dump(mode="json") for p in await s.store.list_stress_periods(patient.id) if p.start <= day <= p.end],
+            "doses": await dose_summary(patient, day, s),
         }
 
     @app.put("/v1/diary/{day}")
@@ -444,6 +448,84 @@ def create_app(services: Services | None = None) -> FastAPI:
         decisions.manual.append(ManualFlare(body.start, body.end))
         await s.store.save_period_decisions(patient.id, decisions)
         return await s.insights.periods(patient)
+
+    # ------------------------------------------------------------ medicines and tests (reminders and logging only)
+
+    async def dose_summary(patient: Patient, day: date, s: Services) -> dict | None:
+        """How many of the day's scheduled doses the patient ticked, for the diary's dose question."""
+        try:
+            doses = doses_for(await s.store.list_medications(patient.id), day, await s.store.doses_taken(patient.id, day))
+        except NotSupported:
+            return None
+        return {"due": len(doses), "taken": sum(d["taken"] for d in doses)} if doses else None
+
+    async def medications_payload(patient: Patient, s: Services, day: date | None = None) -> dict:
+        today = s.insights.today()
+        day = day or today
+        meds = await s.store.list_medications(patient.id)
+        return {
+            "items": [m.model_dump(mode="json") for m in meds],
+            "today": today.isoformat(),
+            "day": {"date": day.isoformat(), "doses": doses_for(meds, day, await s.store.doses_taken(patient.id, day))},
+        }
+
+    @app.get("/v1/medications")
+    async def medications(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        return await medications_payload(patient, s)
+
+    @app.post("/v1/medications", status_code=201)
+    async def add_medication(body: MedicationIn, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        if len(await s.store.list_medications(patient.id)) >= MAX_MEDICATIONS:
+            raise HTTPException(422, "too_many")
+        med = MedicationOut(id=uuid.uuid4().hex[:12], **body.model_dump())
+        await s.store.save_medication(patient.id, med)
+        return med.model_dump(mode="json")
+
+    @app.put("/v1/medications/{medication_id}")
+    async def edit_medication(medication_id: str, body: MedicationIn, patient: Patient = Depends(current_patient),
+                              s: Services = Depends(svc)) -> dict:
+        if not any(m.id == medication_id for m in await s.store.list_medications(patient.id)):
+            raise HTTPException(404, "not_found")
+        med = MedicationOut(id=medication_id, **body.model_dump())
+        await s.store.save_medication(patient.id, med)
+        return med.model_dump(mode="json")
+
+    @app.delete("/v1/medications/{medication_id}", status_code=204)
+    async def delete_medication(medication_id: str, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> None:
+        if not await s.store.delete_medication(patient.id, medication_id):
+            raise HTTPException(404, "not_found")
+
+    @app.put("/v1/doses/{day}")
+    async def mark_dose(day: date, body: DoseIn, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        today = check_day(day, s)
+        if (today - day).days > DIARY_EDIT_DAYS:
+            raise HTTPException(422, "too_old")
+        meds = await s.store.list_medications(patient.id)
+        if not any(d["medication_id"] == body.medication_id and d["time"] == body.time for d in doses_for(meds, day, set())):
+            raise HTTPException(404, "no_such_dose")
+        await s.store.set_dose(patient.id, day, body.medication_id, body.time, body.taken)
+        return await medications_payload(patient, s, day)
+
+    @app.get("/v1/appointments")
+    async def appointments(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        return {"items": [a.model_dump(mode="json") for a in await s.store.list_appointments(patient.id)],
+                "today": s.insights.today().isoformat()}
+
+    @app.post("/v1/appointments", status_code=201)
+    async def add_appointment(body: AppointmentIn, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        today = s.insights.today()
+        if not -365 <= (body.date - today).days <= APPOINTMENT_HORIZON_DAYS:
+            raise HTTPException(422, "bad_date")
+        if len(await s.store.list_appointments(patient.id)) >= MAX_APPOINTMENTS:
+            raise HTTPException(422, "too_many")
+        item = AppointmentOut(id=uuid.uuid4().hex[:12], **body.model_dump())
+        await s.store.add_appointment(patient.id, item)
+        return item.model_dump(mode="json")
+
+    @app.delete("/v1/appointments/{appointment_id}", status_code=204)
+    async def delete_appointment(appointment_id: str, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> None:
+        if not await s.store.delete_appointment(patient.id, appointment_id):
+            raise HTTPException(404, "not_found")
 
     # ------------------------------------------------------------ weight
 

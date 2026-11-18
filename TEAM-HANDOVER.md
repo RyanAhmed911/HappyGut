@@ -38,6 +38,7 @@
 | **Flare Pattern Finder** (My patterns) | Shows which foods and habits (high-fat meals, late nights, exam weeks, missed doses) are *linked to* that person's worse days, with the counts. |
 | **My Gut** | Remission and flare periods kept apart on a timeline, side-by-side summaries, and stressful periods such as exams. |
 | **Flare-risk outlook** | A simple points score for the next three days, with every point explained. |
+| **Medicines & tests** | The patient's own medicine schedule and upcoming tests, with doses to tick off on Today and reminders on the phone. Reminders only, never advice. |
 | **Weight** | A weekly weigh-in with the trend; it tells the patient to contact their doctor if weight drops more than 5% in six months (GLIM criterion). |
 | **Food guide and meal ideas** | Every dish with this person's verdict, and a week of ideas built only from dishes rated "likely OK". |
 | **Doctor's report** | A one-page summary to print or show at a visit. |
@@ -79,6 +80,7 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Food guide, meal ideas, doctor's report, meal history | ✅ | |
 | Sign-in with three test accounts for judges, restore records | ✅ | See [`docs/portal/test-credentials.md`](docs/portal/test-credentials.md) |
 | Health profile editing (stricture, lactose intolerance, IBS-like symptoms) | ✅ | Verdicts change immediately |
+| Medicines and tests | ✅ | Own schedule with dose ticks on Today, tests and appointments, reminders on the phone while the app is open or installed, diary hint, doctor's report. No medicine advice |
 | Weight tracking | ✅ | Weekly weigh-ins on My Gut, a Today prompt, a notice past the GLIM weight-loss threshold, in the doctor's report. Rafi's sample records cross the threshold |
 | Personal Gut Graph view | ✅ | On My patterns |
 | "How it works" public page | ✅ | `/about` |
@@ -91,7 +93,7 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Supabase sign-up for real users | ❌ | The test accounts live in memory |
 | Diary saved in Postgres | ❌ | Database tables exist; diary storage on Postgres is not written |
 | Loading the knowledge into Neo4j / Supabase | ❌ | The app reads the seed files directly |
-| Langfuse tracing, n8n workflows, push notifications | ❌ Designed only | |
+| Langfuse tracing, n8n workflows, server push notifications (reminders while the app is closed) | ❌ Designed only | |
 | Guideline corpus with retrieval (RAG) | ❌ Designed only | Rule Cards carry the cited sentences instead |
 | LightGBM flare model, wearables, voice, federated learning | ❌ Roadmap | |
 

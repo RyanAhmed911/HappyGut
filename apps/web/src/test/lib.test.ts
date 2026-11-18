@@ -60,3 +60,24 @@ describe("diary reminder", () => {
     expect(isDue(at(23, 50), "22:30", "2026-11-15", "2026-11-15")).toBe(false); // already shown today
   });
 });
+
+describe("care reminders", () => {
+  it("a dose reminder is due for an hour from its time, unless ticked", async () => {
+    const { doseDue } = await import("../lib/reminder");
+    expect(doseDue(8 * 60, "08:00", false)).toBe(true);
+    expect(doseDue(8 * 60 + 59, "08:00", false)).toBe(true);
+    expect(doseDue(9 * 60, "08:00", false)).toBe(false);
+    expect(doseDue(7 * 60 + 59, "08:00", false)).toBe(false);
+    expect(doseDue(8 * 60 + 5, "08:00", true)).toBe(false);
+  });
+
+  it("test reminders come the evening before and the morning of the day", async () => {
+    const { testStage } = await import("../lib/reminder");
+    const at = (h: number, m = 0): Date => new Date(2026, 10, 18, h, m);
+    expect(testStage(at(20), "2026-11-18", "2026-11-19", "2026-11-19")).toBe("eve");
+    expect(testStage(at(19, 59), "2026-11-18", "2026-11-19", "2026-11-19")).toBeNull();
+    expect(testStage(at(7, 30), "2026-11-18", "2026-11-19", "2026-11-18")).toBe("day");
+    expect(testStage(at(7, 29), "2026-11-18", "2026-11-19", "2026-11-18")).toBeNull();
+    expect(testStage(at(21), "2026-11-18", "2026-11-19", "2026-11-25")).toBeNull();
+  });
+});

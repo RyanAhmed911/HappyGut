@@ -31,6 +31,7 @@ from happygut_engine.simulate import (
 
 from .agents import AgentRun, PerceivedItem, Perception
 from .auth import AuthError
+from .care import AppointmentOut, MedicationOut, doses_for
 from .diary import DiaryFood, DiaryIn, Sleep, Stool, StressPeriodOut, build_entry
 from .flow import MealCheckFlow
 from .insights import Insights
@@ -44,6 +45,18 @@ DAYS = 120
 # before it take him a little past the GLIM threshold, so his account shows the weight notice.
 WEIGHT_PROFILES = {"cd_remission": (52.0, 0.10, 0.0), "uc_flare": (68.4, 0.40, 0.08)}
 WEIGH_IN_EVERY = 7
+
+# Each sample patient's own medicine list and upcoming tests, as a patient would enter them:
+# (name, times, every N days, days before today the schedule started). Reminders and logging only.
+SAMPLE_MEDICINES = {
+    "cd_remission": [("Azathioprine", ["08:00"], 1, 400), ("Vitamin D", ["09:00"], 7, 14)],
+    "uc_flare": [("Mesalamine", ["08:00", "20:00"], 1, 300)],
+}
+# (kind, days from today, time)
+SAMPLE_APPOINTMENTS = {
+    "cd_remission": [("colonoscopy", -60, "10:00"), ("blood_test", 5, "09:30"), ("doctor_visit", 12, "17:00")],
+    "uc_flare": [("stool_test", 2, "09:00"), ("doctor_visit", 6, "18:30")],
+}
 
 _MEALS = {
     "bread": ("morning",), "egg": ("morning",), "drink": ("morning",),
@@ -245,6 +258,7 @@ async def seed_persona(persona: Persona, store: MemoryStore, knowledge: MemoryKn
             start=today + timedelta(days=in_days), end=today + timedelta(days=in_days + length - 1)))
 
     await _seed_weights(persona, store, sims, config, first)
+    await _seed_care(persona, store, today)
 
     # The patient confirmed the flares the index proposed.
     decisions = await store.period_decisions(patient.id)
@@ -296,6 +310,23 @@ async def _seed_weights(persona: Persona, store: MemoryStore, sims: list[SimDay]
             weight += (usual - weight) * 0.06
         if (DAYS - sim.offset) % WEIGH_IN_EVERY == 2:  # the last weigh-in is two days ago
             await store.save_weight(persona.patient_id, first + timedelta(days=sim.offset), round(weight + rng.gauss(0, 0.2), 1))
+
+
+async def _seed_care(persona: Persona, store: MemoryStore, today: date) -> None:
+    """Sample medicines and tests; the last two days' doses ticked where that day's diary says "taken"."""
+    for i, (name, times, every, started) in enumerate(SAMPLE_MEDICINES.get(persona.history or "", [])):
+        await store.save_medication(persona.patient_id, MedicationOut(
+            id=f"{persona.key}-med-{i}", name=name, times=times, every_days=every, start=today - timedelta(days=started)))
+    for i, (kind, in_days, at) in enumerate(SAMPLE_APPOINTMENTS.get(persona.history or "", [])):
+        await store.add_appointment(persona.patient_id, AppointmentOut(
+            id=f"{persona.key}-appt-{i}", kind=kind, date=today + timedelta(days=in_days), time=at))
+    meds = await store.list_medications(persona.patient_id)
+    for back in (1, 2):
+        day = today - timedelta(days=back)
+        entry = await store.get_diary(persona.patient_id, day)
+        if entry is not None and entry.medication == "taken":
+            for dose in doses_for(meds, day, set()):
+                await store.set_dose(persona.patient_id, day, dose["medication_id"], dose["time"], True)
 
 
 async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: Insights, flow: MealCheckFlow) -> None:
