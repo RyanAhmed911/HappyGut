@@ -3,7 +3,7 @@
 **Domain:** HealthSphere AI · **Challenge:** ChronicCare AI · **Team:** _name_ · **Live demo:** _link_ · **Video:** _link_ · **Code:** github.com/RyanAhmed911/HappyGut
 
 ## Problem
-Inflammatory bowel disease (Crohn's disease, ulcerative colitis) is lifelong, has no cure, and is rising fastest in newly industrialised regions including South Asia. Food triggers differ from person to person, symptoms can follow a meal by a day, and in Bangladesh most meals have no label. Patients either gamble at every meal or cut out so many foods that they risk malnutrition. Between appointments, their doctor sees none of it.
+Inflammatory bowel disease (Crohn's disease, ulcerative colitis) is lifelong, has no cure and no known cause, and is "rising at an alarming rate in south Asia" with "a paucity of data" from the region, especially outside India (Shenoy et al., *Lancet Gastroenterol Hepatol* 2025). Few people in Bangladesh know the disease: across 15 countries in our region, a fifth of Crohn's patients were given tuberculosis treatment and diagnosis took a median of 12 months (Banerjee et al., *J Gastroenterol Hepatol* 2022). Food triggers differ from person to person, symptoms can follow a meal by a day, and in Bangladesh most meals have no label, so no general diet advice fits. Patients either gamble at every meal or cut out so many foods that they risk malnutrition. Between appointments, their doctor sees none of it.
 
 ## Solution
 HappyGut is a Bangla-first companion that answers "is this meal likely to trigger me?" in seconds, and learns from a two-minute nightly diary.
@@ -33,6 +33,9 @@ Graded verdicts with reasons and citations · "not sure" when evidence is missin
 
 ## Business and scale
 **Clinic licence** (remote monitoring and pre-visit reports for gastroenterology clinics) is the main revenue line; **patient-support programmes** and a **freemium** patient tier follow. Beachhead: Bangladesh and the Bangla-speaking diaspora. Cuisines and languages are data, not code, so the next markets are India and Pakistan, then the wider IBD population. Runs on free-tier cloud services today.
+
+## Research and awareness (vision)
+Every diary is useful to its owner first. With explicit consent, anonymised and aggregated patterns from many patients could give researchers the South Asian IBD data that is missing today, and let Bangladesh contribute to a global question. This research layer is designed, not built.
 
 ## Roadmap
 Nov–Dec 2026: deployment, real diaries from consenting users, photo-recognition accuracy on a labelled Bangladeshi set. 2027: clinic pilot in Dhaka, clinician dashboard, wearable sleep import, second cuisine.
