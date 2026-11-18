@@ -91,8 +91,8 @@
 | Local Qwen3 14B, Gemma 3 12B, Llama 3.1 8B, DeepSeek-R1 8B (Qwen3-based distill) (GPU jobs on Ubuntu) | A |
 | RAG: contextual, semantic chunking, Graph RAG, KG, hybrid, reranker | A |
 | MCP built: foodgraph | A |
-| MCP built: guidelines, evals, journal | B |
-| MCP built: research | B (thin, synthetic aggregates). If not built → remove (4 built = 8/10) |
+| MCP built: guidelines (cited Rule Cards), evals (results + red-flag check), journal (one patient's records with their own sign-in) | **A** |
+| MCP built: research | **C**: not built (no real patients to aggregate). Untick; 4 servers are built |
 | MCP used: Supabase, Neo4j | A |
 | MCP used: Filesystem, GitHub, Playwright | B |
 | Agent frameworks: LangGraph, Pydantic-AI | A |

@@ -1,9 +1,9 @@
 [project]
 name = "happygut-mcp"
 version = "0.1.0"
-description = "HappyGut MCP servers (read-only): foodgraph, guidelines, journal, evals, research."
+description = "HappyGut MCP servers (read-only): foodgraph, guidelines, evals, journal."
 requires-python = ">=3.11"
-dependencies = ["mcp>=2,<3", "happygut-pipelines", "happygut-engine", "uvicorn>=0.30"]
+dependencies = ["mcp>=2,<3", "happygut-pipelines", "happygut-engine", "uvicorn>=0.30", "httpx>=0.27"]
 
 [project.optional-dependencies]
 neo4j = ["neo4j>=5"]
@@ -17,6 +17,9 @@ dev = ["pytest>=8", "anyio>=4", "httpx>=0.27"]
 
 [project.scripts]
 happygut-foodgraph = "happygut_mcp.foodgraph:main"
+happygut-guidelines = "happygut_mcp.guidelines:main"
+happygut-evals = "happygut_mcp.evals:main"
+happygut-journal = "happygut_mcp.journal:main"
 
 [build-system]
 requires = ["hatchling"]
