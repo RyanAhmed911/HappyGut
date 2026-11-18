@@ -50,8 +50,12 @@ def test_off_without_keys():
 
 
 def test_langfuse_endpoint_and_basic_auth():
+    import base64
+
     assert tracing.endpoint("https://cloud.langfuse.com/") == "https://cloud.langfuse.com/api/public/otel/v1/traces"
-    assert tracing.auth_header("pk-lf-1", "sk-lf-2") == "Basic cGstbGYtMTpzay1sZi0y"
+    public, secret = "public-example", "secret-example"  # made up; Langfuse uses its public key as the Basic user
+    header = tracing.auth_header(public, secret)
+    assert header.startswith("Basic ") and base64.b64decode(header.removeprefix("Basic ")).decode() == f"{public}:{secret}"
 
 
 def test_a_meal_check_is_one_trace_with_model_calls_inside(exporter):
