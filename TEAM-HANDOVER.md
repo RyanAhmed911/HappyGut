@@ -2,6 +2,8 @@
 
 **Read this first if you are joining the project.** It explains what HappyGut is, what is already built, how the work follows the AIBC Participants Guide, how to run the code, and what is left to do. It was written on **18 November 2026**, when everything up to [pull request 22](https://github.com/RyanAhmed911/HappyGut/pull/22) was merged into `main`.
 
+> 🆕 **Added since this was written:** weight tracking, medicines & tests, three more MCP servers, Langfuse tracing, n8n workflows and the machine-learning flare model. See [`WHATS-NEW.md`](WHATS-NEW.md) for what they do and how to set them up.
+
 > ⏰ **Deadlines (AIBC Participants Guide):** the team preliminary submission closes on **Fri 20 Nov 2026**, and we plan to submit on **Thu 19 Nov**. Selection is announced on 25 Nov and the finals are on **Sat 26 Dec** at Daffodil International University. Section 8 lists what must happen before the 19th, and almost all of it needs people, not code.
 
 ---
