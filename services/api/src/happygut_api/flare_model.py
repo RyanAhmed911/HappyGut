@@ -27,7 +27,13 @@ from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
 
-from happygut_engine import THRESHOLDS, detect_periods, find_patterns, flare_risk, kind_by_day
+from happygut_engine import (
+    THRESHOLDS,
+    detect_periods,
+    find_patterns,
+    flare_risk,
+    kind_by_day,
+)
 from happygut_engine.flare_features import FEATURES, features
 from happygut_engine.simulate import simulate
 
@@ -152,7 +158,7 @@ def train(patients: int = PATIENTS, workers: int = 4) -> dict:
     started = time.time()
     rows = cohort_rows(patients, workers)
     part = {k: [r for r in rows if r["split"] == k] for k in ("train", "valid", "test")}
-    as_xy = lambda rs: (np.array([r["x"] for r in rs], dtype=float), np.array([r["y"] for r in rs]))  # noqa: E731
+    as_xy = lambda rs: (np.array([r["x"] for r in rs], dtype=float), np.array([r["y"] for r in rs]))
     (xt, yt), (xv, yv), (xs, ys) = as_xy(part["train"]), as_xy(part["valid"]), as_xy(part["test"])
 
     # 1. Pick the number of trees on the validation patients, 2. refit on train + validation.

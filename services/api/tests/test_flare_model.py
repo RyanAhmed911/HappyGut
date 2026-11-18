@@ -6,13 +6,13 @@ import math
 from datetime import timedelta
 
 import pytest
+from happygut_engine import THRESHOLDS, detect_periods, kind_by_day
+from happygut_engine.flare_features import FEATURES, features
+from happygut_engine.simulate import simulate
 
 from happygut_api import evaluate, flare_model
 from happygut_api.demo import build_menu
 from happygut_api.knowledge import MemoryKnowledge
-from happygut_engine import THRESHOLDS, detect_periods, kind_by_day
-from happygut_engine.flare_features import FEATURES, features
-from happygut_engine.simulate import simulate
 
 KNOWLEDGE = MemoryKnowledge.from_seeds(evaluate.SEEDS)
 MENU = build_menu(KNOWLEDGE)

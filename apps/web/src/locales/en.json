@@ -608,7 +608,7 @@
     "learn_periods_title": "Remission and flare periods",
     "learn_periods_text": "A flare is proposed when your score is active on 3 of 4 days and ends after 7 calm days. You confirm or reject every one.",
     "learn_risk_title": "Flare-risk outlook",
-    "learn_risk_text": "A simple points score from your recent days. Every point is shown with its reason. It is not a diagnosis.",
+    "learn_risk_text": "A simple points score from your recent days, with every point shown with its reason. Beside it, a machine-learning model trained on simulated patients gives a second opinion on new flares, with the three things that raised it most. Neither is a diagnosis.",
     "safeguards_title": "Safeguards",
     "safe_1": "Verdicts are graded and explained. Nothing is ever labelled risk-free.",
     "safe_2": "No evidence means \"not sure\", not a guess.",

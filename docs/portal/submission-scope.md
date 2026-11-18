@@ -46,7 +46,7 @@
 | Remission / flare periods: timeline + separate Remission and Flare summaries | **A** |
 | "My Gut" screen (trend, periods, "My patterns") | **A** |
 | Flare-risk outlook (rule-based v0) | **A** |
-| Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers | B |
+| Flare-risk outlook v1: LightGBM on the simulated cohort + SHAP drivers, shown beside v0 (ROC AUC 0.658 vs 0.558 on held-out simulated patients) | **A** |
 | Clinician pre-visit PDF | B |
 | "How it works" page (flow, safeguards, data sources, measured results), open without sign-in at `/about` | **A** |
 | Reminders (web push) | B |
@@ -78,7 +78,8 @@
 | Langfuse tracing: one trace per meal check (steps, timings, verdict) with the model calls nested inside; photos and names never sent | **A** once the keys are set on the deployed backend |
 | Calendar heatmap, waterfall chart | B (drop if short on time) |
 | Rule engine, Bayesian statistics | A |
-| Anomaly z-score, LightGBM | B |
+| LightGBM (flare-risk v1) | **A** |
+| Anomaly z-score | B |
 | n8n: health check and keep-awake, nightly refresh, weekly safety self-check, failure email (`n8n/workflows`) | **A** once n8n is deployed |
 | Supabase webhooks, Realtime, exports, GitHub Actions gate | B |
 | PII scrub (Presidio + Gemma), row-level security, SSE streaming, REST API | A |
