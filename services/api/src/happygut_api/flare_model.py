@@ -5,7 +5,7 @@ is not already in a flare. Features come from ``happygut_engine.flare_features``
 that day, nothing later). Drivers are exact per-prediction SHAP values from LightGBM's TreeSHAP
 (``pred_contrib``), so the app can show what raised the estimate.
 
-    uv run python -m happygut_api.flare_model train          # ~3 minutes on 4 cores
+    uv run python -m happygut_api.flare_model train          # about 2 minutes on 4 cores
 
 writes the model (``models/flare-risk-v1.txt``), its card (``models/flare-risk-v1.json``) and
 ``evals/FLARE_MODEL.md``. Training is deterministic.
