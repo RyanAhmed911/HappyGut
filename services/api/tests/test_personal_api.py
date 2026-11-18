@@ -477,3 +477,15 @@ def test_a_short_job_token_is_refused():
 
     assert not jobs.authorised("Bearer short", "short")
     assert jobs.authorised("Bearer " + "k" * 24, "k" * 24)
+
+
+def test_flare_risk_carries_the_model_estimate(demo):
+    from happygut_api import flare_model
+
+    client, _ = demo
+    if flare_model.load() is None:
+        pytest.skip("trained model not present")
+    nusrat = client.get("/v1/insights/flare-risk").json()["model"]
+    assert nusrat["in_flare"] is False and nusrat["level"] in ("low", "raised", "high") and nusrat["scale_checked"] is True
+    rafi = client.get("/v1/insights/flare-risk", headers=sign_in(client, "rafi@happygut.test", SIGN_IN["rafi"])).json()["model"]
+    assert rafi["in_flare"] is True and "probability" not in rafi  # it only looks for new flares

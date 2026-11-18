@@ -25,6 +25,8 @@ pii = [
   "presidio-analyzer>=2.2",
   "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
 ]
+# The flare-risk model v1 (gradient-boosted trees). Installed in the Docker image.
+ml = ["lightgbm>=4.3,<5", "numpy>=1.26"]
 # Tracing to Langfuse Cloud over OpenTelemetry (installed in the Docker image; off unless LANGFUSE_* keys are set).
 tracing = ["opentelemetry-sdk>=1.28", "opentelemetry-exporter-otlp-proto-http>=1.28"]
 # Bengali NER for Bangla-script names. Choose the model and record its licence in docs/03-data.md first.
@@ -35,7 +37,7 @@ happygut-engine = { path = "../../engine", editable = true }
 happygut-pipelines = { path = "../../pipelines", editable = true }
 
 [dependency-groups]
-dev = ["pytest>=8", "httpx>=0.27", "anyio>=4", "opentelemetry-sdk>=1.28"]
+dev = ["pytest>=8", "httpx>=0.27", "anyio>=4", "opentelemetry-sdk>=1.28", "lightgbm>=4.3,<5", "numpy>=1.26"]
 
 [build-system]
 requires = ["hatchling"]
