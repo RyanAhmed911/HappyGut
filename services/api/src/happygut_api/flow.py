@@ -13,13 +13,14 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 import re
+import time
 from typing import Any, AsyncIterator, Awaitable, Callable, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
 from happygut_engine import DEFAULT_CONFIG, DishEvidence, MealVerdict, Verdict, assess_meal, check_red_flags
 
-from . import guard, i18n
+from . import guard, i18n, tracing
 from .agents import Explainer, Explanation, PerceivedItem, Perceiver, Perception, describe_error
 from .evidence import DishContext, build_evidence, packet
 from .images import CleanImage
@@ -226,11 +227,31 @@ class MealCheckFlow:
     async def stream(self, patient: Patient, lang: str, text: str | None, image: CleanImage | None) -> AsyncIterator[Event]:
         state: State = {"patient": patient, "lang": lang, "text": text, "image": image}
         current: dict = dict(state)
-        async for update in self.graph.astream(state, stream_mode="updates"):
-            for node, delta in update.items():
-                current.update(delta or {})
-                for event in self._events(node, current):
-                    yield event
+        started = time.perf_counter()
+        with tracing.meal_check_span(**{
+            "happygut.input_type": "photo" if image is not None else "text", "happygut.lang": lang,
+            "langfuse.user.id": tracing.pseudonym(patient.id),
+            "langfuse.trace.tags": ["sample-data"] if patient.is_synthetic else ["patient"],
+        }) as span:
+            async for update in self.graph.astream(state, stream_mode="updates"):
+                for node, delta in update.items():
+                    current.update(delta or {})
+                    span.add_event(f"step:{node}", {"elapsed_ms": round((time.perf_counter() - started) * 1000)})
+                    for event in self._events(node, current):
+                        if event.name == "verdict":
+                            span.set_attribute("happygut.verdict", event.data["verdict"])
+                            span.set_attribute("happygut.engine_version", event.data["engine_version"])
+                            span.set_attribute("happygut.dishes", len(event.data["dishes"]))
+                        elif event.name == "explanation":
+                            span.set_attribute("happygut.explanation_source", event.data.get("source", ""))
+                        elif event.name == "red_flag":
+                            span.set_attribute("happygut.red_flag", True)
+                        elif event.name == "done":
+                            span.set_attribute("happygut.meal_check_id", event.data["meal_check_id"])
+                        elif event.name in ("error", "not_food"):
+                            span.set_attribute("happygut.outcome", event.name)
+                        yield event
+            span.set_attribute("happygut.total_ms", round((time.perf_counter() - started) * 1000))
 
     def _events(self, node: str, s: dict) -> list[Event]:
         lang = s["lang"]

@@ -93,7 +93,9 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Supabase sign-up for real users | ❌ | The test accounts live in memory |
 | Diary saved in Postgres | ❌ | Database tables exist; diary storage on Postgres is not written |
 | Loading the knowledge into Neo4j / Supabase | ❌ | The app reads the seed files directly |
-| Langfuse tracing, n8n workflows, server push notifications (reminders while the app is closed) | ❌ Designed only | |
+| Langfuse tracing | ✅ | Turns on when `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` are set; one trace per meal check with the model calls inside; no photos or names |
+| n8n workflows | ✅ | Four, in `n8n/workflows`: keep-awake health check, nightly refresh, weekly safety self-check, failure email. Need n8n running (Docker locally, a Space in production); see `n8n/README.md` |
+| Server push notifications (reminders while the app is closed) | ❌ Designed only | |
 | Guideline corpus with retrieval (RAG) | ❌ Designed only | Rule Cards carry the cited sentences instead |
 | LightGBM flare model, wearables, voice, federated learning | ❌ Roadmap | |
 
@@ -339,7 +341,7 @@ The guide forbids "fabricated demos" and "fake or simulated results" (§20.4) bu
 | 4 | **Record the 3-minute video** | Presentation Lead | Follow `docs/portal/video-script.md` exactly: timings, Bangla screens, a "Sample patient records" caption during the demo. Upload the same file to YouTube and Facebook |
 | 5 | **Rewrite the portal text (v4)** | Presentation Lead + Business Analyst | `docs/portal/submission-text.md` (v3) still describes things the app doesn't do: talking to it by voice, a locally hosted name-removal model, medication and test reminders, weight tracking, wearables, a meal-plan-writing dietitian, guideline retrieval. Rewrite to match section 3, keep each section at least as long as before, and add the measured numbers with the right wording |
 | 6 | **Finish the one-page summary** | Presentation Lead | `docs/portal/one-page-summary.md`: team name, roles, links |
-| 7 | **Reconcile the portal ticks** | Team Leader | Checklist in `docs/portal/submission-scope.md` §4: untick everything marked C (not built), e.g. CrewAI, smolagents, DSPy, fine-tuning, n8n, Langfuse, the Eval Lab |
+| 7 | **Reconcile the portal ticks** | Team Leader | Checklist in `docs/portal/submission-scope.md` §4: untick everything marked C (not built), e.g. CrewAI, smolagents, DSPy, fine-tuning, the research MCP server, Supabase webhooks, the Eval Lab. n8n and Langfuse count only once they run on the deployment |
 | 8 | **Talk to 2–3 clinicians** (even 10-minute calls) | Business Analyst | Ask: would a pre-visit report help? Is the verdict wording right? Get permission to quote one sentence. Add it to the summary and video |
 | 9 | Make the repository public and check git history has no keys | Team Leader | The secret scan has been clean on every pull request |
 

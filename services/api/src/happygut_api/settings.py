@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     test_password_rafi: str = ""
     test_password_ayesha: str = ""
     session_secret: str = ""  # signs session tokens; empty = a new key per start (everyone signs in again)
+    # Tracing to Langfuse Cloud (needs the "tracing" extra). Empty keys = no tracing.
+    langfuse_public_key: str = ""
+    langfuse_secret_key: str = ""
+    langfuse_host: str = "https://cloud.langfuse.com"
+    # Bearer token for /v1/jobs/* (called by n8n). Empty = the job endpoints are switched off.
+    jobs_token: str = ""
     timezone: str = "Asia/Dhaka"
 
     # CORS for the PWA

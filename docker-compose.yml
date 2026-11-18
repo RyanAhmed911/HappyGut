@@ -3,14 +3,22 @@
 
 services:
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.123.0
     restart: unless-stopped
     environment:
       GENERIC_TIMEZONE: Asia/Dhaka
       TZ: Asia/Dhaka
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set N8N_ENCRYPTION_KEY in .env}
+      # The workflows in n8n/workflows read these. Locally the backend runs on the host.
+      HAPPYGUT_API_URL: ${HAPPYGUT_API_URL:-http://host.docker.internal:8000}
+      HAPPYGUT_ALERT_FROM: ${HAPPYGUT_ALERT_FROM:-}
+      HAPPYGUT_ALERT_TO: ${HAPPYGUT_ALERT_TO:-}
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - n8n:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
     ports:
       - "127.0.0.1:5678:5678"
 

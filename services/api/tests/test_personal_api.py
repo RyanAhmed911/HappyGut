@@ -449,3 +449,31 @@ def test_appointments_add_delete_report_and_restore(demo):
     assert [m["name"] for m in client.get("/v1/medications", headers=rafi).json()["items"]] == ["Mesalamine"]
     # Accounts never see each other's medicines.
     assert "Mesalamine" not in {m["name"] for m in client.get("/v1/medications").json()["items"]}
+
+
+# ---------------------------------------------------------------- scheduled jobs (n8n)
+
+def test_jobs_are_off_without_a_token_and_need_the_right_one(demo):
+    client, services = demo
+    assert client.post("/v1/jobs/nightly").status_code == 404  # no JOBS_TOKEN configured
+    from dataclasses import replace
+
+    job_token = "j" * 32
+    app = create_app(replace(services, settings=Settings(seeds_dir=FIXTURE_SEEDS, demo_mode=True, jobs_token=job_token)))
+    with TestClient(app) as jobs_client:
+        assert jobs_client.post("/v1/jobs/nightly").status_code == 401
+        assert jobs_client.post("/v1/jobs/nightly", headers={"Authorization": f"Bearer {'x' * 32}"}).status_code == 401
+        body = jobs_client.post("/v1/jobs/nightly", headers={"Authorization": f"Bearer {job_token}"}).json()
+        assert body["ok"] and body["counts"]["patients"] == 3 and body["counts"]["in_flare"] >= 1
+        assert body["counts"]["weight_notices"] >= 1 and body["counts"]["doses_due_today"] >= 4
+        text = str(body)
+        assert "Nusrat" not in text and "patient-" not in text  # counts only
+        check = jobs_client.post("/v1/jobs/selfcheck", headers={"Authorization": f"Bearer {job_token}"}).json()
+        assert check["passed"] and check["checks"]["red_flags"]["caught"] == check["checks"]["red_flags"]["phrases"]
+
+
+def test_a_short_job_token_is_refused():
+    from happygut_api import jobs
+
+    assert not jobs.authorised("Bearer short", "short")
+    assert jobs.authorised("Bearer " + "k" * 24, "k" * 24)

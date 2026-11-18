@@ -13,7 +13,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN pip install --no-cache-dir "uv==0.11.32" && useradd -m -u 1000 user
 WORKDIR /app
 
-# Only what the API needs: engine, pipelines (seed loader), the API, approved seeds and runtime prompts.
+# Only what the API needs: engine, pipelines (seed loader), the API, approved seeds, runtime prompts and the
+# red-flag suite (for the weekly self-check job).
 COPY engine/pyproject.toml engine/README.md engine/
 COPY engine/src engine/src
 COPY pipelines/pyproject.toml pipelines/
@@ -22,8 +23,9 @@ COPY services/api/pyproject.toml services/api/uv.lock services/api/README.md ser
 COPY services/api/src services/api/src
 COPY data/seeds data/seeds
 COPY prompts/runtime prompts/runtime
+COPY evals/sets evals/sets
 
-RUN cd services/api && uv sync --frozen --no-dev --extra pii --python /usr/local/bin/python3.11 && chown -R user /app
+RUN cd services/api && uv sync --frozen --no-dev --extra pii --extra tracing --python /usr/local/bin/python3.11 && chown -R user /app
 
 USER user
 EXPOSE 7860
