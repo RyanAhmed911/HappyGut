@@ -1,6 +1,6 @@
 # The 180-second video: story, script and production plan
 
-> **Owner:** Presentation / Communication Lead. **Version 2 (18 Nov 2026):** rebuilt around the team leader's story (IBD rising and little known in our region, no cure and no known cause, triggers that differ per person, research and awareness). Every fact in the narration is checked against a published source (section 7).
+> **Owner:** Presentation / Communication Lead. **Version 2.1 (18 Nov 2026):** built around the team leader's story (IBD rising and little known in our region, no cure and no known cause, triggers that differ per person, research and awareness), then checked against the portal's **YouTube Video Guidance** (section 2). Every fact in the narration is checked against a published source (section 7).
 
 This one video decides whether we reach the finals (guide §9.2). It is scored segment by segment, so the structure below follows the guide's five fixed segments to the second. The same story becomes our 3-minute live pitch on 26 December.
 
@@ -21,8 +21,31 @@ Three layers, in this order, so judges feel it before they analyse it:
 
 ## 2. Why this structure wins
 
-| Guide segment (§9.2) | What evaluators look for | How this script answers |
-|---|---|---|
+The portal's **YouTube Video Guidance** ("Vibe to Production in 180 Seconds") repeats the guide's five segments and adds a key message for each. Its goal: *show that your idea is real, your AI approach is valid, and your team can build it.*
+
+| Time | Segment | Key message (portal) | What evaluators look for | How this script answers |
+|---|---|---|---|---|
+| 0:00–0:30 | Problem | "This problem matters" | Clarity, relevance; problem, **target users**, urgency **(Bangladesh + global)** | Nusrat at a real Bangladeshi wedding plate; 6.8 million people worldwide; rising fast in South Asia; often treated as TB first; a year to diagnose; no cure, no known cause, triggers differ per person |
+| 0:30–1:00 | Solution | "This is how we solve it" | Simplicity, uniqueness | Who it's for, one sentence of value ("learns *her* triggers"), then the difference: the AI reads, a tested engine decides |
+| 1:00–2:00 | Demo | "This is how it works" | Feasibility, logic | The real app on a phone, in Bangla, in the order a patient uses it: check → diary → patterns → periods → risk |
+| 2:00–2:30 | AI approach | "This is real AI thinking" | Depth, structure; models, RAG, data, personalisation, tools | The flow diagram, the models, the knowledge graph with cited rules, the per-person Bayesian model, privacy, the tool stack, measured numbers |
+| 2:30–3:00 | Impact and next step | "We can build and scale this" | Vision, potential; value, potential users, what comes next | Daily-life value, research data for the region, awareness, how it scales, pilot KPIs and the next step |
+
+**"What gets you selected"** (portal), and where it shows:
+
+| Quality | Where it shows |
+|---|---|
+| **Clarity**: simple, easy to understand | One character, one plate, one sentence per idea; a small segment label in the corner of every segment |
+| **AI thinking**: clear reasoning behind AI usage | "The AI only reads the plate and explains. A tested engine makes the call." said in the Solution segment and shown again in the AI segment |
+| **Feasibility**: realistically buildable | It's already built: the demo minute is the real app, and the numbers are measured |
+| **Structure**: logical flow | The five segments in order, each opening with its label |
+| **Energy**: confidence and ownership | A team member's own voice (no text-to-speech), "we built", "we measured", the team on screen at the end |
+
+**Mandatory requirements** (portal and guide): 3-minute structured pitch ✅ · clear problem and users ✅ · AI-native approach ✅ · input → AI → output flow ✅ (2:00–2:16) · demo ✅ · Bangla ✅ · defined impact: KPIs ✅ (2:50–2:56).
+
+**Common mistakes it avoids:** an idea with no system thinking (the app runs) · no clear AI explanation (the AI's job is named twice) · overcomplicating (one patient, one plate, one flow) · no demo or workflow visual (a full minute of the app, plus the flow diagram) · ignoring real users or problems (Nusrat, the wedding plate, sourced regional facts).
+
+---|---|---|
 | 0:00–0:30 Problem | Clarity, relevance (local + global) | A real person, a real Bangladeshi plate, then four cited facts: rising in South Asia, often first treated as TB, a year to diagnose, no cure or known cause |
 | 0:30–1:00 Solution | Simplicity, uniqueness | One sentence of value ("learns *your* triggers"), then the difference: the AI reads, a tested engine decides |
 | 1:00–2:00 Demo | Feasibility, logic | The real app on a phone, in Bangla, in the order a patient uses it: check → diary → patterns → periods → risk |
@@ -35,16 +58,18 @@ Three layers, in this order, so judges feel it before they analyse it:
 
 ## 3. The script
 
-**Narration:** English, calm and warm, about 150 words a minute, so no more than about 2.5 words a second (the script below is 389 words). English reaches the international and NRB judges; Bangla is everywhere else: Nusrat speaks Bangla, the app is shown in Bangla, and the closing line is in both.
+**Narration:** English, calm and warm, about 150 words a minute, so no more than about 2.5 words a second (the script below is 390 words). English reaches the international and NRB judges; Bangla is everywhere else: Nusrat speaks Bangla, the app is shown in Bangla, and the closing line is in both.
 
 **On-screen text:** short, large, white on dark green (`#0A4237`) or on a blurred background. Sources in small grey text at the bottom (section 7).
+
+**Segment labels:** at the start of each segment, show a small label in the top-left corner for about 3 seconds: **1 · Problem**, **2 · Solution**, **3 · Demo**, **4 · AI approach**, **5 · Impact**. Evaluators score each segment separately, so make it easy for them to see where each one starts.
 
 ### 0:00–0:30 · PROBLEM
 
 | Time | Picture | Sound |
 |---|---|---|
 | 0:00–0:05 | **Live action.** A wedding table. Close-up of a plate: kacchi biryani, borhani, firni. Nusrat (a teammate) looks at it, hesitates. | Wedding chatter, low. Nusrat, in Bangla, quietly: *"এর মধ্যে কোনটা খেলে আবার দুই দিন বিছানায় পড়ে থাকব?"* Subtitle: *"Which of these will put me in bed for two days again?"* |
-| 0:05–0:12 | Nusrat's face, then a slow push-in on the plate. Text appears: **Crohn's disease · ulcerative colitis**, then **Rising at an alarming rate in South Asia** | **VO:** "Nusrat has Crohn's, a bowel disease rising fast in South Asia that few people here have heard of." |
+| 0:05–0:12 | Nusrat's face, then a slow push-in on the plate. Text cards: **6.8 million people with IBD worldwide** (global), then **Rising at an alarming rate in South Asia** (our region) | **VO:** "Nusrat has Crohn's, a bowel disease rising fast in South Asia that few people here have heard of." |
 | 0:12–0:20 | Text cards, one after the other: **1 in 5** *Crohn's patients in our region was given TB treatment* · **~12 months** *median wait for a Crohn's diagnosis* | **VO:** "Across our region, one in five Crohn's patients was given TB treatment, and diagnosis took a median of a year." |
 | 0:20–0:30 | Text: **No cure. No known cause.** Then the plate splits into three different coloured outlines, one per patient: *What hurts one patient doesn't hurt another.* | **VO:** "There's no cure, no known cause, and triggers differ for every patient, so no general diet can tell Nusrat what *her* gut can take." |
 
@@ -52,7 +77,7 @@ Three layers, in this order, so judges feel it before they analyse it:
 
 | Time | Picture | Sound |
 |---|---|---|
-| 0:30–0:37 | HappyGut logo on dark green. Tagline: **Know what your gut can take, before you eat.** | **VO:** "HappyGut is a companion that learns what *her* gut can take." |
+| 0:30–0:37 | HappyGut logo on dark green. Tagline: **Know what your gut can take, before you eat.** Under it: *For people living with Crohn's disease or ulcerative colitis · Bangladesh first* | **VO:** "HappyGut is a companion for people with IBD, like Nusrat, that learns what *her* gut can take." |
 | 0:37–0:50 | Phone in hand over the plate; three verdict chips appear one by one: 🔴 🟡 🟢 | **VO:** "Before she eats, she snaps the plate or types it in Bangla or English, and gets a verdict for each dish, with the reason, the evidence and a gentler option." |
 | 0:50–1:00 | Simple graphic: **AI reads the plate → tested engine decides → AI explains**. Then the diary icon with a moon. | **VO:** "The AI only reads the plate and explains. A tested engine makes the call. And every night, a two-minute diary teaches it a little more about her." |
 
@@ -72,18 +97,19 @@ Keep the caption **"Real app · sample patient records"** in the top corner for 
 
 | Time | Picture | Sound |
 |---|---|---|
-| 2:00–2:16 | Screen recording of the app's **How it works** page, scrolling the six-step flow; highlight each step as it is named | **VO:** "Under the hood: personal details are removed first, and warning signs stop all food advice. Gemini reads the plate. A knowledge graph maps sixty-one Bangladeshi dishes to gut-relevant components, and twenty-five rules quote published IBD research." |
+| 2:00–2:16 | Screen recording of the app's **How it works** page, scrolling the six-step flow (input → AI → output); highlight each step as it is named. Strip along the bottom: *Gemini · Groq · LangGraph · FastAPI · knowledge graph · MCP server · React PWA · built with Claude Code* | **VO:** "Under the hood: personal details are removed first, and warning signs stop all food advice. Gemini reads the plate. A knowledge graph maps sixty-one Bangladeshi dishes to gut-relevant components, and twenty-five rules quote published IBD research." |
 | 2:16–2:30 | Three number cards: **72%** *hidden triggers found in 200 simulated patients* · **29 / 29** *emergency phrases caught, Bangla and English* · **427 / 427** *verdicts identical on repeat* | **VO:** "A deterministic engine decides, and a Bayesian model learns each person's patterns. We measured it: it found seventy-two percent of hidden triggers in simulated patients, and caught every emergency phrase we tested." |
 
 ### 2:30–3:00 · IMPACT AND NEXT STEP
 
 | Time | Picture | Sound |
 |---|---|---|
-| 2:30–2:40 | Nusrat back at the wedding, now choosing plain rice and light chicken curry, relaxed, laughing with family | **VO:** "For patients, that means fewer guesses: what suits me, what set me off, what comes before my flares." |
-| 2:40–2:52 | Map of South Asia with Bangladesh highlighted. Many small dots (patients) join into a network. Text: **IBD data from South Asia is scarce** (source). Then: **With consent · anonymised · shared** | **VO:** "And it can do more. IBD research in our region lacks data. If thousands of patients choose to share anonymised patterns, machine learning across them could show researchers what no single clinic can see." |
-| 2:52–3:00 | Text: **Next: pilot with Dhaka gastroenterology clinics.** Then logo and **HappyGut · নিজের পেটকে জানুন, খাওয়ার আগেই** · *Know your gut, before you eat.* · **From Bangladesh, for the world.** · team name | **VO:** "Raising awareness here, and helping Bangladesh contribute to a global question. HappyGut: know your gut, before you eat." |
+| 2:30–2:40 | Nusrat back at the wedding, now choosing plain rice and light chicken curry, relaxed, laughing with family | **VO:** "For patients: fewer guesses about what suits them, what set them off, what comes before a flare." |
+| 2:40–2:50 | Map of South Asia with Bangladesh highlighted. Many small dots (patients) join into a network. Text: **IBD data from South Asia is scarce** (source), then **With consent · anonymised · shared** | **VO:** "IBD research here lacks data. If thousands of patients choose to share anonymised patterns, machine learning could show researchers what no single clinic sees." |
+| 2:50–2:56 | Two cards. **Scales by data, not code:** *a new cuisine or language is a data file · runs on free cloud tiers*. **Next: pilot with Dhaka gastroenterology clinics**, measuring *4-week diary retention · symptom-free days · food-related quality of life (FR-QoL-29)* | **VO:** "It scales: a new cuisine is just data. Next, a Dhaka clinic pilot, so Bangladesh can raise awareness and help answer a global question." |
+| 2:56–3:00 | The team together, smiling (2 s). Then logo and **HappyGut · নিজের পেটকে জানুন, খাওয়ার আগেই** · *Know your gut, before you eat.* · **Built in Bangladesh, for the world** · team name · live link | Music rises; no narration |
 
-**Word count:** problem 62 (plus Nusrat's line), solution 68, demo 121, AI 68, impact 70 = 389 words. Read it aloud with a stopwatch; if a segment runs long, **cut words, not shots**.
+**Word count:** problem 62 (plus Nusrat's line), solution 74, demo 121, AI 68, impact 65 = 390 words, at most about 2.5 words a second in every segment. Read it aloud with a stopwatch; if a segment runs long, **cut words, not shots**.
 
 ---
 
@@ -94,7 +120,7 @@ Keep the caption **"Real app · sample patient records"** in the top corner for 
 | Job | Person (fill in) | Notes |
 |---|---|---|
 | Director and editor | Presentation Lead | Owns timing and the final cut |
-| Narrator | the clearest English speaker | Record in a quiet room, phone 20 cm from the mouth, inside a wardrobe or under a blanket if the room echoes |
+| Narrator | the clearest English speaker on the team | **A team member's own voice, never text-to-speech**: evaluators score energy, confidence and ownership. Smile while reading; it is audible. Record in a quiet room, phone 20 cm from the mouth, inside a wardrobe or under a blanket if the room echoes |
 | Nusrat (on camera) | a teammate | Ideally a woman on the team (also a guide bonus, §13.3) |
 | App recording | Frontend Developer | Knows the app; records each demo shot several times |
 | Facts and wording check | Business Analyst | Checks every number against section 7 before export |
@@ -165,6 +191,9 @@ Sources: Shenoy et al., Lancet Gastroenterol Hepatol 2025 (PMID 39954693) · Ban
 - [ ] Subtitles on all speech
 - [ ] Last frame: team name, live link, and (if space) the five names with roles
 - [ ] The same file on YouTube and Facebook
+- [ ] YouTube visibility is **Public** or **Unlisted**, never Private. Paste the full link (`https://youtu.be/...`) into the portal, then open it in a private browser window to check it plays without signing in
+- [ ] Segment labels appear at 0:00, 0:30, 1:00, 2:00 and 2:30
+- [ ] A team member's own voice; the team is on screen at the end
 
 **Why the care:** the guide disqualifies "fabricated demos" and "fake or simulated results" (§20.4) and asks us not to misrepresent technical capabilities (§20.9). Saying "sample patient" and "simulated" out loud turns a risk into a sign of integrity, which is part of the Responsible AI score.
 
