@@ -312,3 +312,66 @@ def test_changing_the_diagnosis_rescores_the_diary(demo):
     assert day["index"]["name"] == "SCCAI"
     client.patch("/v1/me", json={"diagnosis": "CD"})
     assert client.get("/v1/insights/periods").json()["index_name"] == "HBI"
+
+
+# ---------------------------------------------------------------- weight
+
+def test_weigh_ins_trend_and_the_glim_notice(demo):
+    client, _ = demo
+    nusrat = client.get("/v1/weights").json()
+    assert len(nusrat["entries"]) >= 15 and nusrat["latest"] and nusrat["loss"] is None and not nusrat["due"]
+    assert nusrat["source"]["pmid"] == "30920778" and nusrat["thresholds"]["recent_percent"] == 5.0
+    rafi = client.get("/v1/weights", headers=sign_in(client, "rafi@happygut.test", SIGN_IN["rafi"])).json()
+    assert rafi["loss"]["window"] == "recent" and rafi["loss"]["percent"] > 5.0  # his flare took him past the threshold
+    ayesha = client.get("/v1/weights", headers=sign_in(client, "ayesha@happygut.test", demo[1].accounts.generated["ayesha@happygut.test"])).json()
+    assert ayesha["entries"] == [] and ayesha["latest"] is None and ayesha["due"]
+
+
+def test_saving_replacing_and_deleting_a_weigh_in(demo):
+    client, services = demo
+    ayesha = sign_in(client, "ayesha@happygut.test", services.accounts.generated["ayesha@happygut.test"])
+    today = today_of(client)
+    earlier = (today - timedelta(days=60)).isoformat()
+    assert client.put(f"/v1/weights/{earlier}", json={"kg": 58.0}, headers=ayesha).status_code == 200
+    body = client.put(f"/v1/weights/{today}", json={"kg": 55.04}, headers=ayesha).json()
+    assert body["latest"] == {"date": today.isoformat(), "kg": 55.0} and body["loss"]["percent"] == 5.2
+    assert not body["due"]
+    replaced = client.put(f"/v1/weights/{today}", json={"kg": 57.5}, headers=ayesha).json()
+    assert len(replaced["entries"]) == 2 and replaced["loss"] is None  # one weigh-in per day
+    assert client.delete(f"/v1/weights/{today}", headers=ayesha).status_code == 204
+    assert client.delete(f"/v1/weights/{today}", headers=ayesha).status_code == 404
+    assert client.get("/v1/weights").json()["entries"] != client.get("/v1/weights", headers=ayesha).json()["entries"]
+    client.delete(f"/v1/weights/{earlier}", headers=ayesha)
+
+
+def test_weigh_ins_are_validated(demo):
+    client, _ = demo
+    today = today_of(client)
+    assert client.put(f"/v1/weights/{today}", json={"kg": 5}).status_code == 422
+    assert client.put(f"/v1/weights/{today}", json={"kg": 400}).status_code == 422
+    assert client.put(f"/v1/weights/{today + timedelta(days=1)}", json={"kg": 52}).status_code == 422
+    assert client.put(f"/v1/weights/{today - timedelta(days=400)}", json={"kg": 52}).json()["detail"] == "too_old"
+
+
+def test_report_includes_weight_and_restore_resets_it(demo):
+    client, _ = demo
+    rafi = sign_in(client, "rafi@happygut.test", SIGN_IN["rafi"])
+    report = client.get("/v1/reports/previsit", headers=rafi).json()
+    assert report["weight"]["latest"] and report["weight"]["loss"]["percent"] > 5.0 and report["weight"]["weigh_ins"] >= 10
+    before = client.get("/v1/weights", headers=rafi).json()["entries"]
+    client.put(f"/v1/weights/{today_of(client)}", json={"kg": 70}, headers=rafi)
+    client.post("/v1/account/restore", headers=rafi)
+    assert client.get("/v1/weights", headers=rafi).json()["entries"] == before
+
+
+def test_weights_need_supported_storage():
+    store = PostgresStore("postgresql://unused")
+    import asyncio
+
+    for call in (store.list_weights("p"), store.save_weight("p", date(2026, 1, 1), 50.0), store.delete_weight("p", date(2026, 1, 1))):
+        try:
+            asyncio.run(call)
+        except Exception as exc:  # NotSupported
+            assert type(exc).__name__ == "NotSupported"
+        else:
+            raise AssertionError("expected NotSupported")

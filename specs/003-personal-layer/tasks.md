@@ -31,6 +31,7 @@
 - [x] T025 Health profile editing (diagnosis, stricture, lactose intolerance, IBS-like symptoms); a diagnosis change rescores the diary
 - [x] T026 Food guide (every dish with the person's verdict) and Meal ideas (a week from dishes rated "likely OK"), computed by the engine
 - [x] T027 Sample-data notice shown once at entry; per-screen labels removed (Constitution V, v2.0.0)
+- [x] T028 Weight tracking (FR-029): weekly weigh-ins, trend and changes, GLIM-based notice, Today prompt, doctor's report; sample weigh-ins for the test accounts
 
 ## Proof (step 4)
 - [ ] T020 Simulated cohort (≥ 200 patients × 180 days) and the recovery metrics SC-002 to SC-004 in the Eval Lab

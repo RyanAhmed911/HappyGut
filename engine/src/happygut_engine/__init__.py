@@ -26,6 +26,16 @@ from .triggers import (
 )
 from .verdict import assess_dish, assess_meal
 from .vocab import Component, DiseaseState, Diagnosis, Level, Verdict
+from .weight import (
+    DEFAULT_WEIGHT_CONFIG,
+    WeightChange,
+    WeightConfig,
+    WeightEntry,
+    WeightLoss,
+    WeightTrend,
+    valid_weight,
+    weight_trend,
+)
 
 __all__ = [
     "DEFAULT_CONFIG", "EngineConfig", "ComponentAssessment", "DishEvidence", "DishVerdict",
@@ -36,4 +46,6 @@ __all__ = [
     "RiskDriver", "RiskOutlook", "flare_risk", "THRESHOLDS", "DiaryItems", "IndexScore", "hbi", "index_for",
     "index_name", "sccai", "DayRecord", "PatternResult", "exposure", "find_patterns", "personal_evidence", "worse_days",
     "ManualFlare", "Period", "current_kind", "detect_periods", "kind_by_day", "is_late_night", "sleep_hours", "usual_bedtime",
+    "DEFAULT_WEIGHT_CONFIG", "WeightChange", "WeightConfig", "WeightEntry", "WeightLoss", "WeightTrend", "valid_weight",
+    "weight_trend",
 ]

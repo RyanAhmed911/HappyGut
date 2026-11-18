@@ -12,16 +12,31 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from happygut_engine import (THRESHOLDS, Component, DayRecord, DiseaseState, Level, PatternResult, PersonalEvidence,
-                             detect_periods, exposure, find_patterns, flare_risk, index_name, kind_by_day,
-                             personal_evidence)
+from happygut_engine import (
+    THRESHOLDS,
+    Component,
+    DayRecord,
+    DiseaseState,
+    Level,
+    PatternResult,
+    PersonalEvidence,
+    detect_periods,
+    exposure,
+    find_patterns,
+    flare_risk,
+    index_name,
+    kind_by_day,
+    personal_evidence,
+)
 from happygut_engine.flare_risk import DEFAULT_RISK_CONFIG
 from happygut_engine.patterns import DEFAULT_PATTERN_CONFIG, LIKELY, POSSIBLE
 from happygut_engine.periods import DEFAULT_PERIOD_CONFIG, FLARE, REMISSION, Period
+from happygut_engine.weight import DEFAULT_WEIGHT_CONFIG, WeightEntry, weight_trend
+from happygut_engine.weight import SOURCE as WEIGHT_SOURCE
 
 from .diary import DiaryEntry, StressPeriodOut
 from .knowledge import Knowledge
-from .store import Patient, PeriodDecisions, Store
+from .store import NotSupported, Patient, PeriodDecisions, Store
 
 SCOPES = ("all", REMISSION, FLARE)
 MIN_DAYS_FOR_PATTERNS = 14
@@ -241,6 +256,30 @@ class Insights:
             "is_synthetic": patient.is_synthetic,
         }
 
+    async def weight(self, patient: Patient) -> dict:
+        """Weigh-ins, the trend and any loss past the GLIM threshold (engine/weight.py)."""
+        today = self.today()
+        rows = await self.store.list_weights(patient.id)
+        trend = weight_trend([WeightEntry(d, kg) for d, kg in rows], today)
+        point = lambda e: {"date": e.day.isoformat(), "kg": e.kg}
+        c = DEFAULT_WEIGHT_CONFIG
+        return {
+            "today": today.isoformat(),
+            "entries": [{"date": d.isoformat(), "kg": kg} for d, kg in rows],
+            "latest": point(trend.latest) if trend.latest else None,
+            "changes": [{"days": ch.days, "since": ch.since.isoformat(), "from_kg": ch.from_kg, "kg": ch.kg, "percent": ch.percent}
+                        for ch in trend.changes],
+            "loss": None if trend.loss is None else {
+                "level": trend.loss.level, "window": trend.loss.window, "peak": point(trend.loss.peak),
+                "kg": trend.loss.kg, "percent": trend.loss.percent},
+            "due": trend.due,
+            "thresholds": {"recent_percent": c.recent_loss_percent, "long_percent": c.long_loss_percent,
+                           "larger_percent": c.larger_loss_percent, "min_kg": c.min_kg, "max_kg": c.max_kg},
+            "source": WEIGHT_SOURCE,
+            "version": c.version,
+            "is_synthetic": patient.is_synthetic,
+        }
+
     async def report(self, patient: Patient, days: int = 90) -> dict:
         b = await self.bundle(patient)
         today = self.today()
@@ -270,5 +309,17 @@ class Insights:
             "contributors": [r for r in patterns["results"] if r["label"] in (LIKELY, POSSIBLE)],
             "risk": await self.flare_risk(patient),
             "meal_verdicts": verdicts,
+            "weight": await self._report_weight(patient, since),
             "is_synthetic": patient.is_synthetic,
         }
+
+    async def _report_weight(self, patient: Patient, since: date) -> dict | None:
+        try:
+            w = await self.weight(patient)
+        except NotSupported:
+            return None
+        if w["latest"] is None:
+            return None
+        in_range = [e for e in w["entries"] if e["date"] >= since.isoformat()]
+        return {"latest": w["latest"], "first_in_range": in_range[0] if in_range else None, "weigh_ins": len(in_range),
+                "changes": w["changes"], "loss": w["loss"]}

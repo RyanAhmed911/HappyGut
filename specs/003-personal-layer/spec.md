@@ -182,6 +182,7 @@ When the flare-risk outlook rises, or a known personal contributor is coming up 
 - **FR-026**: Free-text notes MUST be scrubbed of personal identifiers inside the backend before any cloud AI call, the same as the meal check.
 - **FR-027**: A simulated cohort (at least 200 patients × 180 days) and a simulated demo persona MUST be generated with known, injected effects for food components, late nights, stress and exam periods, plus confounders and missing days. They MUST be flagged `is_synthetic` and labelled "simulated" wherever shown.
 - **FR-028**: Pattern and period results MUST be recomputed after every saved diary and at least nightly.
+- **FR-029** (added 2026-11-18, D19): The user MUST be able to log their weight (one weigh-in per day, 20–300 kg, up to a year back) and see the trend and the change over 30, 90 and 180 days. When the latest weigh-in is more than 5% below the highest one in the past 6 months, or more than 10% below the highest one 6–12 months back (GLIM criterion), the app MUST show a notice to tell the doctor, citing the source, and the doctor's report MUST include it. The app MUST NOT call this malnutrition or give diet or medication advice about it. A weekly weigh-in prompt appears when the last one is a week old.
 
 ### Key Entities
 

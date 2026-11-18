@@ -11,6 +11,7 @@ HappyGut is a Bangla-first companion that answers "is this meal likely to trigge
 - **Nightly diary:** the day's foods, reactions, stool, sleep and stress; computes the Harvey-Bradshaw Index or SCCAI.
 - **Flare Pattern Finder:** shows which foods and habits (late nights, exam weeks, missed doses) are linked to that person's worse days.
 - **My Gut:** remission and flare periods kept apart, a transparent flare-risk outlook, and a one-page report for the doctor.
+- **Weight:** a weekly weigh-in with the trend; past the GLIM weight-loss threshold (more than 5% in 6 months) it tells the patient to contact their doctor.
 
 ## AI architecture (input → AI → output)
 Photo / text → **PII scrub** and **red-flag check** → **vision-language model** names the dishes → **food knowledge graph** (61 Bangladeshi dishes → gut-relevant components) and **25 cited Rule Cards** → **deterministic verdict engine** combines guidance, the food and the person's own history → **language model** words the explanation → **output guard** checks it against the engine's result (template fallback) → verdict card.

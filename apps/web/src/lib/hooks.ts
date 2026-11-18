@@ -14,10 +14,11 @@ export const keys = {
   patterns: (scope: string) => ["patterns", scope] as const,
   mealChecks: ["mealChecks"] as const,
   stressPeriods: ["stressPeriods"] as const,
+  weights: ["weights"] as const,
 };
 
 /** Query keys to refresh after the diary, a period or a stressful period changes. */
-export const PERSONAL_KEYS = [["risk"], ["periods"], ["days"], ["patterns"], ["diary"], ["me"], ["report"], ["foodGuide"], ["mealPlan"]] as const;
+export const PERSONAL_KEYS = [["risk"], ["periods"], ["days"], ["patterns"], ["diary"], ["me"], ["report"], ["foodGuide"], ["mealPlan"], ["weights"]] as const;
 
 /** A dish's name in the chosen language: known dishes come from the food guide, others keep what was typed. */
 export function useDishName(lang: string): (dish: { dish_id: string | null; name: string }) => string {

@@ -336,9 +336,53 @@ export const Report = z.object({
   contributors: z.array(Pattern),
   risk: Risk,
   meal_verdicts: z.record(z.string(), z.number()),
+  weight: z
+    .object({
+      latest: z.object({ date: z.string(), kg: z.number() }),
+      first_in_range: z.object({ date: z.string(), kg: z.number() }).nullable(),
+      weigh_ins: z.number(),
+      changes: z.array(z.object({ days: z.number(), since: z.string(), from_kg: z.number(), kg: z.number(), percent: z.number() })),
+      loss: z
+        .object({
+          level: z.enum(["notable", "larger"]),
+          window: z.enum(["recent", "long"]),
+          peak: z.object({ date: z.string(), kg: z.number() }),
+          kg: z.number(),
+          percent: z.number(),
+        })
+        .nullable(),
+    })
+    .nullable()
+    .optional(),
   is_synthetic: z.boolean(),
 });
 export type Report = z.infer<typeof Report>;
+
+// ---------------------------------------------------------------- weight
+
+export const WeightPoint = z.object({ date: z.string(), kg: z.number() });
+export type WeightPoint = z.infer<typeof WeightPoint>;
+export const WeightLoss = z.object({
+  level: z.enum(["notable", "larger"]),
+  window: z.enum(["recent", "long"]),
+  peak: WeightPoint,
+  kg: z.number(),
+  percent: z.number(),
+});
+export type WeightLoss = z.infer<typeof WeightLoss>;
+export const Weight = z.object({
+  today: z.string(),
+  entries: z.array(WeightPoint),
+  latest: WeightPoint.nullable(),
+  changes: z.array(z.object({ days: z.number(), since: z.string(), from_kg: z.number(), kg: z.number(), percent: z.number() })),
+  loss: WeightLoss.nullable(),
+  due: z.boolean(),
+  thresholds: z.object({ recent_percent: z.number(), long_percent: z.number(), larger_percent: z.number(), min_kg: z.number(), max_kg: z.number() }),
+  source: z.object({ key: z.string(), citation: z.string(), doi: z.string(), pmid: z.string(), quote: z.string(), licence: z.string() }),
+  version: z.string(),
+  is_synthetic: z.boolean(),
+});
+export type Weight = z.infer<typeof Weight>;
 
 export const FoodMatch = z.object({ dish_id: z.string(), name_en: z.string(), name_bn: z.string(), score: z.number() });
 export type FoodMatch = z.infer<typeof FoodMatch>;

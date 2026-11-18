@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
 import { FactorIcon, PeriodStrip, TrendChart, useFactorName } from "@/components/insights";
+import { WeightSection } from "@/components/weight";
 import { LoadError, PageLoading, useLang } from "@/components/shell";
 import { Badge, Button, Card, Chip, Empty, Field, inputClass, PageTitle, SectionTitle, Sheet, Tabs } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -141,6 +142,7 @@ export function Gut() {
 
   useEffect(() => {
     if (hash === "#periods" && stress.data) document.getElementById("periods")?.scrollIntoView({ behavior: "smooth" });
+    if (hash === "#weight") window.setTimeout(() => document.getElementById("weight")?.scrollIntoView({ behavior: "smooth" }), 300);
   }, [hash, stress.data]);
 
   if (periods.isLoading || !today) return <PageLoading />;
@@ -262,6 +264,10 @@ export function Gut() {
         </>
       )}
 
+
+      <div className="mt-6">
+        <WeightSection />
+      </div>
       </div>
 
       {/* Period list */}

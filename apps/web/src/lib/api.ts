@@ -91,5 +91,8 @@ export const api = {
   addFlare: (start: string, end: string | null) => json(S.Periods, "/v1/insights/periods/manual", send("POST", { start, end })),
   risk: () => json(S.Risk, "/v1/insights/flare-risk"),
   report: (days = 90) => json(S.Report, `/v1/reports/previsit?days=${days}`),
+  weights: () => json(S.Weight, "/v1/weights"),
+  saveWeight: (day: string, kg: number) => json(S.Weight, `/v1/weights/${day}`, send("PUT", { kg })),
+  deleteWeight: (day: string) => raw(`/v1/weights/${day}`, { method: "DELETE" }),
   searchFoods: async (q: string) => (await json(S.FoodSearch, `/v1/foods/search?q=${encodeURIComponent(q)}`)).results,
 };

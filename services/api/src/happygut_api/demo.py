@@ -11,6 +11,7 @@ Everything lives in the in-memory store and is rebuilt on every start.
 from __future__ import annotations
 
 import hmac
+import random
 import secrets
 import time
 from dataclasses import dataclass
@@ -18,9 +19,15 @@ from datetime import date, datetime, timedelta
 from datetime import time as clock
 
 import jwt
-
 from happygut_engine import Component, Diagnosis, DiseaseState, Level
-from happygut_engine.simulate import Effect, MenuItem, SimConfig, SimDay, StressPeriod, simulate
+from happygut_engine.simulate import (
+    Effect,
+    MenuItem,
+    SimConfig,
+    SimDay,
+    StressPeriod,
+    simulate,
+)
 
 from .agents import AgentRun, PerceivedItem, Perception
 from .auth import AuthError
@@ -31,6 +38,12 @@ from .knowledge import MemoryKnowledge
 from .store import MemoryStore, Patient
 
 DAYS = 120
+
+# Sample weigh-ins: (usual weight in kg, daily loss in a flare, daily loss in a stressful period).
+# Between those, weight drifts back towards the usual weight. Rafi's current flare and the deadline
+# before it take him a little past the GLIM threshold, so his account shows the weight notice.
+WEIGHT_PROFILES = {"cd_remission": (52.0, 0.10, 0.0), "uc_flare": (68.4, 0.40, 0.08)}
+WEIGH_IN_EVERY = 7
 
 _MEALS = {
     "bread": ("morning",), "egg": ("morning",), "drink": ("morning",),
@@ -231,6 +244,8 @@ async def seed_persona(persona: Persona, store: MemoryStore, knowledge: MemoryKn
             id=f"{persona.key}-{kind}-upcoming", type=kind, name=name,
             start=today + timedelta(days=in_days), end=today + timedelta(days=in_days + length - 1)))
 
+    await _seed_weights(persona, store, sims, config, first)
+
     # The patient confirmed the flares the index proposed.
     decisions = await store.period_decisions(patient.id)
     periods = await insights.periods(patient)
@@ -262,6 +277,25 @@ async def seed_persona(persona: Persona, store: MemoryStore, knowledge: MemoryKn
                 f.source, f.meal_check_id = "meal_check", meal_check_id
     await insights.personal_evidence(patient)  # warm the cache
     return patient
+
+
+async def _seed_weights(persona: Persona, store: MemoryStore, sims: list[SimDay], config: SimConfig, first: date) -> None:
+    """Weekly sample weigh-ins that follow the simulated history (lower in flares, recovering after)."""
+    if persona.history not in WEIGHT_PROFILES:
+        return
+    usual, flare_rate, period_rate = WEIGHT_PROFILES[persona.history]
+    rng = random.Random(f"{persona.key}-weight")
+    weight = usual
+    for sim in sims:
+        stressed = any(p.start <= sim.offset <= p.end for p in config.stress_periods)
+        if sim.in_flare:
+            weight -= flare_rate
+        elif stressed:
+            weight -= period_rate
+        else:
+            weight += (usual - weight) * 0.06
+        if (DAYS - sim.offset) % WEIGH_IN_EVERY == 2:  # the last weigh-in is two days ago
+            await store.save_weight(persona.patient_id, first + timedelta(days=sim.offset), round(weight + rng.gauss(0, 0.2), 1))
 
 
 async def seed_demo(store: MemoryStore, knowledge: MemoryKnowledge, insights: Insights, flow: MealCheckFlow) -> None:

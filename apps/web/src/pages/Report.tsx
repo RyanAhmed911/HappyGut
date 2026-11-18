@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Printer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TrendChart, useFactorName } from "@/components/insights";
+import { signedKg } from "@/components/weight";
 import { LoadError, Logo, PageLoading, useLang } from "@/components/shell";
 import { Button, PageTitle } from "@/components/ui";
 import { api } from "@/lib/api";
-import { dateRange, longDate, num, pct } from "@/lib/format";
+import { dateRange, longDate, num, pct, shortDate } from "@/lib/format";
 import { keys } from "@/lib/hooks";
 import type { DaySummary } from "@/lib/schemas";
 
@@ -81,6 +82,30 @@ export function Report() {
               <Row label={t("report.doses_missed")} value={n(r.adherence.missed)} />
               <Row label={t("report.risk_now")} value={`${t(`risk.badge_${r.risk.level}`)} · ${n(r.risk.score)}/${n(100)}`} />
             </dl>
+            {r.weight && (
+              <>
+                <h3 className="mb-1 mt-4 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("weight.report_title")}</h3>
+                <dl>
+                  <Row label={t("weight.report_latest")} value={`${t("weight.kg", { value: num(r.weight.latest.kg, lang, 1) })} · ${shortDate(r.weight.latest.date, lang)}`} />
+                  {r.weight.first_in_range && r.weight.first_in_range.date !== r.weight.latest.date && (
+                    <Row
+                      label={t("weight.report_change", { date: shortDate(r.weight.first_in_range.date, lang) })}
+                      value={`${signedKg(r.weight.latest.kg - r.weight.first_in_range.kg, lang)} ${t("weight.unit_short")}`}
+                    />
+                  )}
+                  <Row label={t("weight.report_weigh_ins")} value={n(r.weight.weigh_ins)} />
+                </dl>
+                {r.weight.loss && (
+                  <p className="mt-1.5 rounded-lg bg-caution-soft px-2.5 py-1.5 text-xs font-semibold text-caution">
+                    {t("weight.report_loss", {
+                      percent: num(r.weight.loss.percent, lang, 1),
+                      kg: num(r.weight.loss.peak.kg, lang, 1),
+                      date: shortDate(r.weight.loss.peak.date, lang),
+                    })}
+                  </p>
+                )}
+              </>
+            )}
             <h3 className="mb-1 mt-4 text-[13px] font-bold uppercase tracking-[0.08em] text-ink-faint">{t("report.meals")}</h3>
             <dl>
               {verdicts.map((v) => (
