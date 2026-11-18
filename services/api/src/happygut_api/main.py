@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from happygut_engine import DEFAULT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
+from happygut_engine import DEFAULT_CONFIG, DEFAULT_WEIGHT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
 
 from . import __version__, foods, i18n
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
@@ -35,11 +35,16 @@ from .store import MemoryStore, NotSupported, Patient, PostgresStore, Store
 log = logging.getLogger("happygut.api")
 MAX_TEXT = 1000
 DIARY_EDIT_DAYS = 2  # a diary can be filled in up to 2 days late (spec 003 FR-007)
+WEIGHT_BACKFILL_DAYS = 365  # older weigh-ins (e.g. from a clinic visit) can be added up to a year back
 Lang = Literal["bn", "en"]
 
 
 class Feedback(BaseModel):
     answer: Literal["right", "wrong", "not_sure"]
+
+
+class WeightIn(BaseModel):
+    kg: float = Field(ge=DEFAULT_WEIGHT_CONFIG.min_kg, le=DEFAULT_WEIGHT_CONFIG.max_kg)
 
 
 class Credentials(BaseModel):
@@ -439,6 +444,26 @@ def create_app(services: Services | None = None) -> FastAPI:
         decisions.manual.append(ManualFlare(body.start, body.end))
         await s.store.save_period_decisions(patient.id, decisions)
         return await s.insights.periods(patient)
+
+    # ------------------------------------------------------------ weight
+
+    @app.get("/v1/weights")
+    async def weights(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
+        return await s.insights.weight(patient)
+
+    @app.put("/v1/weights/{day}")
+    async def save_weight(day: date, body: WeightIn, patient: Patient = Depends(current_patient),
+                          s: Services = Depends(svc)) -> dict:
+        today = check_day(day, s)
+        if (today - day).days > WEIGHT_BACKFILL_DAYS:
+            raise HTTPException(422, "too_old")
+        await s.store.save_weight(patient.id, day, round(body.kg, 1))
+        return await s.insights.weight(patient)
+
+    @app.delete("/v1/weights/{day}", status_code=204)
+    async def delete_weight(day: date, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> None:
+        if not await s.store.delete_weight(patient.id, day):
+            raise HTTPException(404, "not_found")
 
     @app.get("/v1/insights/flare-risk")
     async def risk(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:

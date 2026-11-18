@@ -67,6 +67,7 @@
 | API-2 | **Open Food Facts API** | Packaged-food lookup by barcode: ingredient lists, additives, allergens, including products sold in Bangladesh | REST, no key | Database: ODbL · images: CC BY-SA | MVP |
 | API-3 | **Europe PMC REST API** | Find and fetch open-access IBD nutrition papers and guidelines; returns each article's licence, so licence filtering is automatic | REST, no key | Per article (we only store full text for CC-licensed articles) | MVP |
 | API-4 | **NCBI PubMed E-utilities** | Citation metadata (PMID, DOI, authors) so every verdict's citation resolves to a real paper | REST + free API key | Metadata free to use; abstracts are publisher copyright (not stored) | MVP |
+| LIT-1 | **GLIM criteria for the diagnosis of malnutrition** (Cederholm et al., J Cachexia Sarcopenia Muscle 2019; DOI 10.1002/jcsm.12383; PMID 30920778; PMC6438340) | The weight-loss threshold for the weight notice (`engine/src/happygut_engine/weight.py`): ">5% within past 6 months, or >10% beyond 6 months" (Table 3) | Retrieved from Europe PMC, 2026-11-18 | CC BY 4.0 | Built |
 | API-5 | **Fitbit Web API / Google Health platform** | Resting HR, HRV, sleep, steps for Flare Early Warning, with patient OAuth consent | OAuth REST | Per-user consent; platform terms (*verify the current API, as Google is migrating Fitbit APIs*) | Finals |
 
 #### C. Public web (scraping and crawling)

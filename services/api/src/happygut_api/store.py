@@ -101,6 +101,9 @@ class Store(Protocol):
     async def period_decisions(self, patient_id: str) -> PeriodDecisions: ...
     async def save_period_decisions(self, patient_id: str, decisions: PeriodDecisions) -> None: ...
     async def data_version(self, patient_id: str) -> int: ...
+    async def list_weights(self, patient_id: str) -> list[tuple[date, float]]: ...
+    async def save_weight(self, patient_id: str, day: date, kg: float) -> None: ...
+    async def delete_weight(self, patient_id: str, day: date) -> bool: ...
 
 
 class MemoryStore:
@@ -115,6 +118,7 @@ class MemoryStore:
         self.diary: dict[str, dict[date, DiaryEntry]] = {}
         self.stress_periods: dict[str, list[StressPeriodOut]] = {}
         self.decisions: dict[str, PeriodDecisions] = {}
+        self.weights: dict[str, dict[date, float]] = {}
         self.versions: dict[str, int] = {}
 
     def _bump(self, patient_id: str) -> None:
@@ -124,7 +128,7 @@ class MemoryStore:
         """Forget everything stored for one patient (used to restore a test account's sample records)."""
         for user_id in [u for u, p in self.patients.items() if p.id == patient_id]:
             del self.patients[user_id]
-        for table in (self.personal, self.diary, self.stress_periods, self.decisions):
+        for table in (self.personal, self.diary, self.stress_periods, self.decisions, self.weights):
             table.pop(patient_id, None)
         self.meal_checks = {k: r for k, r in self.meal_checks.items() if r.patient_id != patient_id}
         self.feedback = [f for f in self.feedback if f[0] != patient_id]
@@ -203,6 +207,15 @@ class MemoryStore:
 
     async def data_version(self, patient_id: str) -> int:
         return self.versions.get(patient_id, 0)
+
+    async def list_weights(self, patient_id: str) -> list[tuple[date, float]]:
+        return sorted(self.weights.get(patient_id, {}).items())
+
+    async def save_weight(self, patient_id: str, day: date, kg: float) -> None:
+        self.weights.setdefault(patient_id, {})[day] = kg  # one weigh-in per day; a second one replaces it
+
+    async def delete_weight(self, patient_id: str, day: date) -> bool:
+        return self.weights.get(patient_id, {}).pop(day, None) is not None
 
 
 class PostgresStore:
@@ -327,3 +340,12 @@ class PostgresStore:
 
     async def data_version(self, patient_id: str) -> int:
         return 0
+
+    async def list_weights(self, patient_id: str) -> list[tuple[date, float]]:
+        raise NotSupported("weights")
+
+    async def save_weight(self, patient_id: str, day: date, kg: float) -> None:
+        raise NotSupported("weights")
+
+    async def delete_weight(self, patient_id: str, day: date) -> bool:
+        raise NotSupported("weights")

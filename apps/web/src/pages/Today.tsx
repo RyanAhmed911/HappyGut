@@ -3,6 +3,7 @@ import { ArrowRight, CalendarClock, Camera, ChevronRight, CircleCheck, FileText,
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { RiskCard, TrendChart } from "@/components/insights";
+import { TodayWeight } from "@/components/weight";
 import { LoadError, useLang, useProfile } from "@/components/shell";
 import { Card, SectionTitle, Skeleton } from "@/components/ui";
 import { VerdictDot } from "@/components/verdict";
@@ -99,6 +100,7 @@ export function Today() {
           </p>
         </Link>
       </div>
+      <TodayWeight />
 
       </div>
 
