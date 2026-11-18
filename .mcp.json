@@ -2,8 +2,33 @@
   "mcpServers": {
     "happygut-foodgraph": {
       "command": "uv",
-      "args": ["run", "--project", "services/mcp", "happygut-foodgraph"],
-      "env": { "HAPPYGUT_INCLUDE_DRAFTS": "1" }
+      "args": [
+        "run",
+        "--project",
+        "services/mcp",
+        "happygut-foodgraph"
+      ],
+      "env": {
+        "HAPPYGUT_INCLUDE_DRAFTS": "1"
+      }
+    },
+    "happygut-guidelines": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "services/mcp",
+        "happygut-guidelines"
+      ]
+    },
+    "happygut-evals": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "services/mcp",
+        "happygut-evals"
+      ]
     }
   }
 }

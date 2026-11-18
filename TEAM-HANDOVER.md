@@ -87,7 +87,7 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Bangla and English throughout | ✅ | A test checks both files have the same keys |
 | Knowledge layer: 61 Bangladeshi dishes, 25 cited Rule Cards | ✅ | All reviewed by an LLM judge against retrieved sentences from papers |
 | Evaluation with measured numbers | ✅ | [`evals/RESULTS.md`](evals/RESULTS.md) |
-| Food-graph MCP server | ✅ | `services/mcp` |
+| MCP servers | ✅ | Four, read-only: food graph, guidelines (cited Rule Cards), evals (results and a red-flag check), journal (one patient's records with their own sign-in). `services/mcp/README.md` |
 | Automated tests and CI | ✅ | About 250 tests; every pull request runs them, plus a secret scan |
 | **Deployment (public link)** | ❌ **Not done** | Needed for judges; see section 8 |
 | Supabase sign-up for real users | ❌ | The test accounts live in memory |
@@ -158,7 +158,7 @@ The full design, including the parts not built yet, is in [`docs/02-architecture
 ```
 apps/web/           The web app (pages in src/pages, text in src/locales)
 services/api/       FastAPI backend: meal-check flow, diary, insights, sign-in, evaluation
-services/mcp/       Food-graph MCP server
+services/mcp/       MCP servers: food graph, guidelines, evals, journal
 engine/             Verdict engine, red flags, Pattern Finder, periods, simulator (pure Python)
 pipelines/          Seed validator, knowledge graph, dish search
 data/seeds/         Dishes and Rule Cards (YAML), the knowledge the app uses
@@ -306,7 +306,7 @@ The full requirement-by-requirement check is in [`docs/portal/guide-checklist.md
 | Part | What we show | Weak spot |
 |---|---|---|
 | Innovation and AI-native design | The AI reads and explains but never decides; a personal pattern model per patient; a Bangladeshi food graph | — |
-| Technical excellence and architecture | Cited rules, LangGraph flow, MCP server, output guard, about 250 tests, measured evaluation | Photo accuracy not measured |
+| Technical excellence and architecture | Cited rules, LangGraph flow, four MCP servers, output guard, about 270 tests, measured evaluation | Photo accuracy not measured |
 | Business value and commercial viability | Clinic licence first, then patient-support programmes and a freemium tier (`docs/01-strategy.md` §6) | **No validation yet:** we need quotes from 2–3 gastroenterologists or dietitians |
 | Global scalability and impact | New cuisines and languages are data, not code; free-tier cloud deployment | Say the next markets clearly in the video |
 | Responsible AI, data sovereignty and presentation | Graded verdicts, red-flag escalation, no medication advice, PII scrub, honest wording | A rehearsed, confident 3-minute delivery |
@@ -416,7 +416,7 @@ The guide makes this **mandatory** (§13.2): every member has a named role, decl
 | **Hero flow** | Photo or text → verdict → logged meal → updated patterns. The product's core; protect it above everything |
 | **Tier A / B / C** | Real and working / real but minimal / designed only (never shown as working) |
 | **Demo mode** | `DEMO_MODE=true`: the backend runs with three in-memory test accounts holding sample records |
-| **MCP** | Model Context Protocol: lets other AI tools query our food graph |
+| **MCP** | Model Context Protocol: lets other AI tools (Claude, a clinician's assistant) read our food graph, Rule Cards, results and, with consent, one patient's records |
 | **PII** | Personally identifying information (names, phone numbers, ID numbers) |
 
 ---

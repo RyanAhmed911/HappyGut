@@ -2,18 +2,29 @@
 
 All tools are read-only (`read_only_hint`), take validated inputs and return structured output. No server computes verdicts (the engine does), and only `happygut-journal` touches patient data (consent-scoped).
 
-| Server | Tools | Status |
-|---|---|---|
-| `happygut-foodgraph` | `search_dish`, `get_components`, `explain_verdict_path` | ✅ built (MCP Python SDK v2, `MCPServer`) |
-| `happygut-guidelines` | `search_guidelines`, `get_rule_card`, `cite_source` | planned (Step 4) |
-| `happygut-evals` | `run_eval_suite`, `get_latest_metrics`, `compare_runs` | planned (Step 4) |
-| `happygut-journal` | `get_symptom_trend`, `get_adherence`, `get_previsit_summary` | planned (Step 4) |
-| `happygut-research` | `get_trigger_stats`, `list_cohorts` | planned (Step 4) |
+| Server | Tools | Data | Status |
+|---|---|---|---|
+| `happygut-foodgraph` | `search_dish`, `get_components`, `explain_verdict_path` | Dishes, components, Rule Cards | ✅ built |
+| `happygut-guidelines` | `search_rules`, `get_rule`, `list_sources` | The 25 approved Rule Cards with their papers and exact quotes | ✅ built (keyword search; no embeddings yet) |
+| `happygut-evals` | `get_results`, `pattern_recovery`, `check_red_flags` | `evals/summary.json` and the red-flag sentinel | ✅ built |
+| `happygut-journal` | `get_overview`, `get_recent_days`, `get_patterns` | ONE patient's records, read through the HappyGut API with that patient's own sign-in token | ✅ built |
+| `happygut-research` | — | Consented, anonymised aggregates across patients | not built: there are no real patients to aggregate |
+
+All servers run over stdio by default, or Streamable HTTP behind `MCP_BEARER_TOKEN` with `--http`:
+
+```bash
+cd services/mcp
+uv run --group dev pytest -q                     # 24 tests (in-process MCP client)
+uv run happygut-guidelines                       # stdio
+uv run happygut-evals --http --port 8102         # HTTP (needs MCP_BEARER_TOKEN)
+HAPPYGUT_API_URL=http://127.0.0.1:8000 HAPPYGUT_PATIENT_TOKEN=<the patient's token> uv run happygut-journal
+```
+
+**Journal consent.** The journal server can only read what the patient's own sign-in can read, and nothing it returns includes their name, free-text notes or photos. A patient (or a test account) shares it by giving the token to an AI client, for example a clinician's assistant before a visit; signing out or restoring the account ends it. It has no write tools.
 
 ## foodgraph
 ```bash
 cd services/mcp
-uv run --group dev pytest -q                                  # 13 tests (in-process MCP client)
 HAPPYGUT_INCLUDE_DRAFTS=1 uv run happygut-foodgraph            # stdio
 MCP_BEARER_TOKEN=... uv run happygut-foodgraph --http --port 8100   # Streamable HTTP + bearer token
 ```
