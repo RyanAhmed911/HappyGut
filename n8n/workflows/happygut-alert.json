@@ -1,0 +1,67 @@
+{
+  "id": "happygutAlerts01",
+  "versionId": "db62fc67-c1c1-5a57-847b-0fc23319c3c8",
+  "name": "HappyGut: email the team when a workflow fails",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "bb033fe0-cad8-5b3a-8363-2fb866d21ae2",
+      "name": "When a HappyGut workflow fails",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.HAPPYGUT_ALERT_FROM }}",
+        "toEmail": "={{ $env.HAPPYGUT_ALERT_TO }}",
+        "subject": "=HappyGut: {{ $json.workflow.name }} failed",
+        "emailFormat": "text",
+        "text": "={{ $json.workflow.name }} failed at {{ $json.execution.lastNodeExecuted }}.\n\n{{ $json.execution.error.message }}\n\nExecution: {{ $json.execution.url }}",
+        "options": {}
+      },
+      "id": "4106d614-6f1b-535b-a1f8-3c71d3858f45",
+      "name": "Email the team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "happygutSmtp",
+          "name": "HappyGut alert email"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When a HappyGut workflow fails": {
+      "main": [
+        [
+          {
+            "node": "Email the team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Dhaka",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Optional. Set it as the Error Workflow of the other three (workflow settings) to get an email when one fails. Needs an SMTP credential."
+  },
+  "tags": []
+}

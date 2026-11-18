@@ -79,7 +79,8 @@
 | Calendar heatmap, waterfall chart | B (drop if short on time) |
 | Rule engine, Bayesian statistics | A |
 | Anomaly z-score, LightGBM | B |
-| n8n (reminders, nightly), Supabase webhooks, Realtime, exports, GitHub Actions gate | B |
+| n8n: health check and keep-awake, nightly refresh, weekly safety self-check, failure email (`n8n/workflows`) | **A** once n8n is deployed |
+| Supabase webhooks, Realtime, exports, GitHub Actions gate | B |
 | PII scrub (Presidio + Gemma), row-level security, SSE streaming, REST API | A |
 | ngrok | B |
 
@@ -106,7 +107,8 @@
 | Frontend builders: Lovable | A |
 | Frontend builders: v0, Claude Artifacts, Gemini Canvas, Stitch | B (tick only those really used) |
 | Workflow: LangGraph | A |
-| Workflow: n8n, GitHub Actions, Supabase webhooks | B |
+| Workflow: n8n (4 workflows), GitHub Actions CI | **A** |
+| Workflow: Supabase webhooks | **C**: untick |
 | AI-DLC: AGENTS.md, Spec-Kit, Claude Skills | A (set up on day 0) |
 | Model / data cards | B |
 

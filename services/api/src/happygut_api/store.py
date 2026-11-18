@@ -84,6 +84,7 @@ class MealCheckRecord:
 
 class Store(Protocol):
     async def patient_for_user(self, user_id: str) -> Patient | None: ...
+    async def all_patients(self) -> list[Patient]: ...
     async def personal_evidence(self, patient_id: str) -> dict[Component, PersonalEvidence]: ...
     async def save_meal_check(self, record: MealCheckRecord) -> None: ...
     async def get_meal_check(self, patient_id: str, meal_check_id: str) -> MealCheckRecord | None: ...
@@ -150,6 +151,9 @@ class MemoryStore:
 
     async def patient_for_user(self, user_id: str) -> Patient | None:
         return self.patients.get(user_id)
+
+    async def all_patients(self) -> list[Patient]:
+        return list(self.patients.values())
 
     async def personal_evidence(self, patient_id: str) -> dict[Component, PersonalEvidence]:
         return self.personal.get(patient_id, {})
@@ -384,6 +388,9 @@ class PostgresStore:
 
     async def data_version(self, patient_id: str) -> int:
         return 0
+
+    async def all_patients(self) -> list[Patient]:
+        raise NotSupported("jobs")
 
     async def list_weights(self, patient_id: str) -> list[tuple[date, float]]:
         raise NotSupported("weights")

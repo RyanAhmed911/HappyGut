@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from happygut_engine import DEFAULT_CONFIG, DEFAULT_WEIGHT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
 
-from . import __version__, foods, i18n, tracing
+from . import __version__, foods, i18n, jobs, tracing
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
 from .care import (MAX_APPOINTMENTS, MAX_MEDICATIONS, AppointmentIn, AppointmentOut, DoseIn, MedicationIn, MedicationOut,
@@ -552,6 +552,25 @@ def create_app(services: Services | None = None) -> FastAPI:
     async def delete_weight(day: date, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> None:
         if not await s.store.delete_weight(patient.id, day):
             raise HTTPException(404, "not_found")
+
+    # ------------------------------------------------------------ scheduled jobs (n8n)
+
+    def job_auth(authorization: str | None = Header(default=None), s: Services = Depends(svc)) -> Services:
+        if not s.settings.jobs_token:
+            raise HTTPException(404, "jobs_disabled")
+        if not jobs.authorised(authorization, s.settings.jobs_token):
+            raise HTTPException(401, "invalid_job_token")
+        return s
+
+    @app.post("/v1/jobs/nightly")
+    async def job_nightly(s: Services = Depends(job_auth)) -> dict:
+        return await jobs.nightly(s.store, s.insights)
+
+    @app.post("/v1/jobs/selfcheck")
+    async def job_selfcheck(s: Services = Depends(job_auth)) -> dict:
+        if not isinstance(s.knowledge, MemoryKnowledge):
+            raise HTTPException(501, "selfcheck_needs_seed_knowledge")
+        return jobs.selfcheck(s.knowledge)
 
     @app.get("/v1/insights/flare-risk")
     async def risk(patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:

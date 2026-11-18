@@ -59,6 +59,8 @@ class Settings(BaseSettings):
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_host: str = "https://cloud.langfuse.com"
+    # Bearer token for /v1/jobs/* (called by n8n). Empty = the job endpoints are switched off.
+    jobs_token: str = ""
     timezone: str = "Asia/Dhaka"
 
     # CORS for the PWA

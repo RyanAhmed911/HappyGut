@@ -1,0 +1,236 @@
+{
+  "id": "happygutNightly1",
+  "versionId": "06a2f68d-73f1-5eba-b9c2-b4a10858cbbe",
+  "name": "HappyGut: nightly refresh",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "80df4da9-0028-526a-8d5a-c555a0142183",
+      "name": "Every night 23:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "2abf28ef-17cb-5155-8d33-322ca026677a",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.HAPPYGUT_API_URL }}/v1/jobs/nightly",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "9ffcedc1-05f0-55ae-a348-8522493af673",
+      "name": "Nightly job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        100
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "happygutJobsToken",
+          "name": "HappyGut jobs token"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "6d6c914a-8ba4-533f-abab-a077e1aab484",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "204ea8af-4007-5499-b11a-56fca0c86dbd",
+      "name": "Done?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8022991c-5460-5a0b-99e9-dc7bd76655e3",
+              "name": "date",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "651aa2d7-6a71-52e1-b77a-c4838fa0aea5",
+              "name": "patients",
+              "value": "={{ $json.counts.patients }}",
+              "type": "number"
+            },
+            {
+              "id": "332aa128-0b81-594f-a72e-e706e30695f1",
+              "name": "diary_filled_today",
+              "value": "={{ $json.counts.diary_filled_today }}",
+              "type": "number"
+            },
+            {
+              "id": "4a3e5e64-900e-5bb7-bb93-e8d3833841ed",
+              "name": "in_flare",
+              "value": "={{ $json.counts.in_flare }}",
+              "type": "number"
+            },
+            {
+              "id": "1ba0c664-f26c-508f-8473-d5f06f345c62",
+              "name": "high_flare_risk",
+              "value": "={{ $json.counts.high_flare_risk }}",
+              "type": "number"
+            },
+            {
+              "id": "330766ad-342a-5525-9ac0-e537e6940ef4",
+              "name": "weight_notices",
+              "value": "={{ $json.counts.weight_notices }}",
+              "type": "number"
+            },
+            {
+              "id": "eb9d71a5-2c5e-5fbf-a279-fd0fff9fb59e",
+              "name": "doses_ticked",
+              "value": "={{ $json.counts.doses_ticked_today }} of {{ $json.counts.doses_due_today }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c3b77c7-c665-59f7-a270-2c3e4799e6f6",
+      "name": "Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=HappyGut nightly job failed: {{ JSON.stringify($json) }}"
+      },
+      "id": "10094c6a-eefa-5ca2-87f9-e80098a3d2f7",
+      "name": "Fail the run",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        720,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Every night 23:30": {
+      "main": [
+        [
+          {
+            "node": "Nightly job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run now": {
+      "main": [
+        [
+          {
+            "node": "Nightly job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nightly job": {
+      "main": [
+        [
+          {
+            "node": "Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done?": {
+      "main": [
+        [
+          {
+            "node": "Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fail the run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Dhaka",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Every night (Asia/Dhaka) refreshes every patient's insights for the new day and records aggregate counts: no names or records."
+  },
+  "tags": []
+}
