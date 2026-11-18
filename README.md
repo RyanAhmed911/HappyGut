@@ -5,7 +5,7 @@ HappyGut learns what *your* gut tolerates. Snap any meal, in Bangla or English, 
 
 International AI Builders Congress 2026 · HealthSphere AI · ChronicCare AI
 
-> **New to the team?** Start with [`TEAM-HANDOVER.md`](TEAM-HANDOVER.md): what is built, how to run it, how we follow the Participants Guide and what is left.
+> **New to the team?** Start with [`TEAM-HANDOVER.md`](TEAM-HANDOVER.md): what is built, how to run it, how we follow the Participants Guide and what is left. Then read [`WHATS-NEW.md`](WHATS-NEW.md) for everything added since, with setup steps.
 
 ## Project docs
 | Doc | Contents |
