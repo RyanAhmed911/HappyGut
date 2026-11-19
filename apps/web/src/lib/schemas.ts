@@ -122,11 +122,15 @@ export const DiaryFood = z.object({
   name_bn: z.string().nullable().optional(),
   dish_id: z.string().nullable().optional(),
   time_of_day: z.enum(TIMES_OF_DAY),
+  time: z.string().nullable().optional(),
   source: z.enum(["meal_check", "diary"]),
   meal_check_id: z.string().nullable().optional(),
   reactions: z.array(z.enum(REACTIONS)),
 });
 export type DiaryFood = z.infer<typeof DiaryFood>;
+
+export const DiaryAdded = z.object({ day: z.string(), added: z.number(), already: z.boolean() });
+export type DiaryAdded = z.infer<typeof DiaryAdded>;
 
 export const DiaryBody = z.object({
   foods: z.array(DiaryFood),

@@ -35,7 +35,7 @@ def test_search_dish_banglish_sentence():
 
 
 def test_search_dish_unknown_explains_not_sure():
-    r = call("search_dish", {"query": "pepperoni pizza"})
+    r = call("search_dish", {"query": "sushi platter"})
     assert r.structured_content["candidates"] == []
     assert "Not sure" in r.structured_content["note"]
 

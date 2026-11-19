@@ -1,0 +1,37 @@
+id: dish.potato_chips
+name_en: "Potato chips"
+name_bn: "পটেটো চিপস"
+aliases: ["chips", "potato chips", "crisps", "chips packet", "potato crackers", "চিপস"]
+cuisine: International
+category: snack
+preparation: ["deep-fried", "packaged"]
+ingredients:
+  - {name: "potato"}
+  - {name: "frying oil"}
+  - {name: "salt"}
+  - {name: "flavouring powder"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

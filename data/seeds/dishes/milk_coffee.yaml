@@ -1,0 +1,36 @@
+id: dish.milk_coffee
+name_en: "Milk coffee"
+name_bn: "দুধ কফি"
+aliases: ["coffee", "milk coffee", "cappuccino", "latte", "cold coffee", "nescafe", "dudh coffee", "কফি"]
+cuisine: International
+category: drink
+preparation: ["brewed with milk"]
+ingredients:
+  - {name: "coffee"}
+  - {name: "milk"}
+  - {name: "sugar"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: none
+  lactose: medium
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: medium
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.rong_cha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

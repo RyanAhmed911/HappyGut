@@ -7,7 +7,7 @@ import uuid
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from happygut_engine import DiaryItems, Diagnosis, check_red_flags, index_for, is_late_night, sleep_hours
 
@@ -17,15 +17,36 @@ PeriodType = Literal["exam", "work", "family", "fasting", "travel", "menstruatio
 CLOCK = r"^([01]\d|2[0-3]):[0-5]\d$"
 
 
+def time_of_day_for(hour: int) -> TimeOfDay:
+    """The diary's meal slot for a clock hour (the Pattern Finder groups foods by slot)."""
+    if hour < 5 or hour >= 22:
+        return "night"
+    return "morning" if hour < 11 else "noon" if hour < 15 else "afternoon" if hour < 18 else "evening"
+
+
 class DiaryFood(BaseModel):
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12], max_length=40)
     name: str = Field(min_length=1, max_length=80)
     name_bn: str | None = Field(default=None, max_length=80)
     dish_id: str | None = Field(default=None, max_length=80)
     time_of_day: TimeOfDay = "noon"
+    time: str | None = Field(default=None, pattern=CLOCK)  # when it was eaten (HH:MM); sets time_of_day
     source: Literal["meal_check", "diary"] = "diary"
     meal_check_id: str | None = None
     reactions: list[Reaction] = Field(default_factory=list, max_length=4)
+
+    @model_validator(mode="after")
+    def _slot_from_time(self) -> "DiaryFood":
+        if self.time:
+            self.time_of_day = time_of_day_for(int(self.time[:2]))
+        return self
+
+
+class DiaryAddIn(BaseModel):
+    """Add a meal check's dishes to a day's diary at a chosen time."""
+
+    time: str = Field(pattern=CLOCK)
+    day: date | None = None  # default: today
 
 
 class Stool(BaseModel):

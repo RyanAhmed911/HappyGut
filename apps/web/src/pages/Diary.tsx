@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Check, CircleCheck, GraduationCap, LoaderCircle, Plus, ScanLine, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleCheck, Clock, GraduationCap, LoaderCircle, Pencil, Plus, ScanLine, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
@@ -8,7 +8,7 @@ import { Badge, Button, Card, Chip, Field, inputClass, PageTitle, Segmented, She
 import { Escalation } from "@/components/verdict";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { addDays, clock, longDate, num, shortDate } from "@/lib/format";
+import { addDays, clock, longDate, nowClock, num, shortDate, slotOf } from "@/lib/format";
 import { PERSONAL_KEYS, useToday } from "@/lib/hooks";
 import { REACTIONS, TIMES_OF_DAY, type DiaryBody, type DiaryDay, type DiaryFood, type DiarySaved, type FoodMatch } from "@/lib/schemas";
 
@@ -93,71 +93,104 @@ function BristolPicker({ value, onChange }: { value: number | null; onChange: (v
   );
 }
 
-// ---------------------------------------------------------------- add a food
+// ---------------------------------------------------------------- add or change a food
 
-function AddFoodSheet({ open, onOpenChange, onAdd }: { open: boolean; onOpenChange: (o: boolean) => void; onAdd: (food: DiaryFood) => void }) {
+type Choice = { name: string; name_bn: string | null; dish_id: string | null };
+
+/** Adds a food (food = null) or changes one: pick a different food and/or the time it was eaten. */
+function FoodSheet({ open, onOpenChange, food, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; food: DiaryFood | null; onSave: (food: DiaryFood) => void }) {
   const { t } = useTranslation();
   const lang = useLang();
+  const editing = food !== null;
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [time, setTime] = useState<(typeof TIMES_OF_DAY)[number]>("noon");
+  const [time, setTime] = useState("");
+  const [choice, setChoice] = useState<Choice | null>(null);
   useEffect(() => {
     const id = setTimeout(() => setDebounced(q.trim()), 220);
     return () => clearTimeout(id);
   }, [q]);
   useEffect(() => {
-    if (open) setQ("");
-  }, [open]);
+    if (!open) return;
+    setQ("");
+    setTime(food ? (food.time ?? "") : nowClock());
+    setChoice(food ? { name: food.name, name_bn: food.name_bn ?? null, dish_id: food.dish_id ?? null } : null);
+  }, [open, food]);
   const results = useQuery({ queryKey: ["foods", debounced], queryFn: () => api.searchFoods(debounced), enabled: debounced.length >= 2 });
 
-  const add = (match: FoodMatch | null): void => {
-    onAdd(
-      match
-        ? { name: match.name_en, name_bn: match.name_bn, dish_id: match.dish_id, time_of_day: time, source: "diary", reactions: [] }
-        : { name: q.trim(), dish_id: null, time_of_day: time, source: "diary", reactions: [] },
-    );
+  const pick = (match: FoodMatch | null): void => {
+    setChoice(match ? { name: match.name_en, name_bn: match.name_bn, dish_id: match.dish_id } : { name: q.trim(), name_bn: null, dish_id: null });
+    setQ("");
+  };
+
+  const save = (): void => {
+    if (!choice) return;
+    const base: DiaryFood = food ?? { name: choice.name, time_of_day: "noon", source: "diary", reactions: [] };
+    const swapped = !food || choice.name !== food.name || choice.dish_id !== (food.dish_id ?? null);
+    onSave({
+      ...base,
+      ...choice,
+      time: time || null,
+      time_of_day: time ? slotOf(time) : base.time_of_day,
+      // A swapped food is no longer the checked dish; meal_check_id stays so the check isn't offered again.
+      source: swapped ? "diary" : base.source,
+    });
     onOpenChange(false);
   };
 
+  const chosenName = choice ? (lang === "bn" && choice.name_bn ? choice.name_bn : choice.name) : null;
+  const typed = q.trim();
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t("diary.add_food")} description={t("diary.add_food_hint")}>
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {TIMES_OF_DAY.map((x) => (
-          <Chip key={x} selected={time === x} className="min-h-9 px-3 text-[13px]" onClick={() => setTime(x)}>
-            {t(`time.${x}`)}
-          </Chip>
-        ))}
-      </div>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t(editing ? "diary.edit_food" : "diary.add_food")} description={t(editing ? "diary.edit_food_hint" : "diary.add_food_hint")}>
+      <label className="mb-3 block">
+        <span className="mb-1 block text-xs font-semibold text-ink-soft">{t("diary.time_eaten")}</span>
+        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={inputClass} />
+      </label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
-        <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("diary.food_placeholder")} className={cn(inputClass, "pl-10")} maxLength={80} />
+        <input autoFocus={!editing} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("diary.food_placeholder")} className={cn(inputClass, "pl-10")} maxLength={80} />
       </div>
-      <ul className="mt-3 max-h-64 space-y-1.5 overflow-y-auto">
-        {results.data?.map((m) => (
-          <li key={m.dish_id}>
-            <button type="button" onClick={() => add(m)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-line px-4 py-2.5 text-left hover:border-brand/50 hover:bg-brand-tint">
-              <span>
-                <span className="block font-semibold">{lang === "bn" ? m.name_bn : m.name_en}</span>
-                <span className="text-xs text-ink-faint">{lang === "bn" ? m.name_en : m.name_bn}</span>
-              </span>
-              <Plus className="h-4 w-4 text-brand" />
-            </button>
-          </li>
-        ))}
-        {q.trim().length >= 2 && (
+      {typed.length >= 2 && (
+        <ul className="mt-3 max-h-56 space-y-1.5 overflow-y-auto">
+          {results.data?.map((m) => (
+            <li key={m.dish_id}>
+              <button type="button" onClick={() => pick(m)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-line px-4 py-2.5 text-left hover:border-brand/50 hover:bg-brand-tint">
+                <span>
+                  <span className="block font-semibold">{lang === "bn" ? m.name_bn : m.name_en}</span>
+                  <span className="text-xs text-ink-faint">{lang === "bn" ? m.name_en : m.name_bn}</span>
+                </span>
+                <Plus className="h-4 w-4 text-brand" />
+              </button>
+            </li>
+          ))}
           <li>
-            <button type="button" onClick={() => add(null)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-dashed border-line px-4 py-2.5 text-left text-sm text-ink-soft hover:border-brand/50">
-              <span>{t("diary.add_as_typed", { text: q.trim() })}</span>
+            <button type="button" onClick={() => pick(null)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-dashed border-line px-4 py-2.5 text-left text-sm text-ink-soft hover:border-brand/50">
+              <span>{t("diary.use_as_typed", { text: typed })}</span>
               <Plus className="h-4 w-4" />
             </button>
           </li>
+        </ul>
+      )}
+      <div className="mt-3 rounded-xl bg-paper-deep px-4 py-3">
+        <p className="text-xs font-semibold text-ink-soft">{t("diary.chosen_food")}</p>
+        {chosenName ? (
+          <p className="mt-0.5 flex flex-wrap items-center gap-2 font-bold">
+            {chosenName}
+            {!choice?.dish_id && <Badge>{t("diary.unknown_food")}</Badge>}
+          </p>
+        ) : (
+          <p className="mt-0.5 text-sm text-ink-soft">{t("diary.pick_food")}</p>
         )}
-      </ul>
+      </div>
+      <Button className="mt-4 w-full" disabled={!choice} onClick={save}>
+        <Check className="h-4 w-4" />
+        {t(editing ? "app.save" : "app.add")}
+      </Button>
     </Sheet>
   );
 }
 
-function FoodRow({ food, onChange, onRemove }: { food: DiaryFood; onChange: (f: DiaryFood) => void; onRemove: () => void }) {
+function FoodRow({ food, onChange, onEdit, onRemove }: { food: DiaryFood; onChange: (f: DiaryFood) => void; onEdit: () => void; onRemove: () => void }) {
   const { t } = useTranslation();
   const lang = useLang();
   const name = lang === "bn" && food.name_bn ? food.name_bn : food.name;
@@ -169,7 +202,14 @@ function FoodRow({ food, onChange, onRemove }: { food: DiaryFood; onChange: (f: 
         <div className="min-w-0">
           <p className="font-bold leading-snug">{name}</p>
           <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-faint">
-            {t(`time.${food.time_of_day}`)}
+            {food.time ? (
+              <span className="inline-flex items-center gap-1 font-semibold text-ink-soft">
+                <Clock className="h-3 w-3" />
+                {clock(food.time, lang)}
+              </span>
+            ) : (
+              t(`time.${food.time_of_day}`)
+            )}
             {food.source === "meal_check" && (
               <Badge tone="brand">
                 <ScanLine className="h-3 w-3" />
@@ -179,9 +219,14 @@ function FoodRow({ food, onChange, onRemove }: { food: DiaryFood; onChange: (f: 
             {!food.dish_id && <Badge>{t("diary.unknown_food")}</Badge>}
           </p>
         </div>
-        <button type="button" onClick={onRemove} aria-label={t("app.remove")} className="rounded-full p-1.5 text-ink-faint hover:bg-paper-deep hover:text-trigger">
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="flex shrink-0 gap-0.5">
+          <button type="button" onClick={onEdit} aria-label={t("app.edit")} className="rounded-full p-1.5 text-ink-faint hover:bg-paper-deep hover:text-brand">
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={onRemove} aria-label={t("app.remove")} className="rounded-full p-1.5 text-ink-faint hover:bg-paper-deep hover:text-trigger">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {REACTIONS.map((r) => (
@@ -272,7 +317,7 @@ export function Diary() {
 
   const [form, setForm] = useState<DiaryBody | null>(null);
   const [step, setStep] = useState(0);
-  const [adding, setAdding] = useState(false);
+  const [sheet, setSheet] = useState<{ index: number | null } | null>(null); // index null: adding a new food
   const [saved, setSaved] = useState<DiarySaved | null>(null);
 
   useEffect(() => {
@@ -300,6 +345,9 @@ export function Diary() {
       list.push({ food, index });
       groups.set(food.time_of_day, list);
     });
+    // Within a slot, timed foods come in clock order (after-midnight night foods last); untimed keep their order.
+    const key = (f: DiaryFood): string => (f.time ? (f.time < "05" ? `2${f.time}` : `1${f.time}`) : "3");
+    for (const list of groups.values()) list.sort((a, b) => key(a.food).localeCompare(key(b.food)) || a.index - b.index);
     return TIMES_OF_DAY.filter((x) => groups.has(x)).map((x) => [x, groups.get(x)!] as const);
   }, [form?.foods]);
 
@@ -360,20 +408,28 @@ export function Diary() {
                 <ul className="space-y-2">
                   {foods.map(({ food, index }) => (
                     <FoodRow
-                      key={`${food.name}-${index}`}
+                      key={food.id ?? `${food.name}-${index}`}
                       food={food}
                       onChange={(f) => set("foods", form.foods.map((x, i) => (i === index ? f : x)))}
+                      onEdit={() => setSheet({ index })}
                       onRemove={() => set("foods", form.foods.filter((_, i) => i !== index))}
                     />
                   ))}
                 </ul>
               </div>
             ))}
-            <Button variant="secondary" className="w-full" onClick={() => setAdding(true)}>
+            <Button variant="secondary" className="w-full" onClick={() => setSheet({ index: null })}>
               <Plus className="h-4 w-4" />
               {t("diary.add_food")}
             </Button>
-            <AddFoodSheet open={adding} onOpenChange={setAdding} onAdd={(food) => set("foods", [...form.foods, food])} />
+            <FoodSheet
+              open={sheet !== null}
+              onOpenChange={(o) => !o && setSheet(null)}
+              food={sheet?.index != null ? (form.foods[sheet.index] ?? null) : null}
+              onSave={(food) =>
+                set("foods", sheet?.index != null ? form.foods.map((x, i) => (i === sheet.index ? food : x)) : [...form.foods, food])
+              }
+            />
           </div>
         )}
 

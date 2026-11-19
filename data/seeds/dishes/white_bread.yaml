@@ -1,0 +1,37 @@
+id: dish.white_bread
+name_en: "White bread"
+name_bn: "পাউরুটি"
+aliases: ["bread", "white bread", "pauruti", "paoruti", "toast", "bread toast", "sliced bread"]
+cuisine: Bangladeshi
+category: bread
+preparation: ["baked", "packaged"]
+ingredients:
+  - {name: "refined wheat flour"}
+  - {name: "yeast"}
+  - {name: "sugar"}
+  - {name: "bread improver"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: none
+  insoluble_fibre: none
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: low
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.ruti, dish.plain_rice]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

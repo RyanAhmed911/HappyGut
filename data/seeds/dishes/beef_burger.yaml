@@ -1,0 +1,40 @@
+id: dish.beef_burger
+name_en: "Beef burger"
+name_bn: "বিফ বার্গার"
+aliases: ["burger", "beef burger", "cheese burger", "cheeseburger", "hamburger", "বার্গার"]
+cuisine: International
+category: fast_food
+preparation: ["grilled patty", "bun"]
+ingredients:
+  - {name: "wheat bun"}
+  - {name: "beef patty"}
+  - {name: "processed cheese"}
+  - {name: "onion"}
+  - {name: "mayonnaise"}
+  - {name: "ketchup"}
+  - {name: "lettuce"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: low
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: high
+  emulsifiers: low
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol, dish.chicken_stew, dish.plain_rice]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

@@ -147,7 +147,7 @@ When the flare-risk outlook rises, or a known personal contributor is coming up 
 
 **Nightly diary**
 - **FR-001**: The system MUST send one diary reminder per day at a time the user chooses (default 22:30 local time), and let the user turn it off.
-- **FR-002**: The diary MUST pre-fill every meal checked that day through feature 002, and let the user add, edit or remove foods, each with an approximate time of day.
+- **FR-002**: A meal checked through feature 002 MUST reach the diary only when the user chooses **Add to diary** on the result, at a time that defaults to now and can be changed (decided 2026-11-19: automatic pre-fill logged meals people only looked up). The diary MUST let the user add, edit (swap for a different food, change the time) or remove foods, each with the time it was eaten (HH:MM); the time of day is derived from it.
 - **FR-003**: For each food the user MUST be able to record no reaction, or any of: stomach ache, bloating, urgency, nausea.
 - **FR-004**: The diary MUST record number of stools, the typical Bristol stool type (1–7, chosen from pictures), blood (none / streaks / a lot), mucus, urgency, night-time stools, abdominal pain, general well-being, medication taken (taken / missed / not applicable) and optional free-text notes.
 - **FR-005**: The system MUST calculate the patient-reported HBI (Crohn's) or SCCAI (UC) from the diary answers and store it with the day.

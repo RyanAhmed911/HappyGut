@@ -43,13 +43,23 @@ def test_approved_only_by_default():
     ("mutton rezala", "dish.mutton_rezala"),
     ("patla khichuri", "dish.patla_khichuri"),
     ("lal cha", "dish.rong_cha"),
+    # Fast food, snacks, drinks and fruit (2026-11-19 expansion).
+    ("burger", "dish.beef_burger"),
+    ("chicken burger", "dish.chicken_burger"),
+    ("pepperoni pizza", "dish.pizza"),
+    ("chicken biryani", "dish.chicken_biryani"),
+    ("kacchi biryani", "dish.kacchi_biryani"),
+    ("maggi noodles", "dish.instant_noodles"),
+    ("noodles", "dish.chowmein"),
+    ("coke", "dish.soft_drink"),
+    ("dim bhaji", "dish.omelette"),
 ])
 def test_search_dish(g, query, expected):
     assert g.search_dish(query)[0].dish_id == expected
 
 
 def test_unknown_dish_returns_nothing(g):
-    assert g.search_dish("pepperoni pizza") == []
+    assert g.search_dish("sushi platter") == []
 
 
 def test_get_components(g):

@@ -1,0 +1,38 @@
+id: dish.energy_drink
+name_en: "Energy drink"
+name_bn: "এনার্জি ড্রিংক"
+aliases: ["energy drink", "red bull", "speed", "tiger", "power drink", "monster energy"]
+cuisine: International
+category: drink
+preparation: ["carbonated", "packaged"]
+ingredients:
+  - {name: "carbonated water"}
+  - {name: "sugar"}
+  - {name: "caffeine"}
+  - {name: "taurine"}
+  - {name: "flavouring"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: none
+  insoluble_fibre: none
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: high
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.rong_cha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

@@ -58,3 +58,15 @@ export function clock(hhmm: string, lang: string): string {
   const d = new Date(2000, 0, 1, h ?? 0, m ?? 0);
   return new Intl.DateTimeFormat(locale(lang), { hour: "numeric", minute: "2-digit" }).format(d);
 }
+
+/** The current local time as "HH:MM" (24 h), the default time for a food added to the diary. */
+export function nowClock(date: Date = new Date()): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+/** The diary slot for an "HH:MM" time; mirrors the API's time_of_day_for. */
+export function slotOf(hhmm: string): "morning" | "noon" | "afternoon" | "evening" | "night" {
+  const hour = Number(hhmm.slice(0, 2));
+  if (hour < 5 || hour >= 22) return "night";
+  return hour < 11 ? "morning" : hour < 15 ? "noon" : hour < 18 ? "afternoon" : "evening";
+}

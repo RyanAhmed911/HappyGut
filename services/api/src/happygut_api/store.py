@@ -18,7 +18,7 @@ from datetime import date
 from happygut_engine import Component, Diagnosis, DiseaseState, ManualFlare, PersonalEvidence, Profile
 
 from .care import AppointmentOut, MedicationOut
-from .diary import DiaryEntry, StressPeriodOut
+from .diary import DiaryEntry, DiaryFood, StressPeriodOut
 
 
 class NotSupported(Exception):
@@ -97,6 +97,9 @@ class Store(Protocol):
     async def save_diary(self, patient_id: str, entry: DiaryEntry) -> None: ...
     async def get_diary(self, patient_id: str, day: date) -> DiaryEntry | None: ...
     async def list_diary(self, patient_id: str) -> list[DiaryEntry]: ...
+    async def pending_foods(self, patient_id: str, day: date) -> list[DiaryFood]: ...
+    async def add_pending_foods(self, patient_id: str, day: date, foods: list[DiaryFood]) -> None: ...
+    async def clear_pending_foods(self, patient_id: str, day: date) -> None: ...
     async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]: ...
     async def add_stress_period(self, patient_id: str, period: StressPeriodOut) -> None: ...
     async def delete_stress_period(self, patient_id: str, period_id: str) -> bool: ...
@@ -126,6 +129,7 @@ class MemoryStore:
         self.feedback: list[tuple[str, str, str]] = []
         self.red_flags: list[tuple[str, list[str]]] = []
         self.diary: dict[str, dict[date, DiaryEntry]] = {}
+        self.pending: dict[str, dict[date, list[DiaryFood]]] = {}  # added from meal checks, waiting for the nightly diary
         self.stress_periods: dict[str, list[StressPeriodOut]] = {}
         self.decisions: dict[str, PeriodDecisions] = {}
         self.weights: dict[str, dict[date, float]] = {}
@@ -141,7 +145,7 @@ class MemoryStore:
         """Forget everything stored for one patient (used to restore a test account's sample records)."""
         for user_id in [u for u, p in self.patients.items() if p.id == patient_id]:
             del self.patients[user_id]
-        for table in (self.personal, self.diary, self.stress_periods, self.decisions, self.weights, self.medications,
+        for table in (self.personal, self.diary, self.pending, self.stress_periods, self.decisions, self.weights, self.medications,
                       self.doses, self.appointments):
             table.pop(patient_id, None)
         self.meal_checks = {k: r for k, r in self.meal_checks.items() if r.patient_id != patient_id}
@@ -200,6 +204,15 @@ class MemoryStore:
 
     async def list_diary(self, patient_id: str) -> list[DiaryEntry]:
         return [e for _, e in sorted(self.diary.get(patient_id, {}).items())]
+
+    async def pending_foods(self, patient_id: str, day: date) -> list[DiaryFood]:
+        return list(self.pending.get(patient_id, {}).get(day, []))
+
+    async def add_pending_foods(self, patient_id: str, day: date, foods: list[DiaryFood]) -> None:
+        self.pending.setdefault(patient_id, {}).setdefault(day, []).extend(foods)
+
+    async def clear_pending_foods(self, patient_id: str, day: date) -> None:
+        self.pending.get(patient_id, {}).pop(day, None)
 
     async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]:
         return sorted(self.stress_periods.get(patient_id, []), key=lambda p: p.start)
@@ -369,6 +382,15 @@ class PostgresStore:
         raise NotSupported("diary")
 
     async def list_diary(self, patient_id: str) -> list[DiaryEntry]:
+        raise NotSupported("diary")
+
+    async def pending_foods(self, patient_id: str, day: date) -> list[DiaryFood]:
+        raise NotSupported("diary")
+
+    async def add_pending_foods(self, patient_id: str, day: date, foods: list[DiaryFood]) -> None:
+        raise NotSupported("diary")
+
+    async def clear_pending_foods(self, patient_id: str, day: date) -> None:
         raise NotSupported("diary")
 
     async def list_stress_periods(self, patient_id: str) -> list[StressPeriodOut]:

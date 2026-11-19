@@ -162,8 +162,15 @@ def test_diary_prefill_save_and_index(demo):
     day = today_of(client).isoformat()
     before = client.get(f"/v1/diary/{day}").json()
     assert before["entry"] is None and before["editable"] and before["usual"]["bedtime"]
-    prefill = before["prefill"]
-    assert {f["dish_id"] for f in prefill} >= {"dish.kacchi_biryani", "dish.plain_rice"}  # from the meal check above
+    assert before["prefill"] == []  # a meal check is not added to the diary on its own
+
+    check_id = client.get("/v1/meal-checks?limit=1").json()["items"][0]["id"]  # the kacchi + rice check above
+    added = client.post(f"/v1/meal-checks/{check_id}/diary", json={"time": "21:15"})
+    assert added.status_code == 201 and added.json() == {"day": day, "added": 2, "already": False}
+    assert client.post(f"/v1/meal-checks/{check_id}/diary", json={"time": "21:15"}).json()["already"] is True
+    prefill = client.get(f"/v1/diary/{day}").json()["prefill"]
+    assert {f["dish_id"] for f in prefill} == {"dish.kacchi_biryani", "dish.plain_rice"}
+    assert {(f["time"], f["time_of_day"], f["source"]) for f in prefill} == {("21:15", "evening", "meal_check")}
 
     foods = [dict(f, reactions=["stomach_ache"]) if f["dish_id"] == "dish.kacchi_biryani" else f for f in prefill]
     body = {"foods": foods, "stool": {"count": 4, "bristol": 6, "urgency": "hurry"}, "pain": 2, "wellbeing": 2,
@@ -180,6 +187,45 @@ def test_diary_prefill_save_and_index(demo):
     after = client.get(f"/v1/diary/{day}").json()
     assert after["entry"]["index"]["score"] == 8 and after["prefill"] == []  # not offered twice
     assert client.get("/v1/diary/days?limit=1").json()["days"][0]["food_reaction"] is True
+
+
+def test_diary_food_time_and_add_to_saved_day(demo):
+    client, services = demo
+    day = today_of(client).isoformat()
+    saved = client.get(f"/v1/diary/{day}").json()["entry"]  # saved by the test above
+    # Edit a food: swap it for another dish and change its time; the slot follows the time.
+    foods = [dict(f) for f in saved["foods"]]
+    foods[0] |= {"name": "Plain rice", "dish_id": "dish.plain_rice", "time": "07:30", "source": "diary"}
+    body = {k: saved[k] for k in ("stool", "pain", "wellbeing", "medication", "sleep", "stress", "signs")} | {"foods": foods}
+    entry = client.put(f"/v1/diary/{day}?lang=en", json=body).json()["entry"]
+    assert (entry["foods"][0]["time"], entry["foods"][0]["time_of_day"]) == ("07:30", "morning")
+    assert entry["foods"][0]["id"] == foods[0]["id"]
+    late = client.put(f"/v1/diary/{day}?lang=en", json=body | {"foods": [foods[0] | {"time": "01:10"}]}).json()["entry"]
+    assert late["foods"][0]["time_of_day"] == "night"
+    assert client.put(f"/v1/diary/{day}", json=body | {"foods": [foods[0] | {"time": "7:30"}]}).status_code == 422
+
+    # A meal checked after the diary is saved goes straight into the saved day, without changing its index.
+    r = client.post("/v1/meal-checks", data={"text": "plain rice", "lang": "en"})
+    check_id = dict(events(r.text))["done"]["meal_check_id"]
+    assert client.post(f"/v1/meal-checks/{check_id}/diary", json={"time": "13:05"}).json()["added"] == 1
+    after = client.get(f"/v1/diary/{day}").json()
+    assert after["prefill"] == [] and after["entry"]["index"] == late["index"]
+    assert after["entry"]["foods"][-1] | {"id": None} == {"id": None, "name": "Plain rice", "name_bn": after["entry"]["foods"][-1]["name_bn"],
+                                                           "dish_id": "dish.plain_rice", "time_of_day": "noon", "time": "13:05",
+                                                           "source": "meal_check", "meal_check_id": check_id, "reactions": []}
+
+
+def test_add_to_diary_rules(demo):
+    client, _ = demo
+    today = today_of(client)
+    check_id = client.get("/v1/meal-checks?limit=1").json()["items"][0]["id"]
+    assert client.post(f"/v1/meal-checks/{check_id}/diary", json={"time": "25:00"}).status_code == 422
+    assert client.post(f"/v1/meal-checks/{check_id}/diary",
+                       json={"time": "12:00", "day": (today + timedelta(days=1)).isoformat()}).status_code == 422
+    assert client.post(f"/v1/meal-checks/{check_id}/diary",
+                       json={"time": "12:00", "day": (today - timedelta(days=5)).isoformat()}).status_code == 422
+    missing = "00000000-0000-4000-8000-000000000000"
+    assert client.post(f"/v1/meal-checks/{missing}/diary", json={"time": "12:00"}).status_code == 404
 
 
 def test_diary_date_rules(demo):

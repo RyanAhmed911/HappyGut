@@ -75,6 +75,7 @@ export const api = {
   mealChecks: async (limit = 30) => (await json(S.MealCheckList, `/v1/meal-checks?limit=${limit}`)).items,
   mealCheckById: (id: string) => json(S.MealCheck, `/v1/meal-checks/${id}`),
   feedback: (id: string, answer: "right" | "wrong" | "not_sure") => raw(`/v1/meal-checks/${id}/feedback`, send("POST", { answer })),
+  addToDiary: (id: string, time: string) => json(S.DiaryAdded, `/v1/meal-checks/${id}/diary`, send("POST", { time })),
 
   diary: (date: string) => json(S.DiaryDay, `/v1/diary/${date}`),
   saveDiary: (date: string, body: S.DiaryBody, lang: string) => json(S.DiarySaved, `/v1/diary/${date}?lang=${lang}`, send("PUT", body)),

@@ -1,0 +1,37 @@
+id: dish.bhutta
+name_en: "Roasted corn"
+name_bn: "ভুট্টা"
+aliases: ["corn", "bhutta", "butta", "roasted corn", "sweet corn", "corn on the cob", "bhutta pora"]
+cuisine: Bangladeshi
+category: street_food
+preparation: ["roasted"]
+ingredients:
+  - {name: "maize cob"}
+  - {name: "salt"}
+  - {name: "chilli"}
+  - {name: "lemon"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: none
+  insoluble_fibre: high
+  lactose: none
+  fructans: none
+  gos: none
+  polyols: medium
+  excess_fructose: none
+  capsaicin_spice: low
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: medium
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

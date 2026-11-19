@@ -1,13 +1,14 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Camera, ImagePlus, LoaderCircle, Moon, RotateCcw, Send, ShieldCheck, ThumbsDown, ThumbsUp, UtensilsCrossed, X } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { BookOpen, Camera, CircleCheck, ImagePlus, LoaderCircle, Moon, NotebookPen, RotateCcw, Send, ShieldCheck, ThumbsDown, ThumbsUp, UtensilsCrossed, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useLang } from "@/components/shell";
-import { Button, Card, Chip, PageTitle } from "@/components/ui";
+import { Button, Card, Chip, inputClass, PageTitle } from "@/components/ui";
 import { Escalation, MealResult, VerdictDot } from "@/components/verdict";
 import { api, ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { clock, nowClock } from "@/lib/format";
 import { DishesEvent, ExplanationEvent, RedFlag, VerdictEvent } from "@/lib/schemas";
 
 type Stage =
@@ -18,6 +19,44 @@ type Stage =
   | { name: "message"; kind: "not_food" | "error"; text: string };
 
 const EXAMPLES = ["ex_1", "ex_2", "ex_3", "ex_4"] as const;
+
+/** Nothing reaches the diary on its own: the person adds the checked meal, at now or a time they choose. */
+function AddToDiary({ mealCheckId }: { mealCheckId: string }) {
+  const { t } = useTranslation();
+  const lang = useLang();
+  const queryClient = useQueryClient();
+  const [time, setTime] = useState(nowClock);
+  const add = useMutation({
+    mutationFn: () => api.addToDiary(mealCheckId, time),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["diary"] }),
+  });
+
+  if (add.data) {
+    return (
+      <Card className="flex items-center gap-3 p-4">
+        <CircleCheck className="h-5 w-5 shrink-0 text-ok" />
+        <p className="text-sm font-semibold">{add.data.already ? t("check.already_added") : t("check.added", { time: clock(time, lang) })}</p>
+      </Card>
+    );
+  }
+  return (
+    <Card className="p-4">
+      <p className="text-sm font-semibold">{t("check.add_title")}</p>
+      <p className="mt-0.5 text-[13px] text-ink-soft">{t("check.add_hint")}</p>
+      <div className="mt-3 flex flex-wrap items-end gap-2.5">
+        <label className="min-w-36 flex-1">
+          <span className="mb-1 block text-xs font-semibold text-ink-soft">{t("check.add_time")}</span>
+          <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={inputClass} />
+        </label>
+        <Button className="flex-1" disabled={!time || add.isPending} onClick={() => add.mutate()}>
+          {add.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <NotebookPen className="h-4 w-4" />}
+          {t("check.add_button")}
+        </Button>
+      </div>
+      {add.isError && <p className="mt-2 text-sm text-trigger">{t("app.error")}</p>}
+    </Card>
+  );
+}
 
 export function Check() {
   const { t } = useTranslation();
@@ -171,7 +210,7 @@ export function Check() {
                 </div>
               )}
             </Card>
-            <p className="px-1 text-center text-sm text-ink-soft">{t("check.logged")}</p>
+            <AddToDiary mealCheckId={stage.id} />
             <div className="grid gap-2.5 sm:grid-cols-2">
               <Button variant="outline" onClick={reset}>
                 <RotateCcw className="h-4 w-4" />
