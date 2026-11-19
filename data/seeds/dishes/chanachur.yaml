@@ -1,0 +1,39 @@
+id: dish.chanachur
+name_en: "Chanachur"
+name_bn: "চানাচুর"
+aliases: ["chanachur", "chanachur mix", "bombay mix", "chanachoor"]
+cuisine: Bangladeshi
+category: snack
+preparation: ["deep-fried", "packaged"]
+ingredients:
+  - {name: "gram flour noodles"}
+  - {name: "peanuts"}
+  - {name: "lentils"}
+  - {name: "flattened rice"}
+  - {name: "chilli powder"}
+  - {name: "spices"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: none
+  fructans: low
+  gos: medium
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: medium
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

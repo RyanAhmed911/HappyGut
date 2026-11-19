@@ -1,0 +1,2 @@
+# LightGBM cannot read a model file with CRLF line endings (core.autocrlf would convert it on Windows).
+services/api/src/happygut_api/models/*.txt text eol=lf

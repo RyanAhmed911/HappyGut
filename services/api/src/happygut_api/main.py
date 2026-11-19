@@ -7,7 +7,7 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, replace
-from datetime import date, datetime
+from datetime import date
 from typing import AsyncIterator, Literal
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
@@ -23,7 +23,7 @@ from .auth import AuthError, SupabaseVerifier, Verifier
 from .care import (MAX_APPOINTMENTS, MAX_MEDICATIONS, AppointmentIn, AppointmentOut, DoseIn, MedicationIn, MedicationOut,
                    doses_for)
 from .demo import PERSONAS, DemoVerifier, TestAccounts, seed_demo, seed_persona
-from .diary import CLOCK, DiaryIn, IndexOut, StressPeriodIn, StressPeriodOut, build_entry, items_of
+from .diary import CLOCK, DiaryAddIn, DiaryFood, DiaryIn, IndexOut, StressPeriodIn, StressPeriodOut, build_entry, items_of
 from .flow import Event, MealCheckFlow
 from .images import ImageRejected, sanitise
 from .insights import SCOPES, Insights
@@ -317,24 +317,43 @@ def create_app(services: Services | None = None) -> FastAPI:
             raise HTTPException(404, "not_found")
         return {"status": "saved"}
 
+    @app.post("/v1/meal-checks/{meal_check_id}/diary", status_code=201)
+    async def add_to_diary(meal_check_id: uuid.UUID, body: DiaryAddIn, patient: Patient = Depends(current_patient),
+                           s: Services = Depends(svc)) -> dict:
+        """Put a checked meal's dishes in that day's diary at the time the person chose (nothing is added on its own)."""
+        record = await s.store.get_meal_check(patient.id, str(meal_check_id))
+        if record is None:
+            raise HTTPException(404, "not_found")
+        today = s.insights.today()
+        day = body.day or today
+        if day > today:
+            raise HTTPException(422, "future_date")
+        if (today - day).days > DIARY_EDIT_DAYS:
+            raise HTTPException(422, "too_late_to_edit")
+        entry = await s.store.get_diary(patient.id, day)
+        already = [f for f in (entry.foods if entry else await s.store.pending_foods(patient.id, day))
+                   if f.meal_check_id == record.id]
+        if already:
+            return {"day": day.isoformat(), "added": 0, "already": True}
+        foods = []
+        for dish in record.dishes:
+            en, bn = s.knowledge.names(dish["dish_id"]) if dish.get("dish_id") else (dish["name"][:80], None)
+            foods.append(DiaryFood(name=en, name_bn=bn, dish_id=dish.get("dish_id"), time=body.time,
+                                   source="meal_check", meal_check_id=record.id))
+        if entry is not None:
+            # The day's diary is already saved: foods don't change its index, so append them directly.
+            if len(entry.foods) + len(foods) > 40:
+                raise HTTPException(422, "too_many_foods")
+            await s.store.save_diary(patient.id, entry.model_copy(update={"foods": [*entry.foods, *foods]}))
+        else:
+            await s.store.add_pending_foods(patient.id, day, foods)
+        return {"day": day.isoformat(), "added": len(foods), "already": False}
+
     # ------------------------------------------------------------ nightly diary
 
-    def time_of_day(moment: datetime) -> str:
-        hour = moment.hour
-        return "morning" if hour < 11 else "noon" if hour < 15 else "afternoon" if hour < 18 else "evening" if hour < 22 else "night"
-
     async def prefill(patient: Patient, day: date, s: Services, existing_ids: set[str]) -> list[dict]:
-        """Dishes from that day's meal checks that aren't in the diary yet (spec 003 FR-002)."""
-        foods = []
-        for record in await s.store.list_meal_checks(patient.id, 100):
-            local = record.created_at.astimezone(s.insights.tz)
-            if local.date() != day or record.id in existing_ids:
-                continue
-            for dish in record.dishes:
-                en, bn = (s.knowledge.names(dish["dish_id"]) if dish.get("dish_id") else (dish["name"], None))
-                foods.append({"name": en, "name_bn": bn, "dish_id": dish.get("dish_id"), "time_of_day": time_of_day(local),
-                              "source": "meal_check", "meal_check_id": record.id, "reactions": []})
-        return foods
+        """Foods added from meal checks that the saved diary doesn't hold yet (the person chose to add them)."""
+        return [f.model_dump(mode="json") for f in await s.store.pending_foods(patient.id, day) if f.id not in existing_ids]
 
     def check_day(day: date, s: Services) -> date:
         today = s.insights.today()
@@ -352,7 +371,7 @@ def create_app(services: Services | None = None) -> FastAPI:
     async def get_diary(day: date, patient: Patient = Depends(current_patient), s: Services = Depends(svc)) -> dict:
         today = check_day(day, s)
         entry = await s.store.get_diary(patient.id, day)
-        used = {f.meal_check_id for f in entry.foods if f.meal_check_id} if entry else set()
+        used = {f.id for f in entry.foods} if entry else set()
         recent = [e for e in await s.store.list_diary(patient.id) if e.day < day][-14:]
         scores = sorted(e.index.score for e in recent)
         bedtimes = [e.sleep.bedtime for e in recent if e.sleep.bedtime]
@@ -381,6 +400,7 @@ def create_app(services: Services | None = None) -> FastAPI:
         entry = build_entry(body, day, patient.diagnosis, s.insights.now(), today, bedtimes, patient.is_synthetic,
                             s.scrubber.scrub(body.notes).text if body.notes else "")
         await s.store.save_diary(patient.id, entry)
+        await s.store.clear_pending_foods(patient.id, day)  # the form showed them; what the person kept is in the entry
         out: dict = {"entry": entry.model_dump(mode="json"), "red_flag": None, "comparison": None}
         if entry.red_flags:
             # Stop here: no diet or lifestyle feedback, escalate (spec 003 FR-006).

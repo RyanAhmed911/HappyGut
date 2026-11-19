@@ -1,0 +1,38 @@
+id: dish.biscuits
+name_en: "Biscuits"
+name_bn: "বিস্কুট"
+aliases: ["biscuit", "biscuits", "cookies", "cookie", "toast biscuit", "cream biscuit", "bakery biscuit"]
+cuisine: Bangladeshi
+category: snack
+preparation: ["baked", "packaged"]
+ingredients:
+  - {name: "wheat flour"}
+  - {name: "sugar"}
+  - {name: "vegetable fat"}
+  - {name: "milk solids"}
+  - {name: "emulsifier"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: medium
+  insoluble_fibre: none
+  lactose: low
+  fructans: medium
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: low
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.muri, dish.chitoi_pitha]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

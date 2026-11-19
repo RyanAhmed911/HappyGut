@@ -1,0 +1,38 @@
+id: dish.chocolate
+name_en: "Chocolate"
+name_bn: "চকলেট"
+aliases: ["chocolate", "milk chocolate", "chocolate bar", "dairy milk", "kitkat", "chocolate candy"]
+cuisine: International
+category: sweet
+preparation: ["packaged"]
+ingredients:
+  - {name: "cocoa"}
+  - {name: "sugar"}
+  - {name: "milk solids"}
+  - {name: "cocoa butter"}
+  - {name: "emulsifier"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: high
+  insoluble_fibre: none
+  lactose: medium
+  fructans: none
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: low
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: low
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.chitoi_pitha, dish.roshogolla]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

@@ -1,0 +1,39 @@
+id: dish.chicken_tikka
+name_en: "Chicken tikka"
+name_bn: "চিকেন টিক্কা"
+aliases: ["chicken tikka", "tikka kabab", "chicken boti", "chicken kabab", "reshmi kabab"]
+cuisine: Bangladeshi
+category: fast_food
+preparation: ["grilled", "marinated"]
+ingredients:
+  - {name: "boneless chicken"}
+  - {name: "yogurt"}
+  - {name: "garlic"}
+  - {name: "ginger"}
+  - {name: "chilli"}
+  - {name: "spices"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: none
+  lactose: low
+  fructans: low
+  gos: none
+  polyols: none
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

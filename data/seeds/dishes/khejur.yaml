@@ -1,0 +1,34 @@
+id: dish.khejur
+name_en: "Dates"
+name_bn: "খেজুর"
+aliases: ["dates", "date", "khejur", "dried dates", "ajwa"]
+cuisine: Bangladeshi
+category: fruit
+preparation: ["dried"]
+ingredients:
+  - {name: "dried dates"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: none
+  insoluble_fibre: medium
+  lactose: none
+  fructans: high
+  gos: none
+  polyols: none
+  excess_fructose: medium
+  capsaicin_spice: none
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: low
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.pepe_bhaji]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved

@@ -1,0 +1,40 @@
+id: dish.thai_soup
+name_en: "Thai soup"
+name_bn: "থাই স্যুপ"
+aliases: ["thai soup", "tom yum", "tom yum soup", "thai clear soup"]
+cuisine: International
+category: soup
+preparation: ["simmered"]
+ingredients:
+  - {name: "chicken or prawn"}
+  - {name: "lemongrass"}
+  - {name: "chilli"}
+  - {name: "mushroom"}
+  - {name: "garlic"}
+  - {name: "fish sauce"}
+  - {name: "cornflour"}
+components:  # typical-recipe estimate, checked by the LLM judge; levels: none | low | medium | high
+  fat: low
+  insoluble_fibre: low
+  lactose: none
+  fructans: medium
+  gos: none
+  polyols: medium
+  excess_fructose: none
+  capsaicin_spice: medium
+  alcohol: none
+  caffeine: none
+  skins_seeds_nuts: none
+  red_processed_meat: none
+  emulsifiers: none
+level_basis: typical_recipe_estimate
+gentler_alternatives: [dish.murgir_patla_jhol]
+sources:
+  - {ref: "llm-judge:typical-recipe", licence: "not applicable (model judgement, no external text copied)"}
+reviewed_by: llm-judge
+review:
+  method: llm_judge
+  date: 2026-11-19
+  verdict: approved
+  note: "Added in the fast-food, snack, drink and fruit expansion; levels are typical-recipe estimates awaiting dietitian review."
+status: approved
