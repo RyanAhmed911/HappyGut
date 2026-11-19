@@ -42,10 +42,10 @@ cd pipelines && uv run python -m happygut_pipelines.aliases apply
 ## Bangla interface text
 `apps/web/src/locales/bn.json` and `services/api/src/happygut_api/locales/bn.json`: same meaning as the English, natural phrasing, the same placeholders, none of the banned words. Automated tests check keys, placeholders and banned words; the judge checks meaning and tone.
 
-## Current state (2026-11-15)
+## Current state (2026-11-19)
 | What | Result | Report |
 |---|---|---|
 | Rule Cards | 25 approved (7 with edits), each with an exact retrieved quote | [`rule_cards.md`](../data/review/llm_judge/rule_cards.md), [`evidence.json`](../data/review/llm_judge/evidence.json) |
-| Dishes | 61 approved (3 with edits) | [`dishes.md`](../data/review/llm_judge/dishes.md) |
+| Dishes | 109 approved (61 on 15 Nov, 3 with edits; 48 added on 19 Nov) | [`dishes.md`](../data/review/llm_judge/dishes.md) |
 | Spellings | 50 accepted, 87 rejected | [`g2-aliases.csv`](../data/review/g2-aliases.csv) |
 | Bangla text | reviewed | [`bangla.md`](../data/review/llm_judge/bangla.md) |

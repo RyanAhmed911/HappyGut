@@ -15,7 +15,7 @@ HappyGut is a Bangla-first companion that answers "is this meal likely to trigge
 - **Weight:** a weekly weigh-in with the trend; past the GLIM weight-loss threshold (more than 5% in 6 months) it tells the patient to contact their doctor.
 
 ## AI architecture (input → AI → output)
-Photo / text → **PII scrub** and **red-flag check** → **vision-language model** names the dishes → **food knowledge graph** (61 Bangladeshi dishes → gut-relevant components) and **25 cited Rule Cards** → **deterministic verdict engine** combines guidance, the food and the person's own history → **language model** words the explanation → **output guard** checks it against the engine's result (template fallback) → verdict card.
+Photo / text → **PII scrub** and **red-flag check** → **vision-language model** names the dishes → **food knowledge graph** (109 dishes eaten in Bangladesh → gut-relevant components) and **25 cited Rule Cards** → **deterministic verdict engine** combines guidance, the food and the person's own history → **language model** words the explanation → **output guard** checks it against the engine's result (template fallback) → verdict card.
 The model never decides. Personal patterns come from a Bayesian model over each person's diary. An MCP server exposes the food graph to other AI clients.
 
 ## Data and sovereignty
@@ -24,10 +24,10 @@ Only licensed sources, each recorded with its licence: open-access IBD guidance 
 ## Measured results
 | What | Result |
 |---|---|
-| Pattern Finder on 200 **simulated** patients with hidden contributors, 120 days of diary | Found 293 of 409 (72%); 80% of food contributors; 52 false reports |
+| Pattern Finder on 200 **simulated** patients with hidden contributors, 120 days of diary | Found 274 of 400 (68%); 70% of food contributors; 71 false reports |
 | Red-flag check, Bangla and English | 29 of 29 emergency phrases caught; 0 of 30 ordinary messages flagged |
 | Flare-risk model v1 (LightGBM), 50 held-out **simulated** patients | ROC AUC 0.658 vs 0.558 for the rule-based score; flagging 10% of days catches 31% of flare starts vs 11% |
-| Verdict engine on 61 real dishes × 7 patient profiles | 427 of 427 reproducible; every warning cites a rule; stricture rule 11 of 11 |
+| Verdict engine on 109 real dishes × 7 patient profiles | 763 of 763 reproducible; every warning cites a rule; stricture rule 19 of 19 |
 
 Full report and how to reproduce: `evals/RESULTS.md`.
 

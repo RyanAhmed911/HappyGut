@@ -1,42 +1,42 @@
 {
-  "date": "2026-11-17",
+  "date": "2026-11-19",
   "cohort": {
     "patients": 200,
     "days": 120,
     "horizons": [
       {
         "days": 21,
-        "found": 112,
-        "of": 409,
-        "false_reports": 32
+        "found": 116,
+        "of": 400,
+        "false_reports": 21
       },
       {
         "days": 30,
-        "found": 151,
-        "of": 409,
-        "false_reports": 40
+        "found": 145,
+        "of": 400,
+        "false_reports": 38
       },
       {
         "days": 60,
-        "found": 212,
-        "of": 409,
-        "false_reports": 46
+        "found": 188,
+        "of": 400,
+        "false_reports": 61
       },
       {
         "days": 90,
-        "found": 263,
-        "of": 409,
-        "false_reports": 51
+        "found": 227,
+        "of": 400,
+        "false_reports": 65
       },
       {
         "days": 120,
-        "found": 293,
-        "of": 409,
-        "false_reports": 52
+        "found": 274,
+        "of": 400,
+        "false_reports": 71
       }
     ],
     "food": {
-      "found": 139,
+      "found": 121,
       "of": 173
     }
   },
@@ -47,17 +47,17 @@
     "ordinary": 30
   },
   "verdicts": {
-    "assessments": 427,
-    "identical": 427,
-    "dishes": 61,
+    "assessments": 763,
+    "identical": 763,
+    "dishes": 109,
     "profiles": 7,
     "stricture": {
-      "rated": 11,
-      "of": 11
+      "rated": 19,
+      "of": 19
     }
   },
   "knowledge": {
-    "dishes": 61,
+    "dishes": 109,
     "rule_cards": 25
   }
 }

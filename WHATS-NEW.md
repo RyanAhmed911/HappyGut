@@ -320,7 +320,7 @@ The backend's Docker image (`services/api/Dockerfile`) now installs the tracing 
   - Tick **Langfuse** and **n8n** only once they actually run on the deployment.
   - Untick the research MCP server, Supabase webhooks and anything else marked **C**.
   - You can tick **four MCP servers built**, **LightGBM** and **workflow automation (n8n)** once n8n runs.
-- **Video:** the script didn't change for these features. Weight tracking, medicines and the ML estimate are optional extra shots if the timing allows. If you mention the model, say "trained on simulated patients", as the script does for the 72%.
+- **Video:** use script **v3** in `docs/portal/video-script.md` (19 Nov). It adds the **Add to diary** step, a live red-flag safety shot, the doctor's report and the ML flare model, and uses the 19 Nov numbers (109 dishes, 68%). Always say "simulated" with the 68% and the model's 2.7×.
 
 ---
 

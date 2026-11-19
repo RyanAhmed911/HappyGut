@@ -40,7 +40,7 @@
 | Meal check: photo / Bangla / English text → graded verdict + why + citations + alternative | **A** |
 | Red-flag sentinel + escalation screen | **A** |
 | Stricturing Crohn's hard rules | **A** |
-| Nightly diary: day's foods (pre-filled from meal checks), per-food reactions, stool (Bristol, blood, urgency), HBI / SCCAI, doses, notes | **A** |
+| Nightly diary: day's foods (meals added from a check with one tap; any food or time can be edited), per-food reactions, stool (Bristol, blood, urgency), HBI / SCCAI, doses, notes | **A** |
 | Sleep (bedtime, wake, quality, late-night flag) and stress (0–4, exam / stressful periods) | **A** |
 | Flare Pattern Finder (Bayesian N-of-1 over food components, late / short sleep, stress, exam periods, missed doses) on the simulated demo persona | **A** |
 | Remission / flare periods: timeline + separate Remission and Flare summaries | **A** |
