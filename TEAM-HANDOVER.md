@@ -87,7 +87,7 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Personal Gut Graph view | ✅ | On My patterns |
 | "How it works" public page | ✅ | `/about` |
 | Bangla and English throughout | ✅ | A test checks both files have the same keys |
-| Knowledge layer: 61 Bangladeshi dishes, 25 cited Rule Cards | ✅ | All reviewed by an LLM judge against retrieved sentences from papers |
+| Knowledge layer: 109 dishes (Bangladeshi home cooking, fast food, snacks, drinks, fruit), 25 cited Rule Cards | ✅ | All reviewed by an LLM judge against retrieved sentences from papers |
 | Evaluation with measured numbers | ✅ | [`evals/RESULTS.md`](evals/RESULTS.md) |
 | MCP servers | ✅ | Four, read-only: food graph, guidelines (cited Rule Cards), evals (results and a red-flag check), journal (one patient's records with their own sign-in). `services/mcp/README.md` |
 | Automated tests and CI | ✅ | About 250 tests; every pull request runs them, plus a secret scan |
@@ -281,7 +281,7 @@ More detail on accounts and setup: [`docs/setup.md`](docs/setup.md).
 | "likely OK for you", "likely trigger for you" | "safe", "dangerous" |
 | "linked to your worse days", "likely contributor" | "causes", "caused" |
 | "reviewed by an LLM judge against published sources" | "clinically reviewed", "doctor-approved", "validated" |
-| "recovered 72% of hidden triggers **in simulated patients**" | "72% accurate", "predicts flares" |
+| "recovered 68% of hidden triggers **in simulated patients**" | "68% accurate", "predicts flares" |
 | "sample patient records" | "real patient", "our users" |
 | "competition prototype, not a medical device" | anything that sounds like a diagnosis or treatment |
 
@@ -321,13 +321,13 @@ The full requirement-by-requirement check is in [`docs/portal/guide-checklist.md
 ### The rule that needs the most care
 The guide forbids "fabricated demos" and "fake or simulated results" (§20.4) but also requires health data to be anonymised (§20.6). So we use **sample patients** for the demo and **always say so**. The dishes, rules, citations and verdicts are real and computed live; only the patients' histories are simulated. Keep this wording in everything you write or record.
 
-### The measured numbers (from `evals/RESULTS.md`, 17 Nov)
+### The measured numbers (from `evals/RESULTS.md`, 19 Nov, 109 dishes)
 
 | What | Result |
 |---|---|
-| Pattern Finder on 200 **simulated** patients with hidden triggers, 120 days of diary | Found 293 of 409 (72%); 80% for food triggers; 52 false reports |
+| Pattern Finder on 200 **simulated** patients with hidden triggers, 120 days of diary | Found 274 of 400 (68%); 70% for food triggers; 71 false reports |
 | Red-flag check, Bangla and English | 29 of 29 emergency phrases caught; 0 of 30 ordinary messages flagged |
-| Verdict engine, 61 dishes × 7 patient profiles | 427 of 427 identical when repeated; every warning cites a rule; stricture rule 11 of 11 |
+| Verdict engine, 109 dishes × 7 patient profiles | 763 of 763 identical when repeated; every warning cites a rule; stricture rule 19 of 19 |
 | Not measured yet | Photo recognition accuracy, agreement with a dietitian, anything on real patients |
 
 ---

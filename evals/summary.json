@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-17",
+  "date": "2026-11-19",
   "version": "0.1.0",
   "pattern_version": "patterns-v0.1",
   "simulated_cohort": true,
@@ -11,216 +11,217 @@
       "fat",
       "gos",
       "lactose",
-      "red_processed_meat"
+      "red_processed_meat",
+      "skins_seeds_nuts"
     ],
     "by_horizon": {
       "21": {
-        "food_false_reports": 16,
-        "patients_with_a_false_food_report": 14,
-        "true_contributors": 409,
-        "found": 112,
-        "related_reports": 94,
-        "false_reports": 32,
-        "precision_strict": 0.471,
-        "precision": 0.778,
-        "recall": 0.274,
-        "patients_with_a_false_report": 23,
+        "food_false_reports": 12,
+        "patients_with_a_false_food_report": 10,
+        "true_contributors": 400,
+        "found": 116,
+        "related_reports": 104,
+        "false_reports": 21,
+        "precision_strict": 0.481,
+        "precision": 0.847,
+        "recall": 0.29,
+        "patients_with_a_false_report": 16,
         "no_contributor_patients": 37,
-        "no_contributor_patients_with_any_report": 7,
+        "no_contributor_patients_with_any_report": 5,
         "recall_by_group": {
           "food": {
-            "found": 18,
+            "found": 23,
             "of": 173,
-            "recall": 0.104
+            "recall": 0.133
           },
           "sleep": {
-            "found": 14,
-            "of": 72,
-            "recall": 0.194
+            "found": 22,
+            "of": 74,
+            "recall": 0.297
           },
           "stress": {
-            "found": 42,
-            "of": 65,
-            "recall": 0.646
+            "found": 34,
+            "of": 60,
+            "recall": 0.567
           },
           "period": {
-            "found": 38,
-            "of": 61,
-            "recall": 0.623
+            "found": 37,
+            "of": 54,
+            "recall": 0.685
           },
           "medication": {
             "found": 0,
-            "of": 38,
+            "of": 39,
             "recall": 0.0
           }
         }
       },
       "30": {
-        "food_false_reports": 18,
-        "patients_with_a_false_food_report": 17,
-        "true_contributors": 409,
-        "found": 151,
-        "related_reports": 134,
-        "false_reports": 40,
-        "precision_strict": 0.465,
-        "precision": 0.791,
-        "recall": 0.369,
-        "patients_with_a_false_report": 29,
-        "no_contributor_patients": 37,
-        "no_contributor_patients_with_any_report": 8,
-        "recall_by_group": {
-          "food": {
-            "found": 42,
-            "of": 173,
-            "recall": 0.243
-          },
-          "sleep": {
-            "found": 25,
-            "of": 72,
-            "recall": 0.347
-          },
-          "stress": {
-            "found": 45,
-            "of": 65,
-            "recall": 0.692
-          },
-          "period": {
-            "found": 39,
-            "of": 61,
-            "recall": 0.639
-          },
-          "medication": {
-            "found": 0,
-            "of": 38,
-            "recall": 0.0
-          }
-        }
-      },
-      "60": {
         "food_false_reports": 23,
-        "patients_with_a_false_food_report": 22,
-        "true_contributors": 409,
-        "found": 212,
-        "related_reports": 176,
-        "false_reports": 46,
-        "precision_strict": 0.488,
-        "precision": 0.822,
-        "recall": 0.518,
-        "patients_with_a_false_report": 31,
+        "patients_with_a_false_food_report": 21,
+        "true_contributors": 400,
+        "found": 145,
+        "related_reports": 141,
+        "false_reports": 38,
+        "precision_strict": 0.448,
+        "precision": 0.792,
+        "recall": 0.362,
+        "patients_with_a_false_report": 28,
         "no_contributor_patients": 37,
         "no_contributor_patients_with_any_report": 9,
         "recall_by_group": {
           "food": {
-            "found": 84,
+            "found": 38,
             "of": 173,
-            "recall": 0.486
+            "recall": 0.22
           },
           "sleep": {
-            "found": 37,
-            "of": 72,
-            "recall": 0.514
+            "found": 28,
+            "of": 74,
+            "recall": 0.378
           },
           "stress": {
-            "found": 47,
-            "of": 65,
-            "recall": 0.723
+            "found": 39,
+            "of": 60,
+            "recall": 0.65
           },
           "period": {
-            "found": 44,
-            "of": 61,
-            "recall": 0.721
+            "found": 39,
+            "of": 54,
+            "recall": 0.722
+          },
+          "medication": {
+            "found": 1,
+            "of": 39,
+            "recall": 0.026
+          }
+        }
+      },
+      "60": {
+        "food_false_reports": 44,
+        "patients_with_a_false_food_report": 39,
+        "true_contributors": 400,
+        "found": 188,
+        "related_reports": 163,
+        "false_reports": 61,
+        "precision_strict": 0.456,
+        "precision": 0.755,
+        "recall": 0.47,
+        "patients_with_a_false_report": 45,
+        "no_contributor_patients": 37,
+        "no_contributor_patients_with_any_report": 8,
+        "recall_by_group": {
+          "food": {
+            "found": 76,
+            "of": 173,
+            "recall": 0.439
+          },
+          "sleep": {
+            "found": 39,
+            "of": 74,
+            "recall": 0.527
+          },
+          "stress": {
+            "found": 41,
+            "of": 60,
+            "recall": 0.683
+          },
+          "period": {
+            "found": 32,
+            "of": 54,
+            "recall": 0.593
           },
           "medication": {
             "found": 0,
-            "of": 38,
+            "of": 39,
             "recall": 0.0
           }
         }
       },
       "90": {
-        "food_false_reports": 29,
-        "patients_with_a_false_food_report": 27,
-        "true_contributors": 409,
-        "found": 263,
-        "related_reports": 216,
-        "false_reports": 51,
-        "precision_strict": 0.496,
-        "precision": 0.838,
-        "recall": 0.643,
-        "patients_with_a_false_report": 35,
+        "food_false_reports": 52,
+        "patients_with_a_false_food_report": 46,
+        "true_contributors": 400,
+        "found": 227,
+        "related_reports": 191,
+        "false_reports": 65,
+        "precision_strict": 0.47,
+        "precision": 0.777,
+        "recall": 0.568,
+        "patients_with_a_false_report": 48,
         "no_contributor_patients": 37,
-        "no_contributor_patients_with_any_report": 10,
+        "no_contributor_patients_with_any_report": 11,
         "recall_by_group": {
           "food": {
-            "found": 119,
+            "found": 103,
             "of": 173,
-            "recall": 0.688
+            "recall": 0.595
           },
           "sleep": {
             "found": 45,
-            "of": 72,
-            "recall": 0.625
+            "of": 74,
+            "recall": 0.608
           },
           "stress": {
-            "found": 51,
-            "of": 65,
-            "recall": 0.785
+            "found": 42,
+            "of": 60,
+            "recall": 0.7
           },
           "period": {
-            "found": 47,
-            "of": 61,
-            "recall": 0.77
+            "found": 36,
+            "of": 54,
+            "recall": 0.667
           },
           "medication": {
             "found": 1,
-            "of": 38,
+            "of": 39,
             "recall": 0.026
           }
         }
       },
       "120": {
-        "food_false_reports": 32,
-        "patients_with_a_false_food_report": 31,
-        "true_contributors": 409,
-        "found": 293,
-        "related_reports": 258,
-        "false_reports": 52,
-        "precision_strict": 0.486,
-        "precision": 0.849,
-        "recall": 0.716,
-        "patients_with_a_false_report": 38,
+        "food_false_reports": 50,
+        "patients_with_a_false_food_report": 41,
+        "true_contributors": 400,
+        "found": 274,
+        "related_reports": 243,
+        "false_reports": 71,
+        "precision_strict": 0.466,
+        "precision": 0.794,
+        "recall": 0.685,
+        "patients_with_a_false_report": 46,
         "no_contributor_patients": 37,
-        "no_contributor_patients_with_any_report": 11,
+        "no_contributor_patients_with_any_report": 12,
         "recall_by_group": {
           "food": {
-            "found": 139,
+            "found": 121,
             "of": 173,
-            "recall": 0.803
+            "recall": 0.699
           },
           "sleep": {
-            "found": 49,
-            "of": 72,
-            "recall": 0.681
+            "found": 57,
+            "of": 74,
+            "recall": 0.77
           },
           "stress": {
-            "found": 56,
-            "of": 65,
-            "recall": 0.862
+            "found": 52,
+            "of": 60,
+            "recall": 0.867
           },
           "period": {
-            "found": 47,
-            "of": 61,
-            "recall": 0.77
+            "found": 42,
+            "of": 54,
+            "recall": 0.778
           },
           "medication": {
             "found": 2,
-            "of": 38,
-            "recall": 0.053
+            "of": 39,
+            "recall": 0.051
           }
         }
       }
     },
-    "contributors_per_patient": 2.04
+    "contributors_per_patient": 2
   },
   "red_flags": {
     "by_language": {
@@ -251,73 +252,73 @@
     "ordinary_messages": 30
   },
   "verdicts": {
-    "dishes": 61,
-    "assessments": 427,
+    "dishes": 109,
+    "assessments": 763,
     "by_profile": {
       "cd_remission": {
-        "likely_ok": 61
+        "likely_ok": 109
       },
       "cd_flare": {
-        "likely_ok": 33,
-        "likely_trigger": 26,
-        "caution": 2
+        "likely_ok": 59,
+        "likely_trigger": 44,
+        "caution": 6
       },
       "cd_stricturing": {
-        "likely_ok": 27,
-        "likely_trigger": 21,
-        "caution": 13
+        "likely_ok": 55,
+        "likely_trigger": 30,
+        "caution": 24
       },
       "cd_remission_lactose": {
-        "likely_ok": 51,
-        "caution": 6,
-        "likely_trigger": 4
+        "likely_ok": 92,
+        "caution": 10,
+        "likely_trigger": 7
       },
       "cd_remission_ibs": {
-        "likely_ok": 56,
-        "likely_trigger": 5
+        "likely_ok": 101,
+        "likely_trigger": 8
       },
       "uc_remission": {
-        "likely_ok": 61
+        "likely_ok": 109
       },
       "uc_flare": {
-        "likely_ok": 33,
-        "likely_trigger": 26,
-        "caution": 2
+        "likely_ok": 58,
+        "likely_trigger": 44,
+        "caution": 7
       }
     },
-    "identical_on_repeat": 427,
+    "identical_on_repeat": 763,
     "caution_or_trigger_without_a_rule": 0,
     "stricture_rule": {
-      "dishes_with_fibre_skins_seeds_nuts": 11,
-      "rated_likely_trigger": 11,
+      "dishes_with_fibre_skins_seeds_nuts": 19,
+      "rated_likely_trigger": 19,
       "not_rated_likely_trigger": []
     }
   },
   "dish_names": {
     "bangla": {
-      "names": 61,
-      "resolved_to_own_dish": 61,
+      "names": 109,
+      "resolved_to_own_dish": 109,
       "wrong": []
     },
     "english": {
-      "names": 61,
-      "resolved_to_own_dish": 61,
+      "names": 109,
+      "resolved_to_own_dish": 109,
       "wrong": []
     },
     "spellings": {
-      "names": 209,
-      "resolved_to_own_dish": 209,
+      "names": 477,
+      "resolved_to_own_dish": 477,
       "wrong": []
     }
   },
   "engine_latency": {
     "runs": 300,
     "dishes_per_meal": 3,
-    "p50_ms": 0.21,
-    "p90_ms": 0.25
+    "p50_ms": 0.16,
+    "p90_ms": 0.18
   },
   "knowledge": {
-    "dishes": 61,
+    "dishes": 109,
     "rule_cards": 25,
     "rule_cards_with_quote": 25
   }

@@ -43,7 +43,7 @@ The guide prohibits "fabricated demos" and "fake or simulated results" (§20.4) 
 
 | Part | Real or sample | How we say it |
 |---|---|---|
-| Dishes, ingredients, components | Real: 61 Bangladeshi dishes | — |
+| Dishes, ingredients, components | Real: 109 dishes eaten in Bangladesh | — |
 | Rule Cards and citations | Real: 25 rules, each with a sentence from a published paper confirmed by DOI / PMID | "Reviewed by an LLM judge against published sources", never "clinically reviewed" |
 | Verdicts | Real: computed live by the engine for whatever is typed or photographed | — |
 | Photo and text understanding | Real: live model call | — |
