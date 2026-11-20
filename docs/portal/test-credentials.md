@@ -2,7 +2,7 @@
 
 The portal asks for at least one login, one row per role or user type. HappyGut has three test accounts, one per patient type. Each holds sample data only.
 
-> **Passwords are not in this repository.** Choose three throw-away passwords, set them as `TEST_PASSWORD_NUSRAT`, `TEST_PASSWORD_RAFI` and `TEST_PASSWORD_AYESHA` in the Hugging Face Space's **Secrets** (and in your local `.env`), and type the same values into the portal. The portal stores them in plain text and shows them to judges and event admins, so don't reuse a password from anywhere else.
+> **Passwords are not in this repository.** Choose three throw-away passwords, set them as `TEST_PASSWORD_NUSRAT`, `TEST_PASSWORD_RAFI` and `TEST_PASSWORD_AYESHA` in Render's **Environment** variables (and in your local `.env`), and type the same values into the portal. The portal stores them in plain text and shows them to judges and event admins, so don't reuse a password from anywhere else.
 
 | Role / user type | Username (email) | Password | What a judge sees |
 |---|---|---|---|
@@ -16,4 +16,5 @@ The portal asks for at least one login, one row per role or user type. HappyGut 
 ## Good to know
 - Several judges can use the same account at once; they share its records. **Settings → Restore original records** resets one account, and restarting the backend resets all three.
 - Eight wrong passwords in five minutes lock that email for five minutes.
-- Set `SESSION_SECRET` in the Space's Secrets so a restart doesn't sign everyone out.
+- Set `SESSION_SECRET` on Render so a restart doesn't sign everyone out.
+- Render's free service sleeps after 15 idle minutes and forgets what judges entered; a free uptime ping to `/v1/health` keeps it awake.
