@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
@@ -62,6 +63,12 @@ class Settings(BaseSettings):
     # Bearer token for /v1/jobs/* (called by n8n). Empty = the job endpoints are switched off.
     jobs_token: str = ""
     timezone: str = "Asia/Dhaka"
+    # The live /docs page. The admin page needs a password of at least 12 characters (empty = no admin page).
+    # Visibility defaults; an admin can change them at /docs/admin until the next restart.
+    docs_admin_password: str = ""
+    docs_visible: bool = True
+    docs_starts_at: datetime | None = None  # with a time zone, e.g. 2026-11-20T00:00:00+06:00
+    docs_ends_at: datetime | None = None
 
     # CORS for the PWA
     cors_origins: list[str] = ["http://localhost:5173"]
