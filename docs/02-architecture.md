@@ -1,5 +1,7 @@
 # Step 2: Architecture and stack
 
+> **Note (20 Nov 2026):** this document describes the target architecture, including parts not built yet (Neo4j, pgvector retrieval, guideline RAG, Hugging Face hosting). What is built and live is in [`portal/submission-scope.md`](portal/submission-scope.md) and on the live `/docs` page. Hosting is now Render (backend) + Vercel (web app).
+
 > Status: **v1.0** (2026-10-21). Scope is the preliminary prototype (tiers A and B in `docs/portal/submission-scope.md`). Rules: `.specify/memory/constitution.md`.
 
 ## 1. System overview
