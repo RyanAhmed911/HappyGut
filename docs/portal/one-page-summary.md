@@ -1,6 +1,6 @@
 # HappyGut: one-page summary
 
-**Domain:** HealthSphere AI · **Challenge:** ChronicCare AI · **Team:** Cinnamon Syrups · **Live demo:** _link_ · **Video:** _link_ · **Code:** github.com/RyanAhmed911/HappyGut
+**Domain:** HealthSphere AI · **Challenge:** ChronicCare AI · **Team:** Cinnamon Syrups · **Live demo:** https://happygut-web.vercel.app (pitch deck and technical docs: /docs) · **Video:** _link_ · **Code:** github.com/RyanAhmed911/HappyGut
 
 ## Problem
 Inflammatory bowel disease (Crohn's disease, ulcerative colitis) is lifelong, has no cure and no known cause, and is "rising at an alarming rate in south Asia" with "a paucity of data" from the region, especially outside India (Shenoy et al., *Lancet Gastroenterol Hepatol* 2025). Few people in Bangladesh know the disease: across 15 countries in our region, a fifth of Crohn's patients were given tuberculosis treatment and diagnosis took a median of 12 months (Banerjee et al., *J Gastroenterol Hepatol* 2022). Food triggers differ from person to person, symptoms can follow a meal by a day, and in Bangladesh most meals have no label, so no general diet advice fits. Patients either gamble at every meal or cut out so many foods that they risk malnutrition. Between appointments, their doctor sees none of it.
