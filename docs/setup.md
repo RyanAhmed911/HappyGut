@@ -1,5 +1,7 @@
 # Setup (Step 0): accounts and development
 
+> **Note (20 Nov 2026):** deployment now uses Render (backend) and Vercel (web app), not Hugging Face Spaces, whose Docker Spaces need a paid plan. Step-by-step deployment: [`../WHATS-NEW.md`](../WHATS-NEW.md) Part C. Local setup below still applies; parts that mention Neo4j or Hugging Face describe the original plan.
+
 All free tiers, **no card needed anywhere**. Put every key in `.env` (copy `.env.example`). Never commit `.env`.
 
 ## 1. Accounts (one person each, share keys privately)
