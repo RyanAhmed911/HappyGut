@@ -1,468 +1,197 @@
-# Portal text: AI detail usage (prototype, Nov 20)
+# Portal text: AI detail usage (prototype, updated 20 Nov)
 
-> Paste-ready lists. Same rule as the data section: list only what's really used. Exact model versions are pinned after the Step 2 benchmark. Write the version names you actually run; don't copy placeholder names.
+> Paste-ready lists for the portal's "AI Detail Usage" page. **List only what is really used.** Every line below was checked against the code on 20 Nov 2026. Unticked items are in `submission-scope.md` under "not built".
 
 ## Prompt usage
-
-**Design**
-- Prompts are versioned files in `prompts/runtime/` (id, version, model, temperature, output schema, last eval score)
-- Every LLM call logs its prompt ID + version (Langfuse); every verdict stores the prompt version that explained it
-- One prompt per agent task:
-  - perception (photo → dishes)
-  - dish resolver
-  - evidence explainer
-  - meal planner
-  - red-flag checker
-  - Rule Card extractor
-  - contextual chunk header
-  - evaluation judge
-- Role prompting with hard boundaries: "clinical nutrition evidence explainer". Never says "safe", never diagnoses, never gives medication advice
-- Structured outputs: every prompt returns JSON matching a Pydantic schema; invalid output is retried with the validation error fed back (Instructor)
-- Few-shot: 3–5 curated examples per task (mixed Bangladeshi plate, Bangla label, Bangla text, blurry photo → ⚪ "Not sure")
-- Grounded generation: the explainer only sees evidence objects with IDs, must cite an ID for every claim, and must say so when evidence is insufficient
-- Quote-then-answer: extraction prompts copy the exact source sentence before producing a Rule Card (reduces hallucination)
-- Minimal chain-of-thought: the verdict logic lives in the deterministic engine, so prompts don't need long reasoning. Faster and cheaper, with nothing hidden in model reasoning
-- Bangla-first output: a medical-term glossary in the prompt keeps terminology consistent; plain language, ≤ 60 words, with an expandable "more"
-- Layered safety: red-flag pre-check → guardrailed system prompt → post-output validator (bans "safe" and medication wording, checks every claim has a citation)
-
-**Iteration and versioning**
-- Eval-driven: every prompt change runs against the evaluation sets (promptfoo + Ragas) and is merged only if nothing regresses
-- Failure cases found in testing become new few-shot examples or test cases
-- Prompt versions compared side by side in Langfuse
-- Build prompts (Claude Code sessions) kept in the prompt library `prompts/build/` with CLAUDE.md as project memory
+```
+Versioned prompt files in prompts/runtime/ (Markdown with a header: id, version, model, temperature, output schema, changelog, eval score)
+4 prompts: meal-perception (photo/text → dishes JSON), meal-explanation (the "why" in Bangla or English), g2-dish-aliases (v1 → v2, offline spelling job), g1-context-header (prepared for the guideline corpus)
+Every meal check stores which perception and explanation prompt versions produced it
+Role prompting with strict limits: the model only describes food or explains a verdict the engine already made; it never judges, never says "safe", never gives medicine advice
+Structured JSON output validated against Pydantic schemas
+```
 
 ## Token optimization
-
-- Deterministic verdict engine: the decision needs no LLM, so a scan costs ~2 LLM calls (perception + explanation)
-- LiteLLM router: cheap/fast model for routing and classification, stronger model only for vision and explanations; automatic fallback across providers when a free-tier quota runs out
-- Caching: perception results by image SHA-256
-- Caching: explanations by (dish, profile version, language); common dishes cost no new tokens
-- Gemini implicit context caching: static prefix first (system prompt + glossary + few-shots), variable content last
-- Compact evidence packets: top-5 reranked chunks reduced to short fact lines with IDs (~300 tokens) instead of raw documents
-- Images downscaled to ≤ 1024 px before the vision model
-- Batch work (contextual headers, dish enrichment, evaluation judging, synthetic data) runs on local models (Ollama) at zero API cost; rule-based PII scrubbing in the backend costs no tokens
-- Batch jobs on the local GPU: Rule Card extraction, dish enrichment, contextual chunk headers are computed once at ingestion, never per query
-- Semantic dedup: duplicate chunks removed by content hash before embedding
-- Stateless calls, no chat history; weekly summaries are written from SQL-computed statistics, not raw logs
-- Output caps: max_tokens per task, short answers with "more" on demand
-- Streaming (SSE) for faster perceived response
-- Token usage per call tracked in Langfuse
+```
+Deterministic verdict engine: the decision needs no LLM, so a check needs at most 2 model calls (read the plate, write the explanation)
+Typed dish names are matched locally against the knowledge graph, so no perception call is needed
+Small model first (Gemini flash-lite), larger model only as fallback; Groq as a second provider
+Structured JSON output: no free-text parsing, fewer retries
+If no model is available, a template explanation is shown, so a check never fails
+```
 
 ## Token optimization tools and methods (tick)
-- ✅ Gemini Context Caching (implicit caching of the static prompt prefix)
 - ✅ Structured outputs / JSON mode
-- ✅ Cheap-model routing (LiteLLM)
-- ✅ Request batching (offline enrichment and embedding jobs)
-- ✅ Semantic chunk dedup
-- ❌ Anthropic / OpenAI / DeepSeek caching (we don't call those APIs at runtime)
-- ❌ LLMLingua, Graphify, Caveman, Codeburn, rolling summary, sliding window, KV-cache reuse, speculative decoding (not used)
+- ✅ Cheap-model routing
+- ❌ Not used: context caching, semantic chunk dedup, request batching, prompt compression, KV-cache reuse
 
-## LLMs / models used (tick; +3 each, max 15)
-- ✅ Claude
-- ✅ Gemini
-- ✅ Llama
-- ✅ Qwen
-- ✅ *Add:* Gemma
-- ❌ ChatGPT, Kimi, DeepSeek, Mistral, Grok (not used; tick ChatGPT only if the team really uses it)
+## LLMs / models used (tick)
+- ✅ Claude (development, Claude Code; LLM judge for knowledge review)
+- ✅ Gemini (runtime)
+- ✅ Gemma (offline spelling job, Gemma 3 12B)
+- ⚠️ Llama: only as a backup in the Groq fallback list
+- Add: `gpt-oss-120b (via Groq)`, optionally `BGE-M3 (embeddings)`
+- ❌ Not used: Qwen, DeepSeek, ChatGPT, Mistral, Kimi, Grok
 
 ## How and why we use these LLMs
-**Live app (cloud only, always on)**
-- Claude (via Claude Code): development only: architecture docs, code generation, refactoring, tests, reviews; CLAUDE.md project memory. Not called at runtime
-- Gemini Flash (free tier, Google AI Studio): primary runtime model
-  - meal/label photo → dishes JSON
-  - Bangla/English evidence explanations
-  - meal plans, weekly summaries
-  - Why: strong vision + Bangla, JSON-schema output, free tier
-- Llama (via Groq free tier): low-latency runtime tasks
-  - text-input intent routing
-  - second check on red-flag free text
-  - fallback explainer when the Gemini quota runs out
-  - Why: very fast inference, separate quota
-
-**GPU jobs (finite jobs on the team GPU, Ubuntu: Ollama + ROCm PyTorch)**
-- Qwen3 14B: contextual chunk headers, Rule Card and dish enrichment drafts. Strong structured output, no API limits for a large batch
-- Gemma 3 12B: Bangla spelling variants and English-letter spellings of dish names; Bangla test utterances; Bangla draft strings for LLM-judge review. The strongest Bangla of the local options that fit in 12 GB
-- Llama 3.1 8B: English test utterances and red-flag paraphrases for the evaluation sets
-- DeepSeek-R1-0528-Qwen3-8B (distill): LLM-as-judge for the full evaluation run (does the evidence support each claim?)
-
-**Supporting models (CPU, in the always-on backend)**
-- BGE-M3 multilingual embeddings, bge-reranker-v2-m3 cross-encoder, an open-source Bengali NER model for PII scrubbing
-
-**Notes**
-- The live app never uses the local GPU. GPU jobs are started by hand, finish on their own, and store their outputs with model name and version
-- Privacy: free-tier cloud APIs may use submitted data to improve the provider's services, so only food photos and de-identified text are sent; production moves to paid tiers with no-training terms
+```
+Claude (via Claude Code): development only: architecture, code, tests, reviews, documentation; LLM judge for the knowledge review
+Gemini Flash / Flash-Lite (free tier, Google AI Studio): runtime: reads meal photos and text into dishes JSON; writes the Bangla or English explanation
+gpt-oss-120b on Groq (free tier): fallback for explanations when Gemini's quota runs out; Llama models on Groq as further backups
+Gemma 3 12B (Ollama, team GPU): offline job suggesting dish-name spellings, each checked by an LLM judge
+BGE-M3: offline dish-name embeddings (not used by the live app yet)
+```
 
 ## Retrieval & RAG (tick)
-- ✅ Contextual RAG (Anthropic-style context per chunk)
-- ✅ Variable / Semantic Chunking
-- ✅ Graph RAG
-- ✅ Knowledge Graph / Other Graph Methods
-- ✅ Hybrid Search (Keyword + Vector)
-- ✅ Rerankers (BGE)
-- ➖ True but not ticked (no extra points): Naive RAG, Vector Database (pgvector), Query Rewriting
-- ❌ Late Chunking, Agentic RAG, Self-RAG, Corrective RAG, HyDE (not used as named techniques)
+- ✅ Knowledge Graph / other graph methods
+- ✅ Graph RAG (with the wording below)
+- ❌ Not used: naive / contextual RAG, semantic or late chunking, vector database, hybrid search, rerankers, agentic / self / corrective RAG, query rewriting
 
 ## RAG architecture details
-**Two retrieval paths, fused into one evidence packet**
-
-Graph path (food facts and personal history)
-- Dish resolution: Bangla or English name (including English-letter spellings such as "kacchi") → canonical dish ID (pg_trgm + BGE-M3 name embeddings)
-- Neo4j traversal: Dish → Ingredient → Component (level per 100 g)
-- Rule Cards matching (component, phenotype, disease state) → cited Papers
-- Patient REACTS_TO edges (personal evidence) + GENTLER_ALTERNATIVE dishes
-
-Text path (guideline passages for the explanation)
-- Corpus: CC-licensed ESPEN / IOIBD / AGA guideline text, published FODMAP composition papers, Rule Card texts
-- Parsing: Docling, structure-aware (sections, headings; tables kept whole)
-- Variable chunking: split by section first, then semantic breakpoints (embedding-similarity drops) into ~200–500-token chunks
-- Contextual RAG: Qwen3 14B (GPU job) writes a 50–100-token context header per chunk (document, section, population, recommendation strength), prepended before embedding and keyword indexing; generated once at ingestion
-- Embeddings: BGE-M3, 1024-d, multilingual (Bangla queries match English guidelines)
-- Index: pgvector HNSW (cosine, m=16, ef_construction=64)
-- Keyword search: Postgres tsvector (English) + pg_trgm (Bangla and dish-name spellings)
-- Metadata filters: licence, phenotype, disease state, document type
-- Query: built from structured facts (component + phenotype + state), not raw user text
-- Hybrid fusion: Reciprocal Rank Fusion, top 50 → bge-reranker-v2-m3 → top 5
-
-Evidence gate and grounding
-- Low reranker score or no matching Rule Card → no explanation from weak evidence → ⚪ "Not sure" + a clarifying question
-- Evidence packet = IDs + short fact lines (~300 tokens) → the explainer must cite IDs → a validator checks every cited ID was in the packet
-
-Evaluation
-- Recall@5, MRR on the guideline Q&A set
-- Ragas faithfulness and context precision
-- Ablation table: naive vector → + contextual headers → + hybrid → + reranker
+```
+Graph-based retrieval: each dish is resolved by fuzzy matching over Bangla, English and English-letter names in the knowledge graph (109 dishes)
+Path: dish → ingredients → gut-relevant components (levels) → Rule Cards for this patient's diagnosis and state → the exact quoted sentence and DOI/PMID
+That retrieved path is given to the explanation model, which may only explain it; a check compares its text with the engine's verdict
+No evidence → ⚪ "Not sure"
+Planned: vector search over guideline text (pgvector, BGE-M3), once the corpus is licensed and loaded
+```
 
 ## MCP usage
-> **Status: PLANNED.** Fill in the portal only for servers that run by the Nov 20 deadline. Repo/deploy URLs and "# endpoints actually called" come from the real build.
 
-### Built
-**happygut-foodgraph** · tick "Reused across multiple projects / clients"
-- # tools: 3
-- Transport: stdio, Streamable HTTP
-- Language / SDK: Python, MCP Python SDK (FastMCP)
-- Repo / deploy URL: GitHub repo path `services/mcp` + Hugging Face Spaces URL *(after build)*
-- Purpose: exposes the HappyGut Food Knowledge Graph (Bangladeshi dishes → ingredients → gut-relevant components → cited IBD Rule Cards) as read-only tools, so the app's agent, our dev tools and clinicians' AI clients share one trusted source of food evidence instead of duplicating graph queries. No patient data.
-- Tools:
-  - `search_dish(query, lang)`: Bangla/English name → canonical dishes
-  - `get_components(dish_id)`: ingredients, component levels, sources
-  - `explain_verdict_path(dish_id, phenotype, state)`: graph path dish → component → Rule Card → paper
+### Built (4 servers, 3 tools each, all read-only, Python MCP SDK)
+| Server | Transport | Tools | Purpose |
+|---|---|---|---|
+| happygut-foodgraph | stdio, Streamable HTTP | search_dish, get_components, explain_verdict_path | Food knowledge graph as read-only tools: dishes → ingredients → gut-relevant components → cited Rule Cards. No patient data |
+| happygut-guidelines | stdio, Streamable HTTP | search_rules, get_rule, list_sources | The 25 cited Rule Cards: search by food or component, read a rule with its exact quoted sentence and DOI/PMID, list the sources and licences |
+| happygut-evals | stdio, Streamable HTTP | get_results, pattern_recovery, check_red_flags | Measured evaluation results and the red-flag check as tools, so a coding agent can check quality before and after a change |
+| happygut-journal | stdio, Streamable HTTP | get_overview, get_recent_days, get_patterns | One patient's own records, read-only, using that patient's own sign-in; for a patient's AI assistant or a pre-visit summary |
 
-**happygut-journal** · tick reuse
-- # tools: 3
-- Transport: Streamable HTTP
-- Language / SDK: Python, FastMCP
-- Purpose: lets a clinician's AI client read one patient's consented, read-only summary before a visit; bearer token per clinician, scoped to patients who shared via QR
-- Tools:
-  - `get_symptom_trend(patient_ref, days)`
-  - `get_adherence(patient_ref, days)`
-  - `get_previsit_summary(patient_ref)`
-
-**happygut-guidelines** · tick reuse
-- # tools: 3
-- Transport: stdio, Streamable HTTP
-- Language / SDK: Python, FastMCP
-- Purpose: exposes our hybrid guideline RAG (contextual chunks + Rule Cards, reranked, with citations) so the explainer agent, Claude Code and clinicians' AI clients search the same cited IBD nutrition evidence
-- Tools:
-  - `search_guidelines(query, phenotype, state, lang)`: top cited passages
-  - `get_rule_card(id)`: structured rule + source quote
-  - `cite_source(id)`: full reference (DOI / PMID, licence)
-
-**happygut-evals** · tick reuse
-- # tools: 3 (+ MCP resources for evaluation reports)
-- Transport: stdio
-- Language / SDK: Python, FastMCP
-- Purpose: makes the evaluation harness available to coding agents, so Claude Code checks quality before and after every change (eval-driven development); also feeds live metrics to /docs
-- Tools:
-  - `run_eval_suite(suite)`: verdict / red-flag / RAG / trigger-recovery suites
-  - `get_latest_metrics()`
-  - `compare_runs(run_a, run_b)`: regression diff
-
-**happygut-research** · tick reuse
-- # tools: 2
-- Transport: Streamable HTTP
-- Language / SDK: Python, FastMCP
-- Purpose: aggregated trigger statistics for researchers, with small groups suppressed (k ≥ 10); runs on the clearly labelled simulated cohort until real consented data exists
-- Tools:
-  - `get_trigger_stats(component, region)`
-  - `list_cohorts()`
+"Reused across multiple projects": not ticked.
 
 ### Used
-**Supabase MCP**
-- Source: Supabase (official)
-- # endpoints called: ~4
-- Capabilities: tools `list_tables`, `execute_sql`, `get_advisors`, `generate_typescript_types` (server run in read-only mode)
-- How: Claude Code inspected the schema, checked row-level security with the security advisors, and generated TypeScript types. Schema changes go through reviewed migration files applied with the Supabase CLI, not through MCP
+| Server | Tools used | What for |
+|---|---|---|
+| GitHub MCP | create_pull_request, pull_request_read, list_pull_requests, merge_pull_request | Claude Code opened one pull request per step, read CI results and merged after checks passed |
 
-**Neo4j Cypher MCP** (`mcp-neo4j-cypher`)
-- Source: Neo4j Labs (open source)
-- # endpoints called: 2
-- Capabilities: tools `get_neo4j_schema`, `read_neo4j_cypher` (write tool not used)
-- How: Claude Code inspected the graph schema and found orphan nodes and unmatched ingredients; fixes go into the reviewed seed files and the graph is rebuilt from them
-
-**Filesystem MCP**
-- Source: Model Context Protocol reference servers (open source)
-- # endpoints called: ~3
-- Capabilities: tools `list_directory`, `read_text_file`, `search_files`
-- How: Claude Code browsed raw/bronze data-lake folders during parser and ingestion work
-
-**GitHub MCP** (`github-mcp-server`)
-- Source: GitHub (official)
-- # endpoints called: ~4
-- Capabilities: tools `issue_write` / `list_issues`, `create_pull_request`, `pull_request_read`, `get_file_contents`
-- How: Claude Code tracked each build step as a GitHub issue, opened one pull request per step, and read PR diffs and review comments while fixing them
-
-**Playwright MCP**
-- Source: Microsoft (open source)
-- # endpoints called: ~4
-- Capabilities: tools `browser_navigate`, `browser_click`, `browser_file_upload`, `browser_take_screenshot`
-- How: Claude Code ran end-to-end checks of the PWA hero flow (upload meal photo → verdict card in Bangla) on mobile viewport sizes and captured screenshots for the demo and /docs
+Tick Supabase MCP only if a teammate really connected it (read-only; migrations are written as files). Neo4j, Filesystem and Playwright MCP were not used.
 
 ### MCP clients / hosts
-- Claude Code: development, schema work, graph curation
-- HappyGut meal-check agent: LangGraph via `langchain-mcp-adapters` → `happygut-foodgraph`
-- Claude Desktop: demo of exploring the food graph / clinician summary
+`Claude Code, Claude Desktop`
 
 ### Transports
-- ✅ stdio
-- ✅ Streamable HTTP
-- ❌ SSE (legacy), WebSocket
+stdio ✅, Streamable HTTP ✅ (behind a bearer token)
 
 ### Reuse, architecture and integration notes
-- One foodgraph server serves the app agent, Claude Code curation and the Claude Desktop demo, so there's a single source of graph logic
-- All built tools are read-only; writes go only through the reviewed ingestion pipeline
-- Data separation: food knowledge (foodgraph) vs consented patient data (journal); research gets aggregates only
-- Auth: bearer tokens on Streamable HTTP, served from the always-on backend on Hugging Face Spaces; stdio local only
-- Rate limits: per-token limits in the server
-- Observability: every tool call traced in Langfuse (tool, latency, caller)
-- Typed contracts: Pydantic input/output models generate the tool JSON schemas
+```
+4 read-only servers built with the MCP Python SDK; every tool is marked read-only
+Knowledge (foodgraph, guidelines) is kept separate from patient data (journal); journal only sees the records of the patient whose sign-in it uses
+stdio for local use; Streamable HTTP requires a bearer token
+```
 
 ### Anything else about MCP
-- Design choice: MCP for knowledge access, but the verdict engine itself stays in-process (deterministic, unit-tested), so the same decision logic isn't spread across tools
-- Gotcha planned for: free Hugging Face Spaces sleep after ~48 h without traffic, so a scheduled GitHub Actions ping keeps the MCP endpoint awake
-- Next: `happygut-research` (aggregated, privacy-protected trigger statistics for researchers), plus MCP resources for Rule Cards and the prompt library
+```
+The verdict engine stays in-process (deterministic, unit-tested); MCP is for knowledge access only
+Next: a research server with aggregated, privacy-protected statistics once consented data exists
+```
 
 ## Open-source tools & libraries (AI)
-- LangGraph: agent graph for the meal-check flow, dietitian loop and background jobs
-- Pydantic-AI: typed agent nodes (perception, resolver, explainer, dietitian) inside the LangGraph graph
-- MCP Python SDK (FastMCP) + langchain-mcp-adapters: our MCP servers and the agent's MCP tool calls
-- LiteLLM: one client across Gemini, Groq and Ollama; model routing, fallbacks, response caching
-- Ollama (llama.cpp runtime): local quantized inference in finite GPU jobs on the team GPU
-- Gemma, Qwen, Llama and DeepSeek-R1-Distill open-weight models: batch knowledge extraction, Bangla aliases, synthetic test sets, LLM-as-judge
-- BGE-M3 + bge-reranker-v2-m3 (sentence-transformers): multilingual embeddings and reranking (CPU in the backend, GPU for batch)
-- sentence-transformers: fine-tuning the dish-name embedding model
-- pgvector + Neo4j: vector index and knowledge graph for Graph RAG
-- Docling + Crawl4AI: guideline documents → structured, chunkable text
-- Instructor + Pydantic: typed, validated LLM outputs with automatic retry
-- Microsoft Presidio: PII detection before any cloud call
-- LightGBM + scikit-learn + SHAP: flare early-warning model and explanations
-- Ragas: RAG faithfulness and context metrics
-- promptfoo: prompt regression tests in CI
-- Langfuse: tracing, prompt versions, evaluation scores, user-feedback scores
-- Streamlit: Evaluation Lab
+```
+LangGraph: the meal-check flow as a state graph
+Pydantic-AI + Pydantic v2: model calls with typed, validated outputs
+MCP Python SDK: our 4 MCP servers
+Presidio + spaCy: PII detection
+LightGBM: flare-risk model with SHAP explanations
+Ollama: offline GPU jobs (Gemma 3 12B); sentence-transformers with BGE-M3
+FastAPI, React, Vite, Tailwind, Recharts, Zod, react-i18next
+n8n: scheduled workflows; Playwright: end-to-end checks and screenshots
+```
 
 ## Agent frameworks & orchestration
-**Meal-check graph (LangGraph state machine)**
-1. Router: input type (photo / text) and language
-2. Safety Sentinel: red-flag rules + LLM second check; can stop the graph and show the escalation screen
-3. Privacy node: Presidio + Bangladesh-specific rules + an open-source Bengali NER model (CPU) strip PII
-4. Perception agent (Gemini vision): dishes, ingredients, method, portion → JSON
-5. Dish Resolver agent: calls the `search_dish` MCP tool; ambiguous match → interrupt to ask the user (human-in-the-loop)
-6. Evidence Retriever, two parallel branches: graph path (`explain_verdict_path` MCP tool + personal edges) and hybrid RAG
-7. Verdict Engine: deterministic tool, not an LLM
-8. Explainer agent (Gemini): grounded Bangla/English explanation with citations
-9. Output Guard: schema, citation and banned-claim checks; retry once, otherwise a safe template
-
-**Other agents**
-- Dietitian agent: generator–critic loop. The LLM drafts a weekly plan, the verdict engine checks every dish, failing dishes are regenerated (max 2 rounds)
-- Knowledge Enrichment agent: takes the "Not sure" / unmatched-dish queue, drafts graph facts, sends them to LLM-judge review
-- Weekly Summary agent: writes the digest from SQL-computed statistics only
-- Trigger Discovery + Flare Early Warning: nightly jobs scheduled by n8n
-
-**Patterns**
-- Tool calling through MCP, with an allow-list of tools per agent
-- Conditional edges, parallel branches, human-in-the-loop interrupts
-- Postgres checkpointer: resumable runs
-- LiteLLM retries and cross-provider fallbacks
+```
+Meal-check graph (LangGraph state machine):
+red-flag sentinel (rules, English/Bangla/romanised) → escalation screen, no diet advice
+→ PII scrub → perception (Gemini, structured JSON) → dish resolver (knowledge graph)
+→ deterministic verdict engine (stricture rules first) → explanation agent (Gemini / Groq)
+→ guard checks the explanation against the verdict; on mismatch a template is shown
+Each step streams to the phone over Server-Sent Events
+```
 
 ## Fine-tuning / adaptation
-- Embedding fine-tuning (GPU job on Ubuntu, ROCm PyTorch): sentence-transformers contrastive training (MultipleNegativesRankingLoss) of the dish-name encoder
-  - Training pairs: Bangla / English dish names (including English-letter spellings) ↔ canonical dish IDs, from graph aliases and reviewed synthetic spellings
-  - Measured by dish-resolution Recall@1 against the base model
-- Adaptation without weight changes: few-shot examples of Bangladeshi dishes, a Bangla medical glossary in prompts, retrieval grounding
-- Finals: QLoRA (PEFT + bitsandbytes, fits 12 GB VRAM) on a small Gemma/Qwen model for Bangla explanation style, trained on team-reviewed explanations
+```
+No fine-tuning. Adaptation is prompt-level (versioned prompts, structured output) plus retrieval of cited Rule Cards and each patient's own diary patterns.
+```
 
 ## Evaluation & quality measurement
-**Test sets (all versioned)**
-- ~200-food verdict set, labelled by the team from Rule Cards
-- ~300 team meal photos with dish labels
-- ~100 guideline Q&A pairs with sources
-- Red-flag suite (Bangla / English)
-- Dish-name set (Bangla names and English-letter spellings)
-- Simulated patient cohort
-
-**Methods**
-- Ragas: faithfulness, context precision/recall, answer relevance
-- LLM-as-judge: an open model on Groq in CI, and local DeepSeek-R1-0528-Qwen3-8B (distill) for the full evaluation run (both different families from the Gemini generator) scores explanations for groundedness, clarity, Bangla fluency and tone against a rubric; checked against human labels on 50 samples (Cohen's kappa reported)
-- Human evaluation: native Bangla speakers on the team blind-rate 50 explanations (readability, accuracy)
-- Ablations: naive RAG → contextual → hybrid → reranker
-- Verdict engine vs LLM-only baseline, compared with McNemar's test
-- Regression gate: promptfoo suite runs in CI on every prompt or model change; merge blocked if red-flag recall < 100% or verdict accuracy drops > 2 points
-- Online signals: "was this right for you?" feedback logged as Langfuse scores; latency and token cost per call
-- Bootstrap 95% confidence intervals; slices by language, sex and phenotype
+```
+Reproducible evaluation run (no language model): evals/RESULTS.md
+• Pattern Finder on 200 simulated patients: found 274 of 400 hidden contributors (68%)
+• Red-flag suite (team-written): 29 of 29 emergency phrases caught, 0 of 30 false alarms
+• Verdict engine: 763 of 763 verdicts identical on repeat; every warning cites a Rule Card; stricture rule 19 of 19
+• Dish names: every Bangla, English and alternative spelling resolves to its own dish
+• Flare-risk model: ROC AUC 0.658 vs 0.558 for the rule-based score, on held-out simulated patients
+LLM judge reviewed every dish, Rule Card and Bangla string against published sources (not clinical review)
+Tests on every pull request (GitHub Actions)
+Not yet measured: photo recognition, agreement with a dietitian, real patients
+```
 
 ## Guardrails, safety & privacy
-**Input**
-- Red-flag Safety Sentinel runs first (rules + LLM second check) → escalation screen, no diet advice
-- PII scrubbing in our backend before any cloud call: Presidio + Bangladesh rules (+8801 phone numbers, NID numbers, emails, addresses) + an open-source Bengali NER model for Bangla names (CPU)
-- EXIF/GPS stripped from photos; "photograph the food, not people" hint
-- Non-food image → rejected
-- Prompt-injection defence: text read from labels/menus is treated as data inside delimiters, never as instructions
-- Tools are read-only and allow-listed per agent; Cypher is parameterised
-- Scope guard: diagnosis or medication questions → polite refusal + "ask your doctor"
-
-**Output**
-- Pydantic schema validation; retry once, otherwise a safe template
-- The LLM can't change the verdict: the validator checks the explanation matches the engine's verdict
-- Citation check: every claim must cite an evidence ID that was retrieved; unsupported claims dropped → ⚪ "Not sure"
-- Banned-claim filter (Bangla + English): "safe", "cure", dose or medication-change wording
-- Stricturing Crohn's hard rules applied before any LLM output
-- Low confidence → ⚪ "Not sure" or a clarifying question
-
-**Privacy and accountability**
-- Consent scopes, row-level security, pseudonymous IDs
-- Free-tier cloud APIs receive only food photos and de-identified text
-- Every verdict logs its evidence IDs + model and prompt versions
-- "Not a medical device" disclaimer
+```
+Input
+• Red-flag sentinel runs first, on the raw text (rules in English, Bangla and romanised Bangla) → escalation screen, no diet advice
+• PII scrub before any cloud AI call: Bangladesh rules (names after self-introduction, +880 phones, NID/birth numbers, emails, URLs) + Presidio
+• Photos: type and size checks, downscaled, EXIF/GPS removed
+Output
+• The engine decides; the LLM only explains, and a guard checks that its text matches the verdict, otherwise a template is shown
+• Never "safe" (graded verdicts only); patterns are "linked to", never "caused", and need ≥3 occurrences
+• No evidence → ⚪ "Not sure"; never any advice to start, stop or change a medicine
+```
 
 ## Frontend AI / visual app builders
-> Tick only the tools the team really uses during the build.
-
-**Tick**
-- ✅ Lovable: initial PWA shell and hero-flow screens
-- ✅ v0 (Vercel): individual components
-- ✅ Claude Artifacts: interactive prototypes and layout exploration
-- ✅ Gemini Canvas: Bangla UI copy drafts
-- ✅ *Add:* Google Stitch: screen designs exported to Figma (*check it's still available when you start*)
-
-**How we used them**
-- Lovable: generated the first React + Tailwind + shadcn/ui + Supabase app (scan screen, verdict card, daily check-in, My Gut dashboard), synced to GitHub, then continued in Claude Code
-- v0: generated self-contained components (verdict card with evidence bar, trigger-insight card, Recharts trend charts, flare-risk gauge), added to the codebase with the shadcn CLI
-- Claude Artifacts: quick clickable prototypes to compare verdict-card variants and the clinician pre-visit report layout before building
-- Gemini Canvas: first drafts of bilingual UI copy, which native Bangla speakers on the team then reviewed and edited
-- Google Stitch → Figma: hero-flow screen designs for the Figma link and design review
-
-**Share AI-built:** target ~80% of UI code AI-generated, then refined by hand; the actual share is reported from git history at submission
-
-**Human-owned parts**
-- Bangla typography and line breaking
-- Safety wording (verdicts, red-flag screen, disclaimer)
-- Accessibility fixes
-- Final Bangla copy
-
-**Custom workflow**
-- Shared design tokens (colours, verdict palette, spacing) given to every tool, so generated pieces match
-- Every generated string moved into `bn` / `en` message files (i18n); no hard-coded text
-- Noto Sans Bengali / Hind Siliguri fonts; Bangla numerals optional
-- Checks on every UI change: axe + Lighthouse (accessibility, performance) and a mobile low-bandwidth budget (small initial JavaScript bundle, lazy-loaded charts)
-- UI-generation prompts saved in the prompt library (`prompts/build/`)
+- ✅ Add **Claude Code**
+- Tick Lovable, v0, Claude Artifacts, Gemini Canvas or Google Stitch only if a teammate really used one (the git history has no Lovable commits)
+```
+Claude Code: built and redesigned the React + Tailwind PWA (meal check, verdict card, nightly diary, My Gut, patterns, doctor's report, live /docs page), checked with Playwright screenshots at phone sizes
+```
 
 ## Workflow automation
-**Tick (4 = max, + n8n bonus)**
-- ✅ n8n (self-hosted)
+- ✅ n8n (4 workflows in `n8n/workflows`: health check, nightly refresh, weekly safety self-check, failure alert email)
 - ✅ LangGraph
-- ✅ *Add:* GitHub Actions
-- ✅ *Add:* Supabase Database Webhooks
-
-**Automated workflows**
-
-n8n
-- Reminders: per-user cron (Asia/Dhaka) → Supabase query → Bangla/English Web Push for doses and check-ins
-- Nightly intelligence (02:00): runs Trigger Discovery + Flare Early Warning (FastAPI) → updates Personal Gut Graph edges
-- Nightly alerts: push "rising flare risk" with top factors, and "new trigger found" insights
-- Weekly digest (Sunday): Weekly Summary agent writes a Bangla/English digest from SQL-computed statistics → push + in-app card
-- Weekly clinician report: pre-visit PDF (WeasyPrint) → signed expiring link
-- Knowledge ingestion: Supabase Storage upload webhook → parse → chunk → contextual headers (Gemini free tier) → embed (BGE-M3, CPU) → Rule Card candidates → review-queue notice
-- Knowledge-gap loop (daily): collects ⚪ "Not sure" / unmatched dishes → Knowledge Enrichment agent drafts graph facts → LLM-judge review
-- Error workflow: any failed run → team chat webhook alert
-
-LangGraph
-- Real-time meal-check agent graph (Safety Sentinel → privacy → perception → dish resolver → evidence retrieval → verdict engine → explainer → output guard)
-- Dietitian generator–critic loop
-
-Supabase Database Webhooks
-- New meal check / check-in → FastAPI → red-flag check + incremental trigger update in real time
-
-GitHub Actions
-- On any PR changing prompts, models or retrieval: run the promptfoo + Ragas evaluation suite and red-flag tests
-- Block the merge on regression; post an eval summary comment on the PR
+- ✅ GitHub Actions, if listed
 
 ## Local / on-device LLMs
-> Local models run as finite GPU jobs on Ubuntu (the team's dual-boot PC). Outputs are versioned files, loaded into the cloud services from Windows.
-
-**Runtimes**
-- ✅ Ollama: runs the local LLMs (GGUF) in GPU jobs on the team GPU
-- ✅ *Add:* Hugging Face Transformers / sentence-transformers (ROCm PyTorch for GPU jobs, CPU in the backend): corpus embeddings and embedding fine-tune as GPU jobs; BGE-M3, bge-reranker and Bengali NER for live queries
-
-**Local models we actually ran** (tick the exact versions you ran)
-- ✅ Qwen3 14B (*add* "Qwen3" if the list only shows Qwen 2 / 2.5): contextual chunk headers, Rule Card and dish enrichment drafts
-- ✅ Gemma 3 12B (*add*): Bangla dish-name variants and English-letter spellings, Bangla test utterances, Bangla draft strings
-- ✅ Llama 3.1 8B (Llama 3 / 3.1 / 3.2): English test utterances and red-flag paraphrases
-- ✅ DeepSeek-R1-0528-Qwen3-8B (distill) (*add*): LLM-as-judge for the evaluation run
-
-**Hardware, quantization, why local**
-- AMD Radeon RX 7700 XT, 12 GB VRAM, ROCm on Ubuntu (native Ollama + ROCm PyTorch) · 16 GB system RAM
-- Used for finite GPU jobs started by hand (each finishes on its own), never as a server; the live app runs entirely on cloud services
-- GGUF, Q4_K_M quantization, 8k context; one model at a time, so each job uses the largest model that fits alone in 12 GB (8–14B, ~5–9.3 GB; rule: download size ≤ ~10 GB)
-- Every batch output (headers, aliases, test sets, judge scores) is stored with model name and version for provenance
-- Why local, cost: $0 with no rate limits for batch jobs over thousands of chunks and test items
-- Why local, independence: the judge model is a different family from the Gemini generator
-- Why local, privacy: knowledge and evaluation data stay on our hardware during batch work
-- Why local, reproducibility: pinned model versions and quantization
+- Runtimes: ✅ Ollama, ✅ sentence-transformers (✅ Hugging Face Transformers underneath)
+- Models: ✅ `Gemma 3 12B`, ✅ `BGE-M3 (embeddings)`; ❌ Llama, Qwen, DeepSeek were not run locally
+```
+GPU: AMD Radeon RX 7700 XT (12 GB VRAM) on Ubuntu, PyTorch on ROCm. The GPU machine is never a server: it runs finite jobs and exchanges files with the team's Windows machines through git
+Job G2, dish-name spellings: Gemma 3 12B on Ollama (model digest recorded), versioned prompt g2-dish-aliases v2, temperature 0.7, 3 samples with fixed seeds, a spelling kept only if 2 of 3 samples agree; 61 dishes in 165 s → 137 candidates, of which an LLM judge accepted 50 and rejected 87
+Job G3, embeddings: BAAI/BGE-M3 with sentence-transformers, 302 dish names → 1024-dimension normalised vectors in 0.8 s
+Every job writes meta.json (model, digest, git commit, prompt version, seeds, timings) and its output to data/gpu_jobs/, so runs are reproducible and reviewable in pull requests
+Why local: $0 cost, no data leaves the team, fixed model versions; the live app does not depend on the GPU
+```
 
 ## Agentic frameworks used
-- ✅ LangGraph: orchestrates the meal-check graph (sentinel → privacy → perception → resolver → retrieval → verdict engine → explainer → guard), the dietitian generator–critic loop, interrupts, Postgres checkpointing
-- ✅ Pydantic-AI: typed agent nodes inside the LangGraph graph (perception, dish resolver, explainer, dietitian), with typed outputs, tool calling and model-agnostic providers (Gemini, Groq, Ollama). Batch data pipelines keep using Instructor
-- ➕ DSPy (optional): offline optimisation of the perception and dish-resolver prompts. Picks the best few-shot examples against our labelled photo and dish-name sets, run with free cloud models or in a GPU batch session. Tick only if done
-- ✅ CrewAI: offline knowledge-curation crew for Rule Cards, run on free cloud models (Groq)
-  - Researcher agent: finds passages via Europe PMC + guideline RAG
-  - Extractor agent: drafts the Rule Card with an exact quote
-  - Critic agent: checks the quote supports the rule
-  - Output → LLM-judge review queue
-- ✅ smolagents: data-ops code agent (Groq-hosted open model, sandboxed). Writes and runs read-only pandas / Cypher analysis on unmatched ingredients, orphan graph nodes and evaluation failures, then proposes fixes as reviewable diffs
-- ❌ AutoGen, Swarm, OpenAI Agents SDK, Letta, Mastra, Agno, Google ADK, Hermes, OpenClaw (not used)
+- ✅ LangGraph, ✅ Pydantic-AI
+- ❌ Not used: CrewAI, smolagents, DSPy, AutoGen and the rest
 
 ## AI Development Lifecycle (AI-DLC)
-**Frameworks adopted (3 = max)**
-- ✅ GitHub Spec-Kit: spec → plan → tasks for every feature
-- ✅ Claude Skills: repeatable project procedures as `.claude/skills/`
-- ✅ AGENTS.md spec: cross-tool agent memory (mirrors CLAUDE.md for Cursor / Lovable / other agents)
+- ✅ GitHub Spec-Kit, ✅ Claude Skills, ✅ AGENTS.md
+```
+Inception: strategy, architecture and data docs with decision logs (docs/); non-negotiable product rules in a constitution and AGENTS.md / CLAUDE.md
+Specification (Spec-Kit): one spec per feature (specs/001 knowledge layer, 002 meal check, 003 personal layer) with requirements, plan and tasks
+Build: Claude Code works from the specs; project skills for repeatable jobs (add a dish, add a Rule Card, new prompt version, run evaluations)
+Gate: one pull request per step; it merges only when CI passes (engine, backend, MCP servers, seeds, web app, database tests) and the secret scan is clean
+Review: every dish, Rule Card and Bangla string reviewed by an LLM judge against published sources (not clinical review)
+Measure: deterministic evaluation run after changes (evals/RESULTS.md), numbers copied into the app and the submission
+```
 
-**Process notes (phases, artifacts, review gates)**
-1. Inception: strategy, data and AI design docs with decision logs (`docs/01-strategy.md`, `docs/03-data.md`, portal texts) + non-negotiable product rules in CLAUDE.md
-   - Gate: team review of every decision
-2. Specification (Spec-Kit): CLAUDE.md rules become the Spec-Kit constitution
-   - Each feature gets `/specify` → spec.md (user stories, acceptance criteria incl. safety rules) → `/plan` → plan.md (architecture, contracts) → `/tasks` → tasks.md
-   - Features: 001 knowledge layer · 002 meal-check hero flow · 003 check-in + trigger discovery · 004 flare early warning · 005 dietitian · 006 clinician report · 007 foodgraph MCP
-   - Gate: spec checked against the constitution before any code
-3. Construction: Claude Code implements tasks in small PRs (one GitHub issue per task via GitHub MCP); Lovable / v0 for UI
-   - Claude Skills encode repeatable steps: add-rule-card, add-dish, new-prompt-version, run-evals
-   - Gate: unit tests on every verdict-engine rule
-   - Gate: CI eval regression (red-flag recall 100%, verdict accuracy must not drop)
-   - Gate: CI on every AI-generated PR; knowledge and Bangla copy reviewed by an LLM judge against a written rubric (not by clinicians)
-4. Operations and learning: Langfuse traces, Evaluation Lab, user feedback, knowledge-gap queue
-   - Lessons feed back into the constitution, skills and prompt library
-- Memory bank: CLAUDE.md + AGENTS.md (project memory), `docs/` decision logs, versioned `prompts/` library (build provenance)
-- Accountability: every AI-generated change is reviewed and owned by a named team member; AI usage documented per the Congress code of conduct
+## /docs module
+✅ Built: https://happygut-web.vercel.app/docs (pitch deck + technical documentation with live data; admin page at `/docs/admin` to switch it on or off, schedule it and edit text, order and team).
 
 ## Anything else about your AI usage?
-- Core design principle: "AI perceives and explains, a deterministic engine decides". Every verdict is reproducible, unit-tested and explainable, so the LLM can't invent a medical judgement
-- Personal AI, not generic AI: the Personal Gut Graph learns each patient's own triggers from their logs (Bayesian N-of-1) instead of giving one-size-fits-all IBD diet rules
-- Bangla-first AI: Bangla / English input, Bangladeshi dish knowledge graph, Bangla medical glossary, LLM-judge review of all generated Bangla
-- Honest evaluation: results on simulated patients are always labelled as simulated; real-data claims are made only where we measured them
-- Explainability everywhere: verdict evidence bar, cited sources, SHAP factors on flare alerts, graph path from dish to guideline
-- Human oversight: humans approve every knowledge-graph fact the AI extracts; humans review every AI-generated PR and all safety wording
-- Model and data cards: one page per model role and per dataset (purpose, limits, licence, evaluation results), published in `/docs`
-- Cost-aware AI: runs at $0 on free tiers through caching and routing; a single consumer GPU runs finite batch jobs only, a realistic path for low-resource settings
-- Privacy by architecture: PII is removed inside our own backend before any cloud call; cloud models only see food photos and de-identified text
-- Known limits, stated openly: not a medical device; flare prediction not yet validated on real patients; dish recognition limited to dishes in our graph (unknown → ⚪ "Not sure")
-- Next: federated learning across users, QLoRA-tuned Bangla explainer, on-device small model for offline use, clinical validation with partner gastroenterologists
+```
+Core principle: "AI perceives and explains, a deterministic engine decides". Every verdict is reproducible (763 of 763 identical on repeat), unit-tested and explainable, so the LLM can't invent a medical judgement.
+Personal AI, not generic AI: the Flare Pattern Finder (Bayesian N-of-1) learns which foods and habits are linked to each patient's own worse days, and a LightGBM model with SHAP drivers adds an early flare estimate. Both are trained and evaluated on simulated patients only.
+Safety before intelligence: red flags stop all food advice before any model runs; personal details are removed before any cloud AI call.
+Bangla first: every screen, verdict and explanation in Bangla and English.
+See it live, no sign-in needed: https://happygut-web.vercel.app/docs (pitch deck and technical documentation) and /about (how it works).
+```
