@@ -1,5 +1,7 @@
 # Step 3: Data lifecycle and engineering
 
+> **Note (20 Nov 2026):** this is the data plan and licence register. Only part of it is in use: team-authored dishes and Rule Cards (papers confirmed through Europe PMC), user photos and text, and labelled synthetic data. Scraping, open datasets, Neo4j, pgvector and the lakehouse are not built; see [`portal/data-lifecycle.md`](portal/data-lifecycle.md) for what is real.
+
 > Status: **§0 prototype selections + §1–12 drafted** (2026-09-24). Later sections are filled in as we work through the portal's data-lifecycle form.
 > Rule (CLAUDE.md #8): every source is listed here with its licence **before** any code ingests it. Rows marked *verify* must be checked and updated before first ingestion.
 
