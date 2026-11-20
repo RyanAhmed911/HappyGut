@@ -228,9 +228,10 @@ function TeamEditor({ state, save }: { state: DocsAdminState; save: (fn: () => P
       </Field>
       <ul className="mt-3 space-y-3">
         {members.map((m, i) => (
-          <li key={i} className="grid gap-2 rounded-xl border border-line p-3 sm:grid-cols-2">
+          <li key={i} className="grid gap-2 rounded-xl border border-line p-3 sm:grid-cols-3">
             <input value={m.name} onChange={(e) => update(i, { name: e.target.value })} placeholder={t("docs_admin.member_name")} aria-label={t("docs_admin.member_name")} className={inputClass} maxLength={80} />
             <input value={m.role} onChange={(e) => update(i, { role: e.target.value })} placeholder={t("docs_admin.member_role")} aria-label={t("docs_admin.member_role")} className={inputClass} maxLength={80} />
+            <input value={m.role_bn} onChange={(e) => update(i, { role_bn: e.target.value })} placeholder={t("docs_admin.member_role_bn")} aria-label={t("docs_admin.member_role_bn")} className={inputClass} maxLength={80} />
             <input type="email" value={m.email} onChange={(e) => update(i, { email: e.target.value })} placeholder={t("docs_admin.member_email")} aria-label={t("docs_admin.member_email")} className={inputClass} maxLength={120} />
             <div className="flex gap-2">
               <input type="url" value={m.photo_url} onChange={(e) => update(i, { photo_url: e.target.value })} placeholder={t("docs_admin.member_photo")} aria-label={t("docs_admin.member_photo")} className={inputClass} maxLength={500} />
@@ -242,7 +243,7 @@ function TeamEditor({ state, save }: { state: DocsAdminState; save: (fn: () => P
         ))}
       </ul>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button variant="outline" disabled={members.length >= 12} onClick={() => setMembers([...members, { name: "", role: "", email: "", photo_url: "" }])}>
+        <Button variant="outline" disabled={members.length >= 12} onClick={() => setMembers([...members, { name: "", role: "", role_bn: "", email: "", photo_url: "" }])}>
           <Plus className="h-4 w-4" /> {t("docs_admin.add_member")}
         </Button>
         <Button disabled={members.some((m) => !m.name.trim())} onClick={() => void save(() => docsApi.team({ team_name: name, members }))}>

@@ -1,6 +1,6 @@
 # HappyGut: one-page summary
 
-**Domain:** HealthSphere AI · **Challenge:** ChronicCare AI · **Team:** _name_ · **Live demo:** _link_ · **Video:** _link_ · **Code:** github.com/RyanAhmed911/HappyGut
+**Domain:** HealthSphere AI · **Challenge:** ChronicCare AI · **Team:** Cinnamon Syrups · **Live demo:** _link_ · **Video:** _link_ · **Code:** github.com/RyanAhmed911/HappyGut
 
 ## Problem
 Inflammatory bowel disease (Crohn's disease, ulcerative colitis) is lifelong, has no cure and no known cause, and is "rising at an alarming rate in south Asia" with "a paucity of data" from the region, especially outside India (Shenoy et al., *Lancet Gastroenterol Hepatol* 2025). Few people in Bangladesh know the disease: across 15 countries in our region, a fifth of Crohn's patients were given tuberculosis treatment and diagnosis took a median of 12 months (Banerjee et al., *J Gastroenterol Hepatol* 2022). Food triggers differ from person to person, symptoms can follow a meal by a day, and in Bangladesh most meals have no label, so no general diet advice fits. Patients either gamble at every meal or cut out so many foods that they risk malnutrition. Between appointments, their doctor sees none of it.
@@ -46,11 +46,13 @@ Nov–Dec 2026: deployment, real diaries from consenting users, photo-recognitio
 ## Team and roles
 | Role | Name |
 |---|---|
-| Team Leader / Coordinator | _name_ |
-| Business Analyst / Data Scientist | _name_ |
-| UI/UX / Frontend Developer | _name_ |
-| Backend / Data Engineer | _name_ |
-| Presentation / Communication Lead | _name_ |
-| NRB / international advisor (if any) | _name, role_ |
+| Team Leader / Coordinator | Ryan Ahmed |
+| Business Analyst / Data Scientist | Al-Saihan Tajvi, Zarin Tasnim |
+| UI/UX / Frontend Developer | Ryan Ahmed, Raiyan Rahman |
+| Backend / Data Engineer | Ryan Ahmed, Raiyan Rahman |
+| Presentation / Communication Lead | Nusayba Mahfuza Zaman |
+| NRB / international advisor (if any) | none |
+
+All five members also built frontend and backend features; the table names who owns each role.
 
 AI tools used to build it are documented in `docs/portal/ai-usage.md`.

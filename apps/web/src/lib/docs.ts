@@ -5,7 +5,7 @@ const BASE: string = (import.meta.env.VITE_API_URL as string | undefined) ?? "/a
 const ADMIN_KEY = "hg.docsAdmin";
 
 const Bilingual = z.object({ en: z.string(), bn: z.string() });
-const Member = z.object({ name: z.string(), role: z.string(), email: z.string(), photo_url: z.string() });
+const Member = z.object({ name: z.string(), role: z.string(), role_bn: z.string().default(""), email: z.string(), photo_url: z.string() });
 const Team = z.object({ name: z.string(), members: z.array(Member) });
 const Order = z.object({ pitch: z.array(z.string()), tech: z.array(z.string()) });
 const Window = z.object({ visible: z.boolean(), starts_at: z.string().nullable(), ends_at: z.string().nullable() });

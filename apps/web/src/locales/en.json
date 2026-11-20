@@ -839,7 +839,7 @@
     "err_invalid_credentials": "That password isn't right.",
     "err_too_many_attempts": "Too many wrong attempts. Please wait five minutes.",
     "err_docs_admin_disabled": "The admin page is switched off on this server: set DOCS_ADMIN_PASSWORD (at least 12 characters).",
-    "err_invalid": "Something in the form isn't valid. Check the dates (the end must be after the start), emails and photo links (https only).",
+    "err_invalid": "Something in the form isn't valid. Check the dates (the end must be after the start), emails and photo links (/team/… or https).",
     "saved": "Saved. The public page shows it now.",
     "open_page": "Open /docs",
     "export": "Download settings (JSON)",
@@ -855,12 +855,12 @@
     "window_hint": "Leave both empty to keep the page open while it's switched on. Settings return to the server's defaults after a restart; download them to keep a copy.",
     "clear_window": "Remove the time window",
     "team": "Team",
-    "team_hint": "Name, role, email and an optional photo link (https). Members without a photo get their initials.",
+    "team_hint": "Name, role in both languages, email and an optional photo (a file in public/team or an https link). Members without a photo get their initials.",
     "team_name": "Team name",
     "member_name": "Full name",
-    "member_role": "Role in the project",
+    "member_role": "Role (English)",
     "member_email": "Email",
-    "member_photo": "Photo link (https, optional)",
+    "member_photo": "Photo: /team/name.jpg or an https link (optional)",
     "add_member": "Add member",
     "sections": "Section text",
     "sections_hint": "Replace any section's text in both languages. A blank line starts a new paragraph; lines starting with \"- \" become bullet points. Live tables and diagrams stay below the text.",
@@ -872,6 +872,7 @@
     "move_down": "Move down",
     "history": "Edit history",
     "history_hint": "Every change since the server started.",
-    "history_empty": "No changes yet."
+    "history_empty": "No changes yet.",
+    "member_role_bn": "Role (Bangla)"
   }
 }

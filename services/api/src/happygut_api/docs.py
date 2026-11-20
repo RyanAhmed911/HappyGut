@@ -32,10 +32,19 @@ TECH_SECTIONS = ("overview", "features", "architecture", "data_flow", "stack", "
                  "roadmap", "performance", "security", "analytics", "changelog")
 SECTION_IDS = PITCH_SECTIONS + TECH_SECTIONS
 
-# Team Cinnamon Syrups. Roles and emails are filled in by the team on the admin page (or here).
-DEFAULT_TEAM: tuple[dict[str, str], ...] = tuple(
-    {"name": name, "role": "", "email": "", "photo_url": ""}
-    for name in ("Ryan Ahmed", "Nusayba Mahfuza Zaman", "Raiyan Rahman", "Al-Saihan Tajvi", "Zarin Tasnim")
+# Team Cinnamon Syrups (roles per AIBC guide §13.2; all five also built frontend and backend).
+# Photos are cropped, resized and metadata-free copies in apps/web/public/team/.
+DEFAULT_TEAM: tuple[dict[str, str], ...] = (
+    {"name": "Ryan Ahmed", "role": "Team Leader · Frontend & Backend", "role_bn": "টিম লিডার · ফ্রন্টএন্ড ও ব্যাকএন্ড",
+     "email": "ryanahmed9110@gmail.com", "photo_url": "/team/ryan-ahmed.jpg"},
+    {"name": "Nusayba Mahfuza Zaman", "role": "Presentation & Communication Lead", "role_bn": "প্রেজেন্টেশন ও যোগাযোগ প্রধান",
+     "email": "nusaybazaman3@gmail.com", "photo_url": "/team/nusayba-mahfuza-zaman.jpg"},
+    {"name": "Raiyan Rahman", "role": "Frontend & Backend Developer", "role_bn": "ফ্রন্টএন্ড ও ব্যাকএন্ড ডেভেলপার",
+     "email": "c.raiyan.rahman0@gmail.com", "photo_url": "/team/raiyan-rahman.jpg"},
+    {"name": "Al-Saihan Tajvi", "role": "Business Analyst / Data Scientist", "role_bn": "বিজনেস অ্যানালিস্ট / ডেটা সায়েন্টিস্ট",
+     "email": "al.saihan.bafsd.5@gmail.com", "photo_url": "/team/al-saihan-tajvi.jpg"},
+    {"name": "Zarin Tasnim", "role": "Business Analyst / Data Scientist", "role_bn": "বিজনেস অ্যানালিস্ট / ডেটা সায়েন্টিস্ট",
+     "email": "zarin_nadia@yahoo.com", "photo_url": "/team/zarin-tasnim.jpg"},
 )
 TEAM_NAME = "Cinnamon Syrups"
 MIN_PASSWORD = 12
@@ -78,8 +87,10 @@ class OrderIn(BaseModel):
 class TeamMemberIn(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     role: str = Field(default="", max_length=80)
+    role_bn: str = Field(default="", max_length=80)
     email: str = Field(default="", max_length=120, pattern=r"^$|^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    photo_url: str = Field(default="", max_length=500, pattern=r"^$|^https://\S+$")
+    # A photo in the web app's public/team folder, or any https link.
+    photo_url: str = Field(default="", max_length=500, pattern=r"^$|^https://\S+$|^/team/[a-z0-9-]+\.(jpg|png|webp)$")
 
 
 class TeamIn(BaseModel):

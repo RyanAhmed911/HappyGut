@@ -306,7 +306,7 @@ function initials(name: string): string {
     .join("");
 }
 
-function TeamGrid({ page }: { page: DocsPage }) {
+function TeamGrid({ page, lang }: { page: DocsPage; lang: DocLang }) {
   const { t } = useTranslation();
   return (
     <div>
@@ -315,14 +315,14 @@ function TeamGrid({ page }: { page: DocsPage }) {
         {page.team.members.map((m) => (
           <li key={m.name} className="flex flex-col items-center rounded-2xl border border-line bg-card p-4 text-center">
             {m.photo_url ? (
-              <img src={m.photo_url} alt="" className="h-20 w-20 rounded-full border-2 border-brand-soft object-cover" loading="lazy" referrerPolicy="no-referrer" />
+              <img src={m.photo_url} alt={m.name} width={96} height={96} className="h-24 w-24 rounded-full border-2 border-brand-soft object-cover" loading="lazy" referrerPolicy="no-referrer" />
             ) : (
-              <span aria-hidden className="grid h-20 w-20 place-items-center rounded-full border-2 border-brand-soft bg-brand-tint text-xl font-bold text-brand-deep">
+              <span aria-hidden className="grid h-24 w-24 place-items-center rounded-full border-2 border-brand-soft bg-brand-tint text-xl font-bold text-brand-deep">
                 {initials(m.name)}
               </span>
             )}
             <p className="mt-3 font-bold leading-snug">{m.name}</p>
-            <p className="mt-0.5 text-sm text-ink-soft">{m.role || t("docs.role_unset")}</p>
+            <p className="mt-0.5 text-sm text-ink-soft">{(lang === "bn" && m.role_bn) || m.role || t("docs.role_unset")}</p>
             {m.email && (
               <a href={`mailto:${m.email}`} className="mt-1.5 inline-flex items-center gap-1 break-all text-xs font-semibold text-brand hover:underline">
                 <Mail className="h-3.5 w-3.5 shrink-0" />
@@ -385,7 +385,7 @@ function Widget({ id, page, lang }: { id: string; page: DocsPage; lang: DocLang 
         </div>
       );
     case "team":
-      return <TeamGrid page={page} />;
+      return <TeamGrid page={page} lang={lang} />;
     case "features":
       return <Features live={live} lang={lang} />;
     case "architecture":
@@ -414,7 +414,10 @@ function markdown(page: DocsPage, lang: DocLang, ordered: DocSection[]): string 
     out.push(`## ${pick(section.title, lang)}`, "");
     const override = page.sections[section.id];
     out.push(override ? override[lang] : sectionText(section, lang), "");
-    if (section.id === "team") page.team.members.forEach((m) => out.push(`- ${m.name}${m.role ? ` · ${m.role}` : ""}${m.email ? ` · ${m.email}` : ""}`));
+    if (section.id === "team") page.team.members.forEach((m) => {
+        const role = (lang === "bn" && m.role_bn) || m.role;
+        out.push(`- ${m.name}${role ? ` · ${role}` : ""}${m.email ? ` · ${m.email}` : ""}`);
+      });
     if (section.id === "features") live.features.forEach((f) => out.push(`- ${FEATURE_LABELS[f.id] ? pick(FEATURE_LABELS[f.id]!, lang) : f.id}: ${f.status}`));
     if (section.id === "api") live.endpoints.forEach((e) => out.push(`- \`${e.method} ${e.path}\` (${e.access})`));
     if (section.id === "changelog") CHANGELOG.forEach((c) => out.push(`- ${c.date}: ${pick(c.text, lang)}`));

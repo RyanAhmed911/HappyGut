@@ -28,14 +28,14 @@ Scope = tiers A and B in [`portal/submission-scope.md`](portal/submission-scope.
 
 **Cut order if behind:** smolagents → CrewAI → DSPy → embedding fine-tune → research MCP → dietitian agent → LightGBM outlook (keep the Bayesian Pattern Finder) → per-period patterns (keep the period timeline). Never cut: hero flow, nightly diary, evals, video.
 
-## Proposed role mapping (fill in names: mandatory, see [`portal/guide-checklist.md`](portal/guide-checklist.md))
+## Role mapping (mandatory, see [`portal/guide-checklist.md`](portal/guide-checklist.md))
 
 The team works across everything, but the portal needs named owners. This mapping gives each role the workstream it naturally leads.
 
 | Official role | Name | Leads |
 |---|---|---|
-| Team Leader / Coordinator | _TBD_ | Roadmap, scope decisions, clinical-advisor outreach, integration |
-| Business Analyst / Data Scientist | _TBD_ | KPIs, synthetic cohort, Trigger Discovery + Flare models, eval harness, business model |
-| UI/UX / Frontend Developer | _TBD_ | PWA, Bangla UI/voice, verdict card, accessibility, Figma |
-| Backend / Data Engineer | _TBD_ | APIs, Neo4j + pgvector, scrapers/parsers, agents, MCP servers, n8n, deployment |
-| Presentation / Communication Lead | _TBD_ | Storyboard, video, 1-page summary, user interviews, portal documentation |
+| Team Leader / Coordinator | Ryan Ahmed | Roadmap, scope decisions, clinical-advisor outreach, integration |
+| Business Analyst / Data Scientist | Al-Saihan Tajvi, Zarin Tasnim | KPIs, synthetic cohort, Trigger Discovery + Flare models, eval harness, business model |
+| UI/UX / Frontend Developer | Ryan Ahmed, Raiyan Rahman | PWA, Bangla UI/voice, verdict card, accessibility, Figma |
+| Backend / Data Engineer | Ryan Ahmed, Raiyan Rahman | APIs, Neo4j + pgvector, scrapers/parsers, agents, MCP servers, n8n, deployment |
+| Presentation / Communication Lead | Nusayba Mahfuza Zaman | Storyboard, video, 1-page summary, user interviews, portal documentation |

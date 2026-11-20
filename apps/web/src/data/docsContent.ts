@@ -223,7 +223,10 @@ export const SECTIONS: DocSection[] = [
     "team",
     "pitch",
     { en: "Team", bn: "দল" },
-    { en: "The people building HappyGut.", bn: "যাঁরা HappyGut তৈরি করছেন।" },
+    {
+      en: "The people building HappyGut. All five of us worked on both the frontend and the backend; each role shows who owns that area.",
+      bn: "যাঁরা HappyGut তৈরি করছেন। আমরা পাঁচজনই ফ্রন্টএন্ড ও ব্যাকএন্ড দুটোতেই কাজ করেছি; প্রত্যেকের ভূমিকা দেখায় কোন দিকটা কার দায়িত্বে।",
+    },
     [],
     [],
   ),
