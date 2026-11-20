@@ -96,7 +96,7 @@ Everything below works when you run the app locally (section 5). Nothing is depl
 | Diary saved in Postgres | ❌ | Database tables exist; diary storage on Postgres is not written |
 | Loading the knowledge into Neo4j / Supabase | ❌ | The app reads the seed files directly |
 | Langfuse tracing | ✅ | Turns on when `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` are set; one trace per meal check with the model calls inside; no photos or names |
-| n8n workflows | ✅ | Four, in `n8n/workflows`: keep-awake health check, nightly refresh, weekly safety self-check, failure email. Need n8n running (Docker locally, a Space in production); see `n8n/README.md` |
+| n8n workflows | ✅ | Four, in `n8n/workflows`: keep-awake health check, nightly refresh, weekly safety self-check, failure email. Need n8n running (Docker locally; optional in production); see `n8n/README.md` |
 | Server push notifications (reminders while the app is closed) | ❌ Designed only | |
 | Guideline corpus with retrieval (RAG) | ❌ Designed only | Rule Cards carry the cited sentences instead |
 | Machine-learning flare model (LightGBM) | ✅ | Second opinion beside the rule-based outlook, top three SHAP reasons; trained on simulated patients; `evals/FLARE_MODEL.md` |
@@ -153,7 +153,8 @@ Passwords are not in the repository. Each person sets their own in `.env` (secti
 | Privacy | Presidio plus Bangladesh-specific rules, in our own backend |
 | Engine | Pure Python, no network: verdicts, red flags, clinical scores, periods, Pattern Finder (Bayesian), flare risk, patient simulator |
 | Knowledge | YAML seed files in `data/seeds/`, reviewed by an LLM judge (`data/review/llm_judge/`) |
-| Database (designed, partly used) | Supabase Postgres with migrations and row-level security, Neo4j for the food graph |
+| Database (designed, not live yet) | Supabase Postgres migrations with row-level security, tested in CI; Neo4j planned for the food graph. The prototype keeps sample accounts in memory |
+| Hosting | Backend: FastAPI in Docker on Render (free). Web app: Vercel (Hobby). Live documentation: `/docs` |
 | CI | GitHub Actions: engine, pipelines, MCP, API, web, database tests; GitGuardian secret scan |
 
 The full design, including the parts not built yet, is in [`docs/02-architecture.md`](docs/02-architecture.md). **Read section 3 above for what is real**: the architecture document describes the target, not today's state.
@@ -339,8 +340,8 @@ The guide forbids "fabricated demos" and "fake or simulated results" (§20.4) bu
 | # | Task | Suggested owner | How |
 |---|---|---|---|
 | 1 | **Fill in the five roles** with names | Team Leader | Table in section 9; then update `docs/00-roadmap.md` and `docs/portal/one-page-summary.md` |
-| 2 | **Deploy the app** so the judges' logins work | Backend + Frontend | Backend: Hugging Face Space (Docker; `services/api/Dockerfile`, port 7860). Set Space secrets `DEMO_MODE=true`, `GEMINI_API_KEY`, `GROQ_API_KEY`, the three `TEST_PASSWORD_*`, `SESSION_SECRET` and `CORS_ORIGINS=["https://<your-vercel-app>.vercel.app"]`. Frontend: Vercel, root directory `apps/web`, environment variable `VITE_API_URL=https://<your-space>.hf.space` (no `/v1`; the app adds it), and a `vercel.json` rewrite of every path to `/index.html` so links like `/about` open directly. Test sign-in on a phone. Write the steps into `docs/setup.md` as you go. |
-| 3 | **Enter the test credentials** in the portal | Team Leader | Three rows from `docs/portal/test-credentials.md`, same passwords as the Space secrets |
+| 2 | **Deploy the app** so the judges' logins work | Backend + Frontend | Done: backend on Render (free web service, Docker, `services/api/Dockerfile`, environment variable `PORT=7860`), web app on Vercel (root directory `apps/web`, `VITE_API_URL=https://<your-service>.onrender.com`, no `/v1`). Render variables: `DEMO_MODE=true`, `GEMINI_API_KEY`, `GROQ_API_KEY`, the three `TEST_PASSWORD_*`, `SESSION_SECRET`, `CORS_ORIGINS=["https://happygut-web.vercel.app"]`, `DOCS_ADMIN_PASSWORD`. Hugging Face Docker Spaces now need a paid plan, so they are not used. Keep Render awake with a free uptime ping to `/v1/health` every 5–10 minutes. |
+| 3 | **Enter the test credentials** in the portal | Team Leader | Three rows from `docs/portal/test-credentials.md`, same passwords as the Render environment variables |
 | 4 | **Record the 3-minute video** | Presentation Lead | Follow `docs/portal/video-script.md` exactly: timings, Bangla screens, a "Sample patient records" caption during the demo. Upload the same file to YouTube and Facebook |
 | 5 | **Rewrite the portal text (v4)** | Presentation Lead + Business Analyst | `docs/portal/submission-text.md` (v3) still describes things the app doesn't do: talking to it by voice, a locally hosted name-removal model, medication and test reminders, weight tracking, wearables, a meal-plan-writing dietitian, guideline retrieval. Rewrite to match section 3, keep each section at least as long as before, and add the measured numbers with the right wording |
 | 6 | **Finish the one-page summary** | Presentation Lead | `docs/portal/one-page-summary.md`: team name, roles, links |
@@ -374,7 +375,7 @@ The guide makes this **mandatory** (§13.2): every member has a named role, decl
 | Team Leader / Coordinator | Ryan Ahmed | Scope decisions, integration, portal, merges |
 | Business Analyst / Data Scientist | Al-Saihan Tajvi, Zarin Tasnim | KPIs, clinician interviews, business model, evaluation, Pattern Finder |
 | UI/UX / Frontend Developer | Ryan Ahmed, Raiyan Rahman | Web app, Bangla text, accessibility, deployment on Vercel |
-| Backend / Data Engineer | Ryan Ahmed, Raiyan Rahman | API, AI models, database, knowledge loading, deployment on Hugging Face |
+| Backend / Data Engineer | Ryan Ahmed, Raiyan Rahman | API, AI models, database, knowledge loading, deployment on Render |
 | Presentation / Communication Lead | Nusayba Mahfuza Zaman | Video, one-page summary, portal text, pitch rehearsal |
 | NRB / international advisor (optional, extra credit) | none yet | Architecture or product advice, documented |
 
