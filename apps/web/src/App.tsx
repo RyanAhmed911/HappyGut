@@ -7,6 +7,8 @@ import { auth } from "./lib/api";
 import { CarePage } from "./pages/Care";
 import { Check } from "./pages/Check";
 import { Diary } from "./pages/Diary";
+import { Docs } from "./pages/Docs";
+import { DocsAdmin } from "./pages/DocsAdmin";
 import { Foods } from "./pages/Foods";
 import { Gut } from "./pages/Gut";
 import { History, HistoryDetail } from "./pages/History";
@@ -43,6 +45,8 @@ export function App() {
   return (
     <Routes>
       <Route path="/welcome" element={<Welcome />} />
+      <Route path="/docs" element={<Docs />} />
+      <Route path="/docs/admin" element={<DocsAdmin />} />
       <Route path="/about" element={auth.token ? <AppShell /> : <PublicFrame />}>
         <Route index element={<About />} />
       </Route>

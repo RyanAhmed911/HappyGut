@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from happygut_engine import DEFAULT_CONFIG, DEFAULT_WEIGHT_CONFIG, Diagnosis, ManualFlare, index_for, usual_bedtime
 
-from . import __version__, foods, i18n, jobs, tracing
+from . import __version__, docs, foods, i18n, jobs, tracing
 from .agents import PydanticExplainer, PydanticPerceiver, Unavailable, build_model
 from .auth import AuthError, SupabaseVerifier, Verifier
 from .care import (MAX_APPOINTMENTS, MAX_MEDICATIONS, AppointmentIn, AppointmentOut, DoseIn, MedicationIn, MedicationOut,
@@ -85,9 +85,14 @@ class Services:
     accounts: TestAccounts | None = None
     models: dict[str, bool] | None = None
     model_names: dict[str, list[str]] | None = None
+    docs_state: docs.DocsState | None = None
+    docs_admin: docs.DocsAdmin | None = None
 
     def __post_init__(self) -> None:
         self.insights = self.insights or Insights(self.store, self.knowledge, self.settings.timezone)
+        cfg = self.settings
+        self.docs_state = self.docs_state or docs.DocsState(cfg.docs_visible, cfg.docs_starts_at, cfg.docs_ends_at)
+        self.docs_admin = self.docs_admin or docs.DocsAdmin(cfg.docs_admin_password, cfg.session_secret)
         self.scrubber = self.scrubber or self.flow.scrubber
         if self.flow.personal is None:
             self.flow.personal = self.insights.personal_evidence
@@ -600,6 +605,100 @@ def create_app(services: Services | None = None) -> FastAPI:
     async def previsit(days: int = Query(default=90, ge=14, le=180), patient: Patient = Depends(current_patient),
                        s: Services = Depends(svc)) -> dict:
         return await s.insights.report(patient, days)
+
+    # ------------------------------------------------------------ live /docs page
+
+    started_at = docs.now_utc()
+
+    def docs_admin(authorization: str | None = Header(default=None), s: Services = Depends(svc)) -> Services:
+        if not s.docs_admin.enabled:
+            raise HTTPException(404, "docs_admin_disabled")
+        if not s.docs_admin.check(authorization):
+            raise HTTPException(401, "invalid_admin_token")
+        return s
+
+    def live(s: Services) -> dict:
+        now = docs.now_utc()
+        card = docs.flare_model_card()
+        models = s.models or {"perception": True, "explanation": True}
+        return {
+            "served_at": now.isoformat(), "started_at": started_at.isoformat(),
+            "uptime_s": int((now - started_at).total_seconds()),
+            "version": __version__, "engine_version": DEFAULT_CONFIG.version, "timezone": s.settings.timezone,
+            "knowledge": {**s.knowledge.counts(), "reviewed_only": s.knowledge.reviewed_only},
+            "models": models, "model_names": s.model_names or {}, "tracing": tracing.enabled(),
+            "storage": type(s.store).__name__, "demo_mode": s.demo is not None,
+            "accounts": [{"email": p.email, "role": p.role} for p in PERSONAS] if s.accounts else [],
+            "usage": docs.usage(s.store), "flare_model": card,
+            "features": docs.features(models, tracing.enabled(), bool(s.settings.jobs_token), card is not None),
+            "endpoints": docs.endpoints(app.routes),
+        }
+
+    @app.get("/v1/docs/status")
+    async def docs_status(s: Services = Depends(svc)) -> dict:
+        available, reason = s.docs_state.status(docs.now_utc())
+        return {"available": available, "reason": reason, **s.docs_state.window(), "admin": s.docs_admin.enabled}
+
+    @app.get("/v1/docs")
+    async def docs_page(authorization: str | None = Header(default=None), s: Services = Depends(svc)) -> dict:
+        available, reason = s.docs_state.status(docs.now_utc())
+        preview = s.docs_admin.check(authorization)
+        if not available and not preview:
+            raise HTTPException(403, "docs_unavailable")
+        return {"available": available, "reason": reason, "preview": preview and not available, **s.docs_state.window(),
+                **s.docs_state.content(), "live": live(s)}
+
+    @app.post("/v1/docs/admin/login")
+    async def docs_login(body: docs.LoginIn, s: Services = Depends(svc)) -> dict:
+        if not s.docs_admin.enabled:
+            raise HTTPException(404, "docs_admin_disabled")
+        if s.docs_admin.locked():
+            raise HTTPException(429, "too_many_attempts")
+        token = s.docs_admin.login(body.password)
+        if token is None:
+            raise HTTPException(401, "invalid_credentials")
+        return {"token": token, "expires_in": docs.ADMIN_TTL_S}
+
+    @app.get("/v1/docs/admin")
+    async def docs_admin_state(s: Services = Depends(docs_admin)) -> dict:
+        available, reason = s.docs_state.status(docs.now_utc())
+        return {"available": available, "reason": reason, **s.docs_state.export()}
+
+    @app.put("/v1/docs/admin/settings")
+    async def docs_settings(body: docs.DocsSettingsIn, s: Services = Depends(docs_admin)) -> dict:
+        state = s.docs_state
+        state.visible, state.starts_at, state.ends_at = body.visible, body.starts_at, body.ends_at
+        state.record(f"visibility {'on' if body.visible else 'off'}, window {docs._iso(body.starts_at)} → {docs._iso(body.ends_at)}",
+                     docs.now_utc())
+        return await docs_admin_state(s)
+
+    @app.put("/v1/docs/admin/sections/{section_id}")
+    async def docs_section(section_id: str, body: docs.SectionIn, s: Services = Depends(docs_admin)) -> dict:
+        if section_id not in docs.SECTION_IDS:
+            raise HTTPException(404, "unknown_section")
+        s.docs_state.sections[section_id] = {"en": body.en.strip(), "bn": body.bn.strip()}
+        s.docs_state.record(f"text of '{section_id}' replaced", docs.now_utc())
+        return await docs_admin_state(s)
+
+    @app.delete("/v1/docs/admin/sections/{section_id}")
+    async def docs_section_reset(section_id: str, s: Services = Depends(docs_admin)) -> dict:
+        if s.docs_state.sections.pop(section_id, None) is None:
+            raise HTTPException(404, "not_found")
+        s.docs_state.record(f"text of '{section_id}' back to the default", docs.now_utc())
+        return await docs_admin_state(s)
+
+    @app.put("/v1/docs/admin/order")
+    async def docs_order(body: docs.OrderIn, s: Services = Depends(docs_admin)) -> dict:
+        s.docs_state.pitch_order, s.docs_state.tech_order = list(body.pitch), list(body.tech)
+        s.docs_state.record("section order changed", docs.now_utc())
+        return await docs_admin_state(s)
+
+    @app.put("/v1/docs/admin/team")
+    async def docs_team(body: docs.TeamIn, s: Services = Depends(docs_admin)) -> dict:
+        s.docs_state.team_name = body.team_name.strip() or docs.TEAM_NAME
+        s.docs_state.team = [m.model_dump() for m in body.members]
+        s.docs_state.record(f"team updated ({len(body.members)} members)", docs.now_utc())
+        return await docs_admin_state(s)
 
     return app
 

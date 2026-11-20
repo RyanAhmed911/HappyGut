@@ -101,6 +101,13 @@ The two job endpoints are protected by a separate `JOBS_TOKEN`, and are switched
 - **Labelling:** the card says it was trained on simulated patients and is not a diagnosis.
 - **If it isn't installed:** the card simply shows the rule-based score alone.
 
+## 9. Live /docs page (added 20 Nov)
+- **What it is:** a public page at `/docs` that is both the pitch deck (problem → vision, with the team) and the technical documentation (features, architecture, data flow, stack, API, data, AI, roadmap, performance, security, KPIs, changelog), in Bangla and English.
+- **Live:** the feature matrix, API endpoint list, knowledge counts, models in use, flare-model metrics, uptime and usage counts come from the running backend (`GET /v1/docs`), so they can't drift from the code. Evaluation results come from `evals/RESULTS.md`.
+- **Tools on the page:** search, section links, Markdown download, print / save as PDF, copy link.
+- **Admin page:** `/docs/admin`, signed in with `DOCS_ADMIN_PASSWORD`. Switch the page on or off, set an opening and closing time (Dhaka time), fill in each member's role, email and photo link, replace any section's text in both languages, reorder sections, see the edit history and download the settings as JSON.
+- **Keep in mind:** admin edits live in memory like the rest of the prototype, so a server restart returns to the defaults. Put lasting changes (for example the team's roles) in `services/api/src/happygut_api/docs.py` (`DEFAULT_TEAM`) or the page text in `apps/web/src/data/docsContent.ts`.
+
 ---
 
 # Part B: Set it up, step by step (Windows, PowerShell)
@@ -304,6 +311,8 @@ The backend's Docker image (`services/api/Dockerfile`) now installs the tracing 
 | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` | From step 5 |
 | `JOBS_TOKEN` | Same as in n8n |
 | `CORS_ORIGINS` | `["https://<your-app>.vercel.app"]` |
+| `DOCS_ADMIN_PASSWORD` | A long random password (12+ characters) for `/docs/admin`. Leave it out to switch the admin page off |
+| `DOCS_VISIBLE`, `DOCS_STARTS_AT`, `DOCS_ENDS_AT` | Optional defaults for `/docs`: `true` / `false`, and times with a zone, e.g. `2026-11-20T00:00:00+06:00`. Without them the page is always open |
 
 **Watch the first build log.** The `libgomp1` install couldn't be tested here. If the model fails to load, the app still works and just shows the rule-based score.
 
