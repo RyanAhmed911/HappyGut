@@ -85,7 +85,7 @@ There are now four read-only servers that other AI tools (Claude Desktop, Claude
 
 | Workflow | When | What it does |
 |---|---|---|
-| `happygut-health.json` | every 30 minutes | Calls `/v1/health`. **Keeps the free Hugging Face Space awake for judges** and fails if the knowledge isn't fully loaded |
+| `happygut-health.json` | every 30 minutes | Calls `/v1/health`. **Keeps the free Render backend awake for judges** and fails if the knowledge isn't fully loaded |
 | `happygut-nightly.json` | 23:30 Dhaka time | Calls `POST /v1/jobs/nightly`: refreshes every patient's insights and records counts only (no names) |
 | `happygut-safety-check.json` | Mondays 07:10 | Calls `POST /v1/jobs/selfcheck`: re-runs the red-flag suite, verdict checks, stricture rule and dish names on the live app |
 | `happygut-alert.json` | when one of the above fails | Optional: emails the team |
@@ -298,12 +298,13 @@ npm test
 
 ---
 
-# Part C: Deployment (Hugging Face Space + Vercel)
+# Part C: Deployment (Render + Vercel)
 
-The backend's Docker image (`services/api/Dockerfile`) now installs the tracing and ML extras, LightGBM's system library (`libgomp1`) and the red-flag suite used by the safety check. On the backend Space, set these **Secrets**:
+The backend's Docker image (`services/api/Dockerfile`) now installs the tracing and ML extras, LightGBM's system library (`libgomp1`) and the red-flag suite used by the safety check. Hugging Face Docker Spaces now need a paid plan, so the backend runs on **Render** (free web service, Docker, Dockerfile path `./services/api/Dockerfile`, build context `.`, health check `/v1/health`). In Render → **Environment**, set:
 
-| Secret | Value |
+| Variable | Value |
 |---|---|
+| `PORT` | `7860` (the port the Dockerfile listens on) |
 | `DEMO_MODE` | `true` |
 | `TEST_PASSWORD_NUSRAT`, `TEST_PASSWORD_RAFI`, `TEST_PASSWORD_AYESHA` | Your throw-away passwords (the same ones you put in the portal) |
 | `SESSION_SECRET` | A long random string |
@@ -316,9 +317,11 @@ The backend's Docker image (`services/api/Dockerfile`) now installs the tracing 
 
 **Watch the first build log.** The `libgomp1` install couldn't be tested here. If the model fails to load, the app still works and just shows the rule-based score.
 
-**Vercel** (web app): root directory `apps/web`; environment variable `VITE_API_URL=https://<your-space>.hf.space`; and a `vercel.json` that rewrites every path to `/index.html`, so links like `/care` open directly (see `TEAM-HANDOVER.md` section 8).
+**Vercel** (web app): root directory `apps/web`; environment variable `VITE_API_URL=https://<your-service>.onrender.com` (Production and Preview; not marked sensitive, since it is public in the built app); and a `vercel.json` that rewrites every path to `/index.html`, so links like `/care` open directly (see `TEAM-HANDOVER.md` section 8).
 
-**n8n in production:** run the image `n8nio/n8n:1.123.0` as a second Docker Space (set `app_port: 5678` in the Space's README header). Set `HAPPYGUT_API_URL` to the backend Space's URL and `N8N_ENCRYPTION_KEY` as secrets. Free Spaces lose files on restart, so point n8n's database at Supabase (`DB_TYPE=postgresdb` and the `DB_POSTGRESDB_*` variables). Then repeat step 6 there. The health workflow is what keeps the backend Space awake while judges test.
+**Keeping the backend awake:** Render's free service sleeps after 15 minutes without traffic, and a sleeping service takes about a minute to wake (and forgets anything judges entered). Add a free uptime monitor (e.g. UptimeRobot, no card) that calls `https://<your-service>.onrender.com/v1/health` every 5 minutes.
+
+**n8n in production (optional):** run n8n with Docker on your own PC as in Step 6, with `HAPPYGUT_API_URL` set to the Render URL and the same `JOBS_TOKEN` as on Render. A second always-on Render service would exceed the free hours.
 
 ---
 
