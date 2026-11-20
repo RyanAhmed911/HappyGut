@@ -10,7 +10,7 @@ Every requirement in the AIBC Participants Guide that applies to the Team-Built 
 |---|---|---|---|---|
 | 1 | 3-minute video in five fixed segments (problem 0:30, solution 0:30, demo 1:00, AI approach 0:30, impact 0:30) | §9.2 | 👤 | Script v2 with the team leader's story, production plan, two-day schedule and verified sources: [`video-script.md`](video-script.md). Recording and upload are the team's |
 | 2 | 1-page summary | §5 | 🟡 | Draft: [`one-page-summary.md`](one-page-summary.md). Team names and the live link are blank |
-| 3 | Live demo | §5, §9.1 | 👤 | App runs locally with three test accounts. Needs deployment (Hugging Face Space + Vercel) |
+| 3 | Live demo | §5, §9.1 | 👤 | Deployed: backend on Render, web app on Vercel (https://happygut-web.vercel.app), three test accounts; `/docs` and `/about` open without sign-in |
 | 4 | Clear problem and user definition | §9.2 | ✅ | [`submission-text.md`](submission-text.md), [`../01-strategy.md`](../01-strategy.md) §3 |
 | 5 | AI-native approach (LLM / RAG / Graph / ML) | §9.2 | ✅ | Vision + language model for perception and wording, food knowledge graph, cited Rule Cards, Bayesian Pattern Finder, deterministic verdict engine: [`../02-architecture.md`](../02-architecture.md) |
 | 6 | Basic system flow (input → AI → output) | §9.2 | ✅ | Architecture doc; also the in-app "How it works" page |
