@@ -367,16 +367,16 @@ The guide forbids "fabricated demos" and "fake or simulated results" (§20.4) bu
 
 ## 9. Roles
 
-The guide makes this **mandatory** (§13.2): every member has a named role, declared in the documentation and the submission. One person may hold more than one role.
+The guide makes this **mandatory** (§13.2): every member has a named role, declared in the documentation and the submission. One person may hold more than one role. Team **Cinnamon Syrups**; all five members also built frontend and backend features.
 
 | Official role | Name | Leads |
 |---|---|---|
-| Team Leader / Coordinator | _____ | Scope decisions, integration, portal, merges |
-| Business Analyst / Data Scientist | _____ | KPIs, clinician interviews, business model, evaluation, Pattern Finder |
-| UI/UX / Frontend Developer | _____ | Web app, Bangla text, accessibility, deployment on Vercel |
-| Backend / Data Engineer | _____ | API, AI models, database, knowledge loading, deployment on Hugging Face |
-| Presentation / Communication Lead | _____ | Video, one-page summary, portal text, pitch rehearsal |
-| NRB / international advisor (optional, extra credit) | _____ | Architecture or product advice, documented |
+| Team Leader / Coordinator | Ryan Ahmed | Scope decisions, integration, portal, merges |
+| Business Analyst / Data Scientist | Al-Saihan Tajvi, Zarin Tasnim | KPIs, clinician interviews, business model, evaluation, Pattern Finder |
+| UI/UX / Frontend Developer | Ryan Ahmed, Raiyan Rahman | Web app, Bangla text, accessibility, deployment on Vercel |
+| Backend / Data Engineer | Ryan Ahmed, Raiyan Rahman | API, AI models, database, knowledge loading, deployment on Hugging Face |
+| Presentation / Communication Lead | Nusayba Mahfuza Zaman | Video, one-page summary, portal text, pitch rehearsal |
+| NRB / international advisor (optional, extra credit) | none yet | Architecture or product advice, documented |
 
 ---
 

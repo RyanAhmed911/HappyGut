@@ -57,7 +57,9 @@ def test_public_payload_is_live(client):
     assert status["meal_check_photo"] == "off" and status["ai_explanation"] == "live"  # follows the running models
     assert status["neo4j_pgvector"] == "planned"
     assert live["usage"]["accounts"] == 0 and live["flare_model"]["v1"]["roc_auc"] > live["flare_model"]["v0"]["roc_auc"]
-    assert [m["name"] for m in body["team"]["members"]][0] == "Ryan Ahmed" and body["team"]["name"] == "Cinnamon Syrups"
+    members = body["team"]["members"]
+    assert [m["name"] for m in members][0] == "Ryan Ahmed" and body["team"]["name"] == "Cinnamon Syrups"
+    assert all(m["role"] and m["role_bn"] and m["email"] and m["photo_url"].startswith("/team/") for m in members)
     assert body["order"]["pitch"][0] == "problem" and body["sections"] == {}
 
 
@@ -102,11 +104,13 @@ def test_admin_edits_text_order_and_team(client):
 
     team = {"team_name": "Cinnamon Syrups", "members": [{"name": "Ryan Ahmed", "role": "Team Leader", "email": "ryan@example.com"}]}
     body = client.put("/v1/docs/admin/team", headers=headers, json=team).json()
-    assert body["team"]["members"] == [{"name": "Ryan Ahmed", "role": "Team Leader", "email": "ryan@example.com", "photo_url": ""}]
-    insecure = {"members": [{"name": "A", "photo_url": "http://example.com/a.png"}]}
-    assert client.put("/v1/docs/admin/team", headers=headers, json=insecure).status_code == 422
+    assert body["team"]["members"] == [{"name": "Ryan Ahmed", "role": "Team Leader", "role_bn": "", "email": "ryan@example.com", "photo_url": ""}]
+    for bad_photo in ("http://example.com/a.png", "/etc/passwd", "/team/../a.jpg", "javascript:alert(1)"):
+        assert client.put("/v1/docs/admin/team", headers=headers, json={"members": [{"name": "A", "photo_url": bad_photo}]}).status_code == 422
+    local = {"members": [{"name": "A", "photo_url": "/team/a-b.jpg"}]}
+    assert client.put("/v1/docs/admin/team", headers=headers, json=local).status_code == 200
     history = client.get("/v1/docs/admin", headers=headers).json()["history"]
-    assert [h["change"] for h in history][:2] == ["team updated (1 members)", "section order changed"]
+    assert [h["change"] for h in history][:3] == ["team updated (1 members)"] * 2 + ["section order changed"]
 
 
 def test_admin_needs_the_password(client):
